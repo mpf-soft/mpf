@@ -1,0 +1,13 @@
+{
+    "name": "mpf-soft/mpf",
+    "description": "MPF Framework files",
+    "license": "Apache License",
+    "authors": [
+        {
+            "name": "Mirel Mitache",
+            "email": "mitache.mirel@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
