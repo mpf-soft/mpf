@@ -9,7 +9,10 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "php": ">5.4.0",
+        "php-fig/log" : "*"
+    },
     "autoload" : {
 		"psr-4" : {
 			"mpf\\" : "/"
