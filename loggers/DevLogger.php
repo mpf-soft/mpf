@@ -2,11 +2,9 @@
 
 namespace mpf\loggers;
 
-use mpf\base\AutoLoader;
 use mpf\web\AssetsPublisher;
 use mpf\web\helpers\Html;
 use mpf\WebApp;
-use Psr\Log\LogLevel;
 
 class DevLogger extends Logger {
 
@@ -54,7 +52,7 @@ class DevLogger extends Logger {
                 $_self->onShutDown();
             });
         }
-        if ($level == LogLevel::ERROR) {
+        if ($level == Levels::ERROR) {
         }
     }
 

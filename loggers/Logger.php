@@ -20,8 +20,6 @@
 
 namespace mpf\loggers;
 
-use \Psr\Log\LogLevel as Levels;
-
 /**
  * @author Mirel Nicu Mitache <mirel.mitache@gmail.com>
  * @package MPF Framework
@@ -34,7 +32,7 @@ use \Psr\Log\LogLevel as Levels;
  */
 abstract class Logger extends \mpf\base\Object {
 
-    use \Psr\Log\LoggerTrait;
+    use LoggerTrait;
 
     private static $instance;
 
