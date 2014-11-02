@@ -49,6 +49,13 @@ abstract class App extends LogAwareObject {
     public $cacheEngineClass;
 
     /**
+     * Link to composer autoload class
+     * @var \Composer\Autoload\ClassLoader
+     */
+    protected  $autoload;
+
+
+    /**
      * Recors current app instance;
      * @var \mpf\base\App
      */
@@ -194,5 +201,14 @@ abstract class App extends LogAwareObject {
         $class = $this->cacheEngineClass;
         return $class::get();
     }
+
+    /**
+     * Link to composer autoload class
+     * @return \Composer\Autoload\ClassLoader
+     */
+    public function autoload(){
+        return $this->autoload;
+    }
+
 
 }

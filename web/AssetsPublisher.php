@@ -27,7 +27,7 @@
  */
 
 namespace mpf\web;
-use mpf\base\AutoLoader;
+use mpf\WebApp;
 
 /**
  * Description of AssetsPublisher
