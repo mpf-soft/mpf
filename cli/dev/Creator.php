@@ -82,7 +82,7 @@ class {$this->class} extends DbModel {
     }
 
     /**
-     * Gets DataProvider used later by widgets like \mWidgets\datatable\Table to manage models.
+     * Gets DataProvider used later by widgets like \mpf\widgets\datatable\Table to manage models.
      * @return \mpf\datasources\sql\DataProvider
      */
     public function getDataProvider() {

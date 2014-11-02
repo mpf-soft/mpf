@@ -189,11 +189,11 @@ class WebApp extends base\App {
             return $this->controllerAliases[$module ? $module . '/' . $controller : $controller];
         }
         if (!$module) {
-            return '\\' . base\AutoLoader::APP_DEVELOPER_VENDORKEY . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
+            return '\\app\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
         } elseif (isset($this->modulesAliases[$module])) {
             return '\\' . $this->modulesAliases[$module] . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
         }
-        return '\\' . base\AutoLoader::APP_DEVELOPER_VENDORKEY . '\\' . $this->modulesNamespace . '\\' . $module . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
+        return '\\app\\' . $this->modulesNamespace . '\\' . $module . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
     }
 
     /**

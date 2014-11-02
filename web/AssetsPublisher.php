@@ -27,7 +27,6 @@
  */
 
 namespace mpf\web;
-use mpf\WebApp;
 
 /**
  * Description of AssetsPublisher
@@ -74,7 +73,7 @@ class AssetsPublisher extends \mpf\base\LogAwareObject {
     }
 
     public function mpfAssetFile($name){
-        return self::publishFolder(AutoLoader::getLastRegistered()->path('\mpf\__assets', true)) . $name;
+        return self::publishFolder(dirname(__DIR__). DIRECTORY_SEPARATOR . '__assets' . DIRECTORY_SEPARATOR) . $name;
     }
 
     /**
