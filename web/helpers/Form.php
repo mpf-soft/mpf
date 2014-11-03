@@ -28,7 +28,48 @@
 
 namespace mpf\web\helpers;
 
+
+use mpf\WebApp;
+
 class Form extends \mpf\base\Helper {
+
+    /**
+     * MarkItUp http://markitup.jaysalvat.com/ is used to generate HtmlTextareas by method ::htmlTextarea.
+     * From this variable JS file for settings can be changed to a custom one.
+     * @var null|string
+     */
+    public $tinyMCESkin = 'lightgray';
+
+    public $tinyMCEOptionTemplates = [
+        'basic' => [
+            'plugins' => [
+                "advlist autolink lists link image charmap print preview anchor",
+                "searchreplace visualblocks code fullscreen",
+                "insertdatetime media table contextmenu paste"
+            ],
+            'menubar' => false
+        ],
+        'advanced' => [
+            'plugins' => [
+                "advlist autolink lists link image charmap print preview anchor",
+                "searchreplace visualblocks code fullscreen",
+                "insertdatetime media table contextmenu paste"
+            ],
+            'toolbar' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
+        ],
+        'full' => [
+            'theme' => "modern",
+            'plugins' => [
+                "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+                "searchreplace wordcount visualblocks visualchars code fullscreen",
+                "insertdatetime media nonbreaking save table contextmenu directionality",
+                "emoticons template paste textcolor colorpicker textpattern"
+            ],
+            'toolbar1' => "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+            'toolbar2' => "print preview media | forecolor backcolor emoticons",
+            'image_advtab' => true
+        ]
+    ];
 
     /**
      * Generates an input with the selected data. Value is automatically calculated
@@ -85,7 +126,27 @@ class Form extends \mpf\base\Helper {
         return '</form>';
     }
 
-    public function textarea($name, $value = null, $htmlOptions = null){
+    /**
+     * Generates an HTML Textarea using TinyMCE
+     * @param $name
+     * @param null $value
+     * @param array $htmlOptions
+     * @param string $tinyMCETemplate
+     * @return string
+     */
+    public function htmlTextarea($name, $value = null, $htmlOptions = array(), $tinyMCETemplate = 'basic') {
+        $r = Html::get()->mpfScriptFile('jquery.js') . Html::get()->mpfScriptFile('tinymce/tinymce.min.js') . Html::get()->mpfScriptFile('tinymce/jquery.tinymce.min.js');
+        if (!isset($htmlOptions['id'])) {
+            $htmlOptions['id'] = 'tinymce_' . uniqid();
+        }
+        $htmlOptions['class'] = (isset($htmlOptions['class']) ? $htmlOptions['class'] . ' ' : '') . 'input tinymce-textarea';
+        $r .= $this->textarea($name, $value, $htmlOptions);
+        $options = json_encode($this->tinyMCEOptionTemplates[$tinyMCETemplate]);
+        $r .= Html::get()->script("$('#{$htmlOptions['id']}').tinymce($options)");
+        return $r;
+    }
+
+    public function textarea($name, $value = null, $htmlOptions = array()) {
         $htmlOptions['name'] = $name;
         return Html::get()->tag('textarea', $value, $htmlOptions);
     }
@@ -145,17 +206,17 @@ class Form extends \mpf\base\Helper {
      * @return mixed
      */
     public function checkbox($name, $label, $value = 1, $checked = null, $htmlOptions = array(), $template = '<input><label>') {
-        if (null === $checked){
+        if (null === $checked) {
             $checked = $this->getArrayValue($_POST, $name);
             if (is_null($value)) {
                 $checked = $this->getArrayValue($_GET, $name);
             }
         }
-        if ($checked){
+        if ($checked) {
             $htmlOptions['checked'] = 'checked';
         }
-        $htmlOptions['id'] = isset($htmlOptions['id'])?$htmlOptions['id']:str_replace(array('[', ']'), '_', $name) . '_'. $value;
-        $input = $this->input($name, 'checkbox', $value,  $htmlOptions);
+        $htmlOptions['id'] = isset($htmlOptions['id']) ? $htmlOptions['id'] : str_replace(array('[', ']'), '_', $name) . '_' . $value;
+        $input = $this->input($name, 'checkbox', $value, $htmlOptions);
         $label = Html::get()->tag('label', $label, array('for' => $htmlOptions['id']));
         return str_replace(array('<input>', '<label>'), array($input, $label), $template);
     }
@@ -170,17 +231,17 @@ class Form extends \mpf\base\Helper {
      * @return mixed
      */
     public function radio($name, $label, $value = 1, $checked = null, $htmlOptions = array(), $template = '<input><label>') {
-        if (null === $checked){
+        if (null === $checked) {
             $checked = $this->getArrayValue($_POST, $name);
             if (is_null($value)) {
                 $checked = $this->getArrayValue($_GET, $name);
             }
         }
-        if ($checked){
+        if ($checked) {
             $htmlOptions['checked'] = 'checked';
         }
-        $htmlOptions['id'] = isset($htmlOptions['id'])?$htmlOptions['id']:str_replace(array('[', ']'), '_', $name) . '_'. $value;
-        $input = $this->input($name, 'radio', $value,  $htmlOptions);
+        $htmlOptions['id'] = isset($htmlOptions['id']) ? $htmlOptions['id'] : str_replace(array('[', ']'), '_', $name) . '_' . $value;
+        $input = $this->input($name, 'radio', $value, $htmlOptions);
         $label = Html::get()->tag('label', $label, array('for' => $htmlOptions['id']));
         return str_replace(array('<input>', '<label>'), array($input, $label), $template);
     }
@@ -204,7 +265,7 @@ class Form extends \mpf\base\Helper {
         }
         $r = array();
         foreach ($options as $value => $label) {
-            $r[] = $this->checkbox($name.'[]', $label, $value, is_array($selected) ? in_array($value, $selected) : $selected == $value, $htmlOptions, $template);
+            $r[] = $this->checkbox($name . '[]', $label, $value, is_array($selected) ? in_array($value, $selected) : $selected == $value, $htmlOptions, $template);
         }
         return implode($separator, $r);
     }
