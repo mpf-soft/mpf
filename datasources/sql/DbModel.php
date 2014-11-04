@@ -384,7 +384,8 @@ abstract class DbModel extends BaseModel implements ModelInterface {
         if ($this->_isNewRecord) {
             $this->{$this->_pk} = $this->_db->table($this->_tableName)->insert($this->_updatedAttributes);
             $this->_originalPk =$this->{$this->_pk};
-            $this->_updatedAttributes = array();
+            $this->_isNewRecord = false; // so that the next save won't do another insert
+            $this->reload();  // to get extra default values.
             if (!$this->{$this->_pk}) {
                 return false; // there was an error when saving
             }
@@ -455,7 +456,7 @@ abstract class DbModel extends BaseModel implements ModelInterface {
         $this->_relations = array();
         $this->_attributes = $this->_db->table($this->_tableName)
             ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
-            ->get();
+            ->first();
         $this->_updatedAttributes = array();
         $this->afterLoad();
     }
