@@ -48,7 +48,7 @@ trait LogAwareObjectTrait {
      * Init logs for current component;
      * @param array $config
      * @return null
-     * @throws \mpf\components\InvalidComponentException
+     * @throws \Exception
      */
     protected function init($config = array()) {
         foreach ($this->loggers as $class => $config) {
@@ -58,7 +58,7 @@ trait LogAwareObjectTrait {
             }
             $instance = $class::get($config);
             if (!is_a($instance, 'mpf\\loggers\\Logger'))
-                throw new \mpf\components\InvalidComponentException("Loggers must extend mpf\\base\\Logger class!");
+                throw new \Exception("Loggers must extend mpf\\base\\Logger class!");
             $this->loggersInstances[] = $instance;
         }
         return true;
@@ -70,7 +70,7 @@ trait LogAwareObjectTrait {
      * 
      * $this->addLogger(MyCustomLogger::get());
      * 
-     * @param \mpf\base\mpf\loggers\Logger $logger An insantiated object for selected engine;
+     * @param \mpf\loggers\Logger $logger An insantiated object for selected engine;
      */
     public function addLogger(\mpf\loggers\Logger $logger) {
         $this->loggersInstances[] = $logger;
