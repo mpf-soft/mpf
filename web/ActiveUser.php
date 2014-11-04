@@ -78,12 +78,13 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
     protected $connected = false;
 
     public function init($config = array()) {
+        parent::init($config);
+
         $this->refresh();
         if ($this->isGuest()) {
             $this->checkAutoLogin();
         }
-
-        return parent::init($config);
+        return true;
     }
 
     /**
