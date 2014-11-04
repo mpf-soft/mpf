@@ -114,6 +114,7 @@ class WebApp extends base\App {
      * @return string
      */
     protected function calculateControllerClassFromRights() {
+        $this->user(); //init user first;
         $controllerClass = $this->getControllerClassFromNameAndModule($this->request()->getController(), $this->request()->getModule());
         if (!class_exists($controllerClass)) {
             $this->alert('Controller ' . $controllerClass . ' not found!', array(
