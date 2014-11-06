@@ -423,10 +423,14 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
 
         $url = $this->getLinkRoot();
         if ((!is_null($module)) && $module != $this->module) {
-            if ($module = $this->defaultModule) {
-                $url = str_replace('/' . $this->module . '/', '/', $url);
-            } else {
-                $url = str_replace('/' . $this->module . '/', '/' . $module . '/', $url);
+            if ($this->module != $this->defaultModule){
+                if ($module = $this->defaultModule) {
+                    $url = str_replace('/' . $this->module . '/', '/', $url);
+                } else {
+                    $url = str_replace('/' . $this->module . '/', '/' . $module . '/', $url);
+                }
+            } elseif ($module != $this->defaultModule) {
+                $url .= $module.'/';
             }
         }
 
