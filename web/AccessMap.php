@@ -88,7 +88,7 @@ class AccessMap extends \mpf\base\LogAwareObject implements \mpf\interfaces\Acce
         }
         $hasRights = false;
         foreach ($rights as $right) {
-            $hasRights = $hasRights or \mpf\WebApp::get()->user()->hasRight($right);
+            $hasRights = $hasRights || \mpf\WebApp::get()->user()->hasRight($right);
         }
         return $hasRights;
     }
