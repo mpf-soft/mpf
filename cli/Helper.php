@@ -186,7 +186,6 @@ class Helper extends \mpf\base\Object {
     }
 
     /**
-     * AviraLogger::timeItTook()
      *
      * Returns a string with time difference between the start time and current time
      * @param float $startTime micro start time
