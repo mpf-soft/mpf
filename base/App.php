@@ -154,6 +154,7 @@ abstract class App extends LogAwareObject {
      * @return \mpf\datasources\mongodb\Connection
      */
     public function mongodb($options = array()) {
+        trigger_error("MONGODB CONNECTION NOT IMPLEMENTED YET!");
         return \mpf\datasources\mongodb\Connection::get($options);
     }
 
@@ -163,6 +164,7 @@ abstract class App extends LogAwareObject {
      * @return \mpf\datasources\couchbase\Connection
      */
     public function couchbase($options = array()) {
+        trigger_error("COUCHBASE CONNECTION NOT IMPLEMENTED YET!");
         return \mpf\datasources\couchbase\Connection::get($options);
     }
 
@@ -172,6 +174,7 @@ abstract class App extends LogAwareObject {
      * @return \mpf\datasources\elasticsearch\Connection
      */
     public function elasticsearch($options = array()) {
+        trigger_error("ELASTICSEARCH CONNECTION NOT IMPLEMENTED YET!");
         return \mpf\datasources\elasticsearch\Connection::get($options);
     }
 
