@@ -43,6 +43,13 @@ abstract class App extends LogAwareObject {
     public $title = 'MPF App';
 
     /**
+     * To be used by common keys like Redis, Cookies, Session, Files Path, any other Cache system and so on.. anything
+     * that can be accessed by multiple websites.
+     * @var string
+     */
+    public $shortName = 'app';
+
+    /**
      * Class name for cache engine. Must have implement CacheInterface
      * @var string
      */

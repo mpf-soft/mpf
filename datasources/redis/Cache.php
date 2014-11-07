@@ -9,12 +9,13 @@
 namespace mpf\datasources\redis;
 
 
+use mpf\base\App;
 use mpf\base\LogAwareObject;
 use mpf\interfaces\CacheInterface;
 
 class Cache extends LogAwareObject implements CacheInterface{
 
-    public $key = 'App:Cache';
+    public $key = ':Cache';
 
     private static $instance;
 
@@ -29,20 +30,20 @@ class Cache extends LogAwareObject implements CacheInterface{
     }
 
     public function value($key) {
-        return $this->exists($key)?unserialize(Connection::get()->hget($this->key, $key)):null;
+        return $this->exists($key)?unserialize(Connection::get()->hget(App::get()->shortName . $this->key, $key)):null;
     }
 
     public function set($key, $value) {
-        return Connection::get()->hset($this->key, $key, serialize($value));
+        return Connection::get()->hset(App::get()->shortName . $this->key, $key, serialize($value));
         // TODO: Implement set() method.
     }
 
     public function exists($key) {
-        return Connection::get()->exists($this->key) && Connection::get()->hexists($this->key, $key);
+        return Connection::get()->exists(App::get()->shortName . $this->key) && Connection::get()->hexists(App::get()->shortName . $this->key, $key);
     }
 
     public function delete($key) {
-        return Connection::get()->hdel($this->prefix, key);
+        return Connection::get()->hdel(App::get()->shortName . $this->key, key);
     }
 
 }

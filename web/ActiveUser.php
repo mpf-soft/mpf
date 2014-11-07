@@ -28,6 +28,7 @@
 
 namespace mpf\web;
 
+use mpf\base\App;
 use mpf\base\LogAwareObject;
 use mpf\interfaces\ActiveUserInterface;
 use mpf\WebApp;
@@ -109,8 +110,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
     public function logout() {
         $this->_userData = array();
         $this->_rights = array();
-        Session::get()->delete($this->sessionKey);
-        Cookie::get()->delete($this->cookieKey);
+        Session::get()->delete(App::get()->shortName . $this->sessionKey);
+        Cookie::get()->delete(App::get()->shortName . $this->cookieKey);
     }
 
     /**
@@ -121,7 +122,7 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      */
     protected function setState($name, $value) {
         $this->_userData[$name] = $value;
-        Session::get()->updateListItem($this->sessionKey, 'vars', $this->_userData, array('vars' => array(), 'rights' => array()));
+        Session::get()->updateListItem(App::get()->shortName . $this->sessionKey, 'vars', $this->_userData, array('vars' => array(), 'rights' => array()));
         return $this;
     }
 
@@ -129,8 +130,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * Load data from $_SESSION if exists
      */
     protected function refresh() {
-        if (Session::get()->exists($this->sessionKey)) {
-            $state = Session::get()->value($this->sessionKey);
+        if (Session::get()->exists(App::get()->shortName . $this->sessionKey)) {
+            $state = Session::get()->value(App::get()->shortName . $this->sessionKey);
             $this->_userData = $state['vars'];
             $this->_rights = $state['rights'];
             $this->connected = (count($this->_userData) > 0);
@@ -153,7 +154,7 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      */
     public function setRights($rights) {
         $this->_rights = $rights;
-        Session::get()->updateListItem($this->sessionKey, 'rights', $this->_rights, array('vars' => array(), 'rights' => array()));
+        Session::get()->updateListItem(App::get()->shortName . $this->sessionKey, 'rights', $this->_rights, array('vars' => array(), 'rights' => array()));
         return $this;
     }
 
