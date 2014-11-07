@@ -28,6 +28,9 @@
 
 namespace mpf\base;
 
+use mpf\datasources\redis\Connection;
+use mpf\datasources\sql\PDOConnection;
+
 abstract class App extends LogAwareObject {
 
     /**
@@ -74,7 +77,7 @@ abstract class App extends LogAwareObject {
      * @param string[] $config
      * @return static
      */
-    public static function run($config = array()) {
+    public static function run($config = []) {
         try {
             $class = get_called_class();
             self::$_instance = new $class($config);
@@ -82,26 +85,29 @@ abstract class App extends LogAwareObject {
             return self::$_instance;
         } catch (\ErrorException $ex) {
             if (in_array($ex->getSeverity(), array(E_WARNING, E_USER_WARNING)))
-                self::get()->warning($ex->getMessage(), array(
+                self::get()->warning($ex->getMessage(), [
                     'File' => $ex->getFile(),
                     'Line' => $ex->getLine(),
                     'Type' => $ex->getSeverity(),
-                    'Trace' => $ex->getTraceAsString()
-                ));
+                    'Trace' => $ex->getTraceAsString(),
+                    'Class' => get_class($ex)
+                ]);
             elseif (in_array($ex->getSeverity(), array(E_NOTICE, E_USER_NOTICE, E_USER_DEPRECATED)))
-                self::get()->notice($ex->getMessage(), array(
+                self::get()->notice($ex->getMessage(), [
                     'File' => $ex->getFile(),
                     'Line' => $ex->getLine(),
                     'Type' => $ex->getSeverity(),
-                    'Trace' => $ex->getTraceAsString()
-                ));
+                    'Trace' => $ex->getTraceAsString(),
+                    'Class' => get_class($ex)
+                ]);
             else
-                self::get()->error($ex->getMessage(), array(
+                self::get()->error($ex->getMessage(), [
                     'File' => $ex->getFile(),
                     'Line' => $ex->getLine(),
                     'Type' => $ex->getSeverity(),
-                    'Trace' => $ex->getTraceAsString()
-                ));
+                    'Trace' => $ex->getTraceAsString(),
+                    'Class' => get_class($ex)
+                ]);
         } catch (\Exception $ex) {
             self::get()->error($ex->getMessage(), array('exception' => $ex));
         }
@@ -129,8 +135,8 @@ abstract class App extends LogAwareObject {
      * @param string[] $options
      * @return \mpf\datasources\sql\PDOConnection
      */
-    public function sql($options = array()) {
-        return \mpf\datasources\sql\PDOConnection::get($options);
+    public function sql($options = []) {
+        return PDOConnection::get($options);
     }
 
     /**
@@ -139,7 +145,7 @@ abstract class App extends LogAwareObject {
      * @return \Predis\Client
      */
     public function redis($options = array()) {
-        return \mpf\datasources\redis\Connection::get($options);
+        return Connection::get($options);
     }
 
     /**
