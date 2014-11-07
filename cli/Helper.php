@@ -93,13 +93,11 @@ class Helper extends \mpf\base\Object {
     }
 
     /**
-     * AviraLogger::start_action()
-     *
      * Start a new action
      * @param string $message
      * @param string $color one of class constants
-     * @param int $level debug level
      * @param int $microtime a custom start time;
+     * @return string
      */
     public function startAction($message, $color = HCli::CWHITE, $microtime = null) {
         self::endAction();
@@ -109,83 +107,57 @@ class Helper extends \mpf\base\Object {
         self::$currentAction = array('length' => 19 + strlen(self::$timeTextSeparator) + self::getTextLength($message),
             'errors' => false,
             'color' => $color,
-            'debugLevel' => $level,
             'message' => '',
             'time' => $microtime ? $microtime : microtime(true));
-        $r = '';
-        if ($level <= self::$debugLevel) {
-            $r = date('Y-m-d H:i:s') . self::$timeTextSeparator . self::color($message, $color);
-            self::writeMessage($r);
-        } else {
-            self::$currentAction['message'] = self::color(date('Y-m-d H:i:s'), self::$dateColor) . self::$timeTextSeparator . self::color($message, $color);
-        }
+        $r = date('Y-m-d H:i:s') . self::$timeTextSeparator . self::color($message, $color);
         return $r;
     }
 
     /**
-     * AviraLogger::continue_action()
-     *
      * Continue an action.
      * @param string $message
      * @param string $color one of class constants
-     * @param int $level debug level for which this message is shown
      * @return type
      */
-    public function continueAction($message, $color = 'default', $level = 'default') {
+    public function continueAction($message, $color = 'default') {
         if (!self::$currentAction)
             return;
-        $level = ($level !== 'default') ? $level : self::$defaultActionLevel;
-        if (self::$debugLevel < $level)
-            return;
         $color = ('default' == $color) ? self::$currentAction['color'] : $color;
-        $r = '';
         $r = (' ' . self::timeItTook(self::$currentAction['time']) . ' ' . self::color($message, $color));
-        self::writeMessage($r);
         self::$currentAction['length'] += 2 + self::$lastTimeLenght + self::getTextLength($message);
         return $r;
     }
 
     /**
-     * AviraLogger::endAction()
-     *
      * End a started action.
      * @param string $message
      * @param string $color
-     * @param int $newLevel
-     * @return type
+     * @return string
      */
-    public function endAction($message = 'done', $color = self::CLIGHT_GREEN, $newLevel = null) {
+    public function endAction($message = 'done', $color = self::CLIGHT_GREEN) {
         $r = '';
         if (empty(self::$currentAction)) {
             return $r;
         }
-        if ($newLevel) {
-            self::$currentAction['debugLevel'] = $newLevel;
+        $r .= self::$currentAction['message'];
+        $time = self::timeItTook(self::$currentAction['time'], false);
+        $length = (self::$currentActionHadLogs ? 0 : self::$currentAction['length']) + self::$lastTimeLenght + self::getTextLength(' [' . $message . '] ');
+        $spaceLength = self::getScreen('columns') - $length - 2;
+        $r .= ' ';
+        if ($spaceLength > 0) {
+            $r .= AviraLogger::color(str_repeat('.', $spaceLength), AviraLogger::CDARK_GRAY);
         }
-        if (self::$currentAction['debugLevel'] <= self::$debugLevel) {
-            $r .= self::$currentAction['message'];
-            $time = self::timeItTook(self::$currentAction['time'], false);
-            $length = (self::$currentActionHadLogs ? 0 : self::$currentAction['length']) + self::$lastTimeLenght + self::getTextLength(' [' . $message . '] ');
-            $spaceLength = self::getScreen('columns') - $length - 2;
-            $r .= ' ';
-            if ($spaceLength > 0) {
-                $r .= AviraLogger::color(str_repeat('.', $spaceLength), AviraLogger::CDARK_GRAY);
-            }
-            $r .= self::color(' [' . $message . '] ', $color) . self::color($time, self::$dateColor) . "\n";
-        }
+        $r .= self::color(' [' . $message . '] ', $color) . self::color($time, self::$dateColor) . "\n";
         self::$currentAction = null;
         if (self::$pendingActionLogs) {
             $r .= implode("\n", self::$pendingActionLogs) . "\n";
         }
-        self::writeMessage($r);
         return $r;
     }
 
     protected $requestsRepeats = 0;
 
     /**
-     * AviraLogger::getScreen()
-     *
      * Get current console dimensions. If is not run from console(and is a cron job or something) then some default values are returned
      * @param type $what
      * @return type
@@ -406,10 +378,35 @@ class Helper extends \mpf\base\Object {
      * @param null|string $color
      * @return string
      */
-    public function input($text = "", $defaultValue = '', $color = null) {
+    public function input($text, $defaultValue = '', $color = null) {
         $text = $text . ($defaultValue ? ": [$defaultValue]" : ": ");
         echo $color ? $this->color($text, $color) : $text;
         return trim(trim($result = fgets(fopen('php://stdin', 'r'))) ? $result : $defaultValue);
+    }
+
+    /**
+     * Get hidden input from cli.
+     * @param $text
+     * @return string
+     */
+    public function passwordInput($text) {
+        if (preg_match('/^win/i', PHP_OS)) {
+            $vbscript = sys_get_temp_dir() . 'prompt_password.vbs';
+            file_put_contents($vbscript, 'wscript.echo(InputBox("' . addslashes($text) . '", "", "password here"))');
+            $command = "cscript //nologo " . escapeshellarg($vbscript);
+            $password = rtrim(shell_exec($command));
+            unlink($vbscript);
+            return $password;
+        }
+        $command = "/usr/bin/env bash -c 'echo OK'";
+        if (rtrim(shell_exec($command)) !== 'OK') {
+            trigger_error("Can't invoke bash");
+            return;
+        }
+        $command = "/usr/bin/env bash -c 'read -s -p \"" . addslashes($text) . "\" mypassword && echo \$mypassword'";
+        $password = rtrim(shell_exec($command));
+        echo "\n";
+        return $password;
     }
 
 }
