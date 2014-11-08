@@ -28,13 +28,13 @@
 
 namespace mpf\base;
 
-class Helper extends \mpf\base\TranslatableObject {
+class Helper extends TranslatableObject {
 
     private static $_instances = array();
 
     /**
      * Return a instance for helper.
-     * @param string[string] $config
+     * @param array $config
      * @return static
      */
     public static function get($config = array()) {
