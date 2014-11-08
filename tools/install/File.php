@@ -30,27 +30,44 @@ class File {
      * @return int
      */
     public static function createConfig($config, $filePath){
-        return file_put_contents($filePath, "<?php\n return [" . implode(",\n",self::toPHPString($config)) . "\n];\n");
+        echo "\nPreview:\n";
+        echo $t = "<?php\n return [\n" .  implode(",\n",self::toPHPString($config)) . "\n];\n";
+        return file_put_contents($filePath, $t);
     }
 
     /**
      * Returns php code for array
      * @param array $config
+     * @param string $prefix
      * @return string[]
      */
     public static function toPHPString($config, $prefix = ""){
         $r = [];
 
         foreach ($config as $key=>$value){
-            $key = addslashes($key);
-            $line = $prefix . self::$tabContent . "\"$key\" => ";
+            if (is_int($key)){
+                $line = $prefix . self::$tabContent;
+            } else {
+                $key = addslashes($key);
+                $line = $prefix . self::$tabContent . "\"$key\" => ";
+            }
             if (is_string($value)){
                 $value = addslashes($value);
                 $line .= "\"$value\"";
                 $r[] = $line;
                 continue;
+            } elseif (is_bool($value)){
+                $line .= ($value?"true":"false");
+                $r[] = $line;
+                continue;
+            } elseif (is_int($value)){
+                $line .= "$value";
+                $r[] = $line;
+                continue;
             }
-            $line .= "[" . implode(",\n", self::toPHPString($value, $prefix.self::$tabContent)) . "\n$prefix]";
+            $line .= "[\n" .
+                implode(",\n", self::toPHPString($value, $prefix.self::$tabContent))
+                . "\n$prefix".self::$tabContent."]";
             $r[] = $line;
         }
 

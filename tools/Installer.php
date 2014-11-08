@@ -29,33 +29,31 @@ class Installer extends Object {
             'developmentMode' => true // change it to true when working on widgets or any other classes that publish assets that are changed during development
         ),
         'mpf\\base\\App' => array(//        'cacheEngineClass' => '\\mpf\\datasources\\redis\\Cache'
-        )];
+        ),
+        'a' => [
+            'b' => [
+                'c' => 'd'
+            ]
+        ]
+    ];
 
     public static function baseAppWithSQL() {
         self::$APP_CONFIG_DIR = dirname(dirname(dirname(dirname(__DIR__)))) . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
-        self::loadSQLConfig();
+        $conf = SQL::loadConfig();
+        self::$data['mpf\\datasources\\sql\\PDOConnection'] = [
+            'dns' => "{$conf[0]}:dbname={$conf[2]};host={$conf[1]}",
+            'username' => $conf[3],
+            'password' => $conf[4]
+        ];
         if (SQL::$connected) {
             echo "\n" . Helper::get()->startAction("importing DB from file..");
-            SQL::importFromFile(self::$APP_CONFIG_DIR . '__db_' . self::$data[0] . '.sql');
+            SQL::importFromFile(self::$APP_CONFIG_DIR . '__db_' . $conf[0] . '.sql');
             echo Helper::get()->endAction();
 
             self::createAdminUser();
         }
         self::checkRedis();
         self::writeConfig();
-    }
-
-
-    protected static function loadSQLConfig() {
-        echo "\n" . Helper::get()->color("DB Config: ") . "\n";
-        do {
-            $type = Helper::get()->input("SQL DB Type", "mysql");
-            $host = Helper::get()->input("SQL Host", "localhost");
-            $name = Helper::get()->input("SQL Name", "");
-            $user = Helper::get()->input("SQL User", "root");
-            $pass = Helper::get()->input("SQL Pass", "");
-        } while (!SQL::testConnection($type, $host, $name, $user, $pass));
-        self::$data['db'] = [$type, $host, $name, $user, $pass];
     }
 
     protected static function createAdminUser() {
@@ -78,6 +76,7 @@ class Installer extends Object {
 
     protected static function checkRedis() {
         if ('y' == Helper::get()->input('Use redis cache?', 'y')) {
+            echo Helper::get()->color("REDIS found", Helper::CLIGHT_GREEN) . "\n";
             self::$data['mpf\\base\\App'] = [
                 'cacheEngineClass' => '\\mpf\\datasources\\redis\\Cache'
             ];
