@@ -99,7 +99,7 @@ class Helper extends \mpf\base\Object {
      * @param int $microtime a custom start time;
      * @return string
      */
-    public function startAction($message, $color = HCli::CWHITE, $microtime = null) {
+    public function startAction($message, $color = self::CWHITE, $microtime = null) {
         self::endAction();
         self::endProgressBar();
         self::$currentActionHadLogs = false;
