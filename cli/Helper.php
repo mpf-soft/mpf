@@ -221,7 +221,7 @@ class Helper extends \mpf\base\Object {
         }
 
         //calculate width
-        $columns = self::getScreen('columns');
+        $columns = $this->getScreen('columns');
         if ($columns < 50)
             return false;
         if (null === $width) {
@@ -232,14 +232,14 @@ class Helper extends \mpf\base\Object {
             $width = $columns - 35 - $extraWidth;
         }
 
-        self::$activeProgressBar = array(
+        $this->$activeProgressBar = array(
             'width' => $width,
             'done' => $done,
             'total' => $total,
             'startTime' => microtime(true),
             'startProgress' => $done,
         );
-        self::progress(null, null, null, 0);
+        $this->progress(null, null, null, 0);
     }
 
     public function progress($message = null, $messageDebugLevel = 'debug', $progressValue = 1, $color = null) {
@@ -250,43 +250,43 @@ class Helper extends \mpf\base\Object {
             if (null === $color) {
                 $color = ($wasObject === 'bad') ? self::CLIGHT_RED : null;
             }
-            $message = $message . str_pad('', self::getScreen('columns') - 19 - strlen(self::$timeTextSeparator) - self::getTextLength($message));
-            self::log($message, $messageDebugLevel, $color, $wasObject, 'from-progress');
+            $message = $message . str_pad('', $this->getScreen('columns') - 19 - strlen(self::$timeTextSeparator) - $this->getTextLength($message));
+            $this->log($message, $messageDebugLevel, $color, $wasObject, 'from-progress');
         }
 
-        if (empty(self::$activeProgressBar)) {
+        if (empty($this->$activeProgressBar)) {
             return;
         }
-        self::$activeProgressBar['done'] += $progressValue;
+        $this->$activeProgressBar['done'] += $progressValue;
         // few display settings
         $colorDone = self::CLIGHT_GREEN;
         $colorTotal = self::CWHITE;
         $colorCurrent = self::CYELLOW;
-        $columns = self::getScreen('columns');
+        $columns = $this->getScreen('columns');
         // end settings
-        $percent = round((self::$activeProgressBar['done'] / self::$activeProgressBar['total']) * 100);
-        $fill = round($percent / (100 / self::$activeProgressBar['width']));
+        $percent = round(($this->$activeProgressBar['done'] / $this->$activeProgressBar['total']) * 100);
+        $fill = round($percent / (100 / $this->$activeProgressBar['width']));
         echo ' ';
-        echo self::color('[', $colorTotal);
-        if ($fill && $fill < self::$activeProgressBar['width']) {
+        echo $this->color('[', $colorTotal);
+        if ($fill && $fill < $this->$activeProgressBar['width']) {
             if (($fill - 1) > 0)
-                echo self::color(str_repeat('=', $fill - 1), $colorDone);
-            echo self::color(str_repeat('=', 1), $colorCurrent);
+                echo $this->color(str_repeat('=', $fill - 1), $colorDone);
+            echo $this->color(str_repeat('=', 1), $colorCurrent);
         } else {
             if ($fill > 0)
-                echo self::color(str_repeat('=', $fill), $colorDone);
+                echo $this->color(str_repeat('=', $fill), $colorDone);
         }
-        if ((self::$activeProgressBar['width'] - $fill) > 0) {
-            echo self::color(str_repeat('-', self::$activeProgressBar['width'] - $fill), $colorTotal);
+        if (($this->$activeProgressBar['width'] - $fill) > 0) {
+            echo $this->color(str_repeat('-', $this->$activeProgressBar['width'] - $fill), $colorTotal);
         }
-        $done = self::$activeProgressBar['done'];
-        $total = self::$activeProgressBar['total'];
+        $done = $this->$activeProgressBar['done'];
+        $total = $this->$activeProgressBar['total'];
 
         //calculate remaining time
         $remainingTime = '';
-        if ((($done - self::$activeProgressBar['startProgress']) > 3) && ($total > 15)) {
-            $duration = microtime(true) - self::$activeProgressBar['startTime'];
-            $unitDuration = $duration / ($done - self::$activeProgressBar['startProgress']);
+        if ((($done - $this->$activeProgressBar['startProgress']) > 3) && ($total > 15)) {
+            $duration = microtime(true) - $this->$activeProgressBar['startTime'];
+            $unitDuration = $duration / ($done - $this->$activeProgressBar['startProgress']);
             $remainingSeconds = ceil(($total - $done) * $unitDuration);
             $remainingMinutes = floor($remainingSeconds / 60);
             if ($remainingMinutes) {
@@ -295,14 +295,14 @@ class Helper extends \mpf\base\Object {
             $remainingTime = ($remainingMinutes ? $remainingMinutes . 'm' : '') . $remainingSeconds . 's remaining';
         }
 
-        echo self::color("] {$percent}% ({$done}/{$total}) {$remainingTime}\r", $colorTotal);
+        echo $this->color("] {$percent}% ({$done}/{$total}) {$remainingTime}\r", $colorTotal);
     }
 
     public function endProgressBar() {
-        if (!self::$activeProgressBar)
+        if (!$this->$activeProgressBar)
             return;
         echo "\n";
-        self::$activeProgressBar = null;
+        $this->$activeProgressBar = null;
     }
 
     /**
@@ -367,7 +367,7 @@ class Helper extends \mpf\base\Object {
      * @return string
      */
     public function logToTextFile($logText) {
-        return strip_tags(self::logToHtml($logText));
+        return strip_tags($this->logToHtml($logText));
     }
 
     /**
