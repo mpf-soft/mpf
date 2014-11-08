@@ -28,20 +28,7 @@
 
 namespace mpf\cli;
 
-class Helper extends \mpf\base\Object {
-
-    private static $_instance;
-
-    /**
-     * Get instance of class.
-     * @return static
-     */
-    public static function get() {
-        if (!self::$_instance) {
-            self::$_instance = new static();
-        }
-        return self::$_instance;
-    }
+class Helper extends \mpf\base\Helper {
 
     // CONSOLE TEXT COLORS:
     const CBLACK = '0;30';
@@ -82,6 +69,14 @@ class Helper extends \mpf\base\Object {
      */
     public $showProgressBar = true;
 
+    public $timeTextSeparator = '';
+
+    protected $currentActionHadLogs;
+
+    protected $pendingActionLogs = [];
+
+    protected $currentAction;
+
     public function color($message, $color = self::CWHITE, $background = null) {
         if (!($color || $background)) {
             return $message;
@@ -100,17 +95,30 @@ class Helper extends \mpf\base\Object {
      * @return string
      */
     public function startAction($message, $color = self::CWHITE, $microtime = null) {
-        self::endAction();
-        self::endProgressBar();
-        self::$currentActionHadLogs = false;
-        self::$pendingActionLogs = array();
-        self::$currentAction = array('length' => 19 + strlen(self::$timeTextSeparator) + self::getTextLength($message),
+        $this->endAction();
+        $this->endProgressBar();
+        $this->currentActionHadLogs = false;
+        $this->pendingActionLogs = array();
+        $this->currentAction = array('length' => 19 + strlen($this->timeTextSeparator) + $this->getTextLength($message),
             'errors' => false,
             'color' => $color,
             'message' => '',
             'time' => $microtime ? $microtime : microtime(true));
-        $r = date('Y-m-d H:i:s') . self::$timeTextSeparator . self::color($message, $color);
+        $r = $this->color($message, $color);
         return $r;
+    }
+
+    /**
+     * Return text length after removing colors
+     * @param string $text
+     * @return int
+     */
+    public function getTextLength($text){
+        $colorsList = array('0;30', '1;30', '0;34', '1;34', '0;32', '1;32', '0;36', '1;36', '0;31', '1;31', '0;35', '1;35', '0;33', '1;33', '0;37', '1;37', '40', '41', '42', '43', '44', '45', '46', '47', '0');
+        foreach ($colorsList as $color) {
+            $text = str_replace("\033[" . $color . "m", '', $text);
+        }
+        return strlen($text);
     }
 
     /**
@@ -120,11 +128,11 @@ class Helper extends \mpf\base\Object {
      * @return type
      */
     public function continueAction($message, $color = 'default') {
-        if (!self::$currentAction)
+        if (!$this->currentAction)
             return;
-        $color = ('default' == $color) ? self::$currentAction['color'] : $color;
-        $r = (' ' . self::timeItTook(self::$currentAction['time']) . ' ' . self::color($message, $color));
-        self::$currentAction['length'] += 2 + self::$lastTimeLenght + self::getTextLength($message);
+        $color = ('default' == $color) ? $this->currentAction['color'] : $color;
+        $r = (' ' . $this->timeItTook($this->currentAction['time']) . ' ' . $this->color($message, $color));
+        $this->currentAction['length'] += 2 + $this->lastTimeLenght + $this->getTextLength($message);
         return $r;
     }
 
@@ -136,21 +144,21 @@ class Helper extends \mpf\base\Object {
      */
     public function endAction($message = 'done', $color = self::CLIGHT_GREEN) {
         $r = '';
-        if (empty(self::$currentAction)) {
+        if (empty($this->currentAction)) {
             return $r;
         }
-        $r .= self::$currentAction['message'];
-        $time = self::timeItTook(self::$currentAction['time'], false);
-        $length = (self::$currentActionHadLogs ? 0 : self::$currentAction['length']) + self::$lastTimeLenght + self::getTextLength(' [' . $message . '] ');
-        $spaceLength = self::getScreen('columns') - $length - 2;
+        $r .= $this->currentAction['message'];
+        $time = $this->timeItTook($this->currentAction['time'], false);
+        $length = ($this->currentActionHadLogs ? 0 : $this->currentAction['length']) + $this->lastTimeLenght + $this->getTextLength(' [' . $message . '] ');
+        $spaceLength = $this->getScreen('columns') - $length - 2;
         $r .= ' ';
         if ($spaceLength > 0) {
-            $r .= AviraLogger::color(str_repeat('.', $spaceLength), AviraLogger::CDARK_GRAY);
+            $r .= $this->color(str_repeat('.', $spaceLength), self::CDARK_GRAY);
         }
-        $r .= self::color(' [' . $message . '] ', $color) . self::color($time, self::$dateColor) . "\n";
-        self::$currentAction = null;
-        if (self::$pendingActionLogs) {
-            $r .= implode("\n", self::$pendingActionLogs) . "\n";
+        $r .= $this->color(' [' . $message . '] ', $color) . $this->color($time) . "\n";
+        $this->currentAction = null;
+        if ($this->pendingActionLogs) {
+            $r .= implode("\n", $this->pendingActionLogs) . "\n";
         }
         return $r;
     }
@@ -163,26 +171,26 @@ class Helper extends \mpf\base\Object {
      * @return type
      */
     protected function getScreen($what) {
-        self::$requestsRepeats++;
-        if (!empty(self::$screen)) {
-            if (self::$requestsRepeats < 10) {
-                return self::$screen[$what];
+        $this->requestsRepeats++;
+        if (!empty($this->screen)) {
+            if ($this->requestsRepeats < 10) {
+                return $this->screen[$what];
             }
-            self::$requestsRepeats = 0;
+            $this->requestsRepeats = 0;
         }
 
-        self::$screen['rows'] = self::$screen['columns'] = 0;
+        $this->screen['rows'] = $this->screen['columns'] = 0;
         preg_match_all("/rows.([0-9]+);.columns.([0-9]+);/", strtolower(exec('stty -a  2> /dev/null | grep columns')), $output);
         if (sizeof($output) == 3) {
             if (count($output[0])) {
-                self::$screen['rows'] = $output[1][0];
-                self::$screen['columns'] = $output[2][0];
+                $this->screen['rows'] = $output[1][0];
+                $this->screen['columns'] = $output[2][0];
             } else {
-                self::$screen['columns'] = 140;
-                self::$screen['rows'] = 40;
+                $this->screen['columns'] = 140;
+                $this->screen['rows'] = 40;
             }
         }
-        return self::$screen[$what];
+        return $this->screen[$what];
     }
 
     /**
@@ -195,15 +203,15 @@ class Helper extends \mpf\base\Object {
         $time = microtime(true) - $startTime;
         $time = number_format($time, 4);
         $time = '[' . $time . 's]';
-        self::$lastTimeLenght = strlen($time);
+        $this->lastTimeLenght = strlen($time);
         if ($time < 60) {
-            return self::color($time, self::$dateColor);
+            return $this->color($time);
         }
         $minutes = (int)($time / 60);
         $seconds = $time - ($minutes * 60);
         $time = '[' . $minutes . 'm' . $seconds . 's]';
-        self::$lastTimeLenght = strlen($time);
-        return self::color($time, self::$dateColor);
+        $this->lastTimeLenght = strlen($time);
+        return $this->color($time);
     }
 
     private $activeProgressBar;
@@ -244,14 +252,8 @@ class Helper extends \mpf\base\Object {
 
     public function progress($message = null, $messageDebugLevel = 'debug', $progressValue = 1, $color = null) {
         if (null !== $message) {
-            if (null === $messageDebugLevel) {
-                $messageDebugLevel = ($wasObject === 'bad') ? self::DEBUG_ERRORS : self::DEBUG_DETAILS;
-            }
-            if (null === $color) {
-                $color = ($wasObject === 'bad') ? self::CLIGHT_RED : null;
-            }
-            $message = $message . str_pad('', $this->getScreen('columns') - 19 - strlen(self::$timeTextSeparator) - $this->getTextLength($message));
-            $this->log($message, $messageDebugLevel, $color, $wasObject, 'from-progress');
+            $message = $message . str_pad('', $this->getScreen('columns') - 19 - strlen($this->timeTextSeparator) - $this->getTextLength($message));
+            $this->log($message, $messageDebugLevel, $color, 'from-progress');
         }
 
         if (empty($this->activeProgressBar)) {
