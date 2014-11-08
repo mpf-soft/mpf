@@ -19,32 +19,36 @@ class Installer extends Object {
     public static $APP_CONFIG_DIR;
 
     protected static $data = [
-        'mpf\\interfaces\\LogAwareObjectInterface' => array(
-            'loggers' => array('mpf\\loggers\\InlineWebLogger')
-        ),
-        'mpf\\interfaces\\TranslatableObjectInterface' => array(
+        'mpf\\interfaces\\LogAwareObjectInterface' => [
+            'loggers' => ['mpf\\loggers\\InlineWebLogger']
+        ],
+        'mpf\\interfaces\\TranslatableObjectInterface' => [
             'translator' => '\\mpf\\translators\\ArrayFile'
-        ),
-        'mpf\\web\\AssetsPublisher' => array(
+        ],
+        'mpf\\web\\AssetsPublisher' => [
             'developmentMode' => true // change it to true when working on widgets or any other classes that publish assets that are changed during development
-        ),
-        'mpf\\base\\App' => array(//        'cacheEngineClass' => '\\mpf\\datasources\\redis\\Cache'
-        ),
-        'a' => [
-            'b' => [
-                'c' => 'd'
-            ]
+        ],
+        'mpf\\base\\App' => [
+            //        'cacheEngineClass' => '\\mpf\\datasources\\redis\\Cache'
         ]
     ];
 
     public static function baseAppWithSQL() {
+        if ('n' == Helper::get()->input("Execute initial setup? (creates db, config file, changes user password salt)", 'y')){
+            return;
+        }
         self::$APP_CONFIG_DIR = dirname(dirname(dirname(dirname(__DIR__)))) . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
+        echo "updating htdocs rights..   ";
+        chmod(dirname(dirname(self::$APP_CONFIG_DIR)). DIRECTORY_SEPARATOR.'htdocs'.DIRECTORY_SEPARATOR.'___assets', '0777');
+        echo "done\n";
         $conf = SQL::loadConfig();
         self::$data['mpf\\datasources\\sql\\PDOConnection'] = [
             'dns' => "{$conf[0]}:dbname={$conf[2]};host={$conf[1]}",
             'username' => $conf[3],
             'password' => $conf[4]
         ];
+        self::$data['mpf\\base\\App']['title'] = Helper::get()->input("App Long Title", 'New MPF App');
+        self::$data['mpf\\base\\App']['shortTitle'] = Helper::get()->input("App Short Name", 'app');
         if (SQL::$connected) {
             echo "\n" . Helper::get()->startAction("importing DB from file..");
             SQL::importFromFile(self::$APP_CONFIG_DIR . '__db_' . $conf[0] . '.sql');
@@ -68,6 +72,7 @@ class Installer extends Object {
         SQL::$connection->table('users')->insert([
             'name' => $name,
             'email' => $email,
+            'status' => \app\models\User::STATUS_ACTIVE,
             'password' => \app\models\User::hashPassword($password) //hash password using password hash from user model
         ], 'ignore'); // don't create if an user is already there
         echo "\n" . Helper::get()->color("DONE!", Helper::CLIGHT_GREEN) . "\n";
