@@ -30,6 +30,8 @@ class Installer extends Object {
         ],
         'mpf\\base\\App' => [
             //        'cacheEngineClass' => '\\mpf\\datasources\\redis\\Cache'
+        ],
+        'mpf\\helpers\\MailHelper' => [
         ]
     ];
 
@@ -56,7 +58,10 @@ class Installer extends Object {
 
             self::createAdminUser();
         }
-        self::checkRedis();
+        if ('y' == Helper::get()->input("Use redis cache?", 'y')){
+            self::$data['mpf\\base\\App']['cacheEngineClass'] = '\\mpf\\datasources\\redis\\Cache';
+        }
+        self::mailConfig();
         self::writeConfig();
     }
 
@@ -76,16 +81,24 @@ class Installer extends Object {
             'password' => \app\models\User::hashPassword($password) //hash password using password hash from user model
         ], 'ignore'); // don't create if an user is already there
         echo "\n" . Helper::get()->color("DONE!", Helper::CLIGHT_GREEN) . "\n";
-
     }
 
-    protected static function checkRedis() {
-        if ('y' == Helper::get()->input('Use redis cache?', 'y')) {
-            echo Helper::get()->color("REDIS found", Helper::CLIGHT_GREEN) . "\n";
-            self::$data['mpf\\base\\App'] = [
-                'cacheEngineClass' => '\\mpf\\datasources\\redis\\Cache'
+    protected static function mailConfig(){
+        echo "Setup MailHelper (from && reply-to data): \n";
+        echo "You can configure multiple setups to be used by different scenarious. To use a different setup other than".
+            "`default` just complete in `from` param the name of the setup. It will automatically get the info from the config\n";
+        $key = 'default';
+        do {
+            echo "Set-up $key options:\n";
+            self::$data['mpf\\helpers\\MailHelper'][$key] = [
+                'email' => Helper::get()->input("From Email Address", 'admin@mydomain.com'),
+                'name' => Helper::get()->input("From Name", "MPF App"),
+                'reply-to' => [
+                    'email' => Helper::get()->input("Reply-to Email Address", "no-reply@mydomain.com"),
+                    'name' => Helper::get()->input("Reply-to Name", '')
+                ]
             ];
-        }
+        } while ('n' != ($key = Helper::get()->input("Next setup(n - to stop)", 'n')));
     }
 
     protected static function writeConfig() {
