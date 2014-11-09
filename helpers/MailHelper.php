@@ -6,25 +6,12 @@
  * Time: 12:17 PM
  */
 
-namespace mpf\base;
+namespace mpf\helpers;
 
 
-class Mailer extends Object {
+use mpf\base\Helper;
 
-    /**
-     * @var Mailer
-     */
-    private static $instance;
-
-    /**
-     * @return Mailer
-     */
-    public static function get() {
-        if (!static::$instance) {
-            static::$instance = new static();
-        }
-        return static::$instance;
-    }
+class MailHelper extends Helper {
 
     /**
      * It can be replaced from config to use another mailing engine.
@@ -38,16 +25,16 @@ class Mailer extends Object {
      * Examples: 'default', 'errors', 'contact', 'orders' and so on
      * @var array
      */
-    public $from = array(
-        'default' => array(
+    public $from = [
+        'default' => [
             'email' => 'me@domain.com',
             'name' => 'MPF App',
-            'reply-to' => array(
+            'reply-to' => [
                 'email' => 'me@domain.com',
                 'name' => 'MPF App'
-            )
-        )
-    );
+            ]
+        ]
+    ];
 
     /**
      * Any other method used to send email must accept this parameters.
@@ -120,7 +107,6 @@ class Mailer extends Object {
         }
 
         $m = mail($to, $subject, count($attachments) ? strip_tags($message) : $message, implode("\r\n", $headers));
-        echo '---here---';
         return $m;
     }
 
