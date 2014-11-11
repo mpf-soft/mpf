@@ -156,6 +156,8 @@ abstract class DataProvider extends Object {
             $order = str_replace($column . '__', '', $_GET[$this->orderGetKey]);
             if ($col == $column) {
                 $order = ('ASC' == $order) ? 'DESC' : 'ASC';
+            } else {
+                $order = 'ASC';
             }
         }
         $params = WebApp::get()->request()->getParams();
