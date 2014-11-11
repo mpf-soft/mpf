@@ -74,12 +74,20 @@ class Installer extends Object {
         $name = Helper::get()->input("Name");
         $email = Helper::get()->input("Email");
         $password = Helper::get()->passwordInput("Password");
-        SQL::$connection->table('users')->insert([
+        $userId = SQL::$connection->table('users')->insert([
             'name' => $name,
             'email' => $email,
             'status' => \app\models\User::STATUS_ACTIVE,
             'password' => \app\models\User::hashPassword($password) //hash password using password hash from user model
         ], 'ignore'); // don't create if an user is already there
+        $groups = SQl::$connection->table('users_groups')->get();
+        $table = SQL::$connection->table('users2groups');
+        foreach ($groups as $group){ // add all possible groups to this user.
+            $table->insert([
+                'group_id' => $group['id'],
+                'user_id' => $userId
+            ], 'IGNORE');
+        }
         echo "\n" . Helper::get()->color("DONE!", Helper::CLIGHT_GREEN) . "\n";
     }
 
