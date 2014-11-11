@@ -195,6 +195,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @return string
      */
     public function __toString() {
+        $table=$model=null;
         if ($this->model) {
             $model = $this->model;
             $table = $model::getTableName();
@@ -209,6 +210,25 @@ class ModelCondition extends \mpf\base\LogAwareObject {
         $for_update = $this->for_update ? ' FOR UPDATE' : '';
         $lock_in_share_mode = $this->lock_in_share_mode ? ' LOCK IN SHARE MODE' : '';
         $q = ($this->model ? "SELECT " . $this->getSelect() . " FROM `$table` as `t` " : "") . $join . " WHERE " . $this->getCondition() . $group . $having . $order . $limit . $procedure . $into . $for_update . $lock_in_share_mode;
+        return $q;
+    }
+
+    /**
+     * Get query For Delete
+     * @param array $deleteOptions Possible Options: LOW_PRIORITY, QUICK or IGNORE
+     * @return string
+     */
+    public function forDelete($deleteOptions = []){
+        $table=$model=null;
+        if ($this->model) {
+            $model = $this->model;
+            $table = $model::getTableName();
+        }
+        $join = $this->getJoin();
+        $order = ($order = $this->getOrder()) ? ' ORDER BY ' . $order : '';
+        $limit = ($limit = $this->getLimit()) ? ' LIMIT ' . $limit : '';
+        $options = implode(" ", $deleteOptions);
+        $q = ($this->model ? "DELETE $options FROM `t` USING `$table` as `t` " : "") . $join . " WHERE (" . $this->getCondition() . ")" . $order . $limit;
         return $q;
     }
 

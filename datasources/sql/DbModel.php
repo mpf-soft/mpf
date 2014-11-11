@@ -630,9 +630,7 @@ abstract class DbModel extends BaseModel implements ModelInterface {
         }
         /* @var $condition ModelCondition */
         $condition->setParams($params);
-        $query = explode(' FROM ', $condition->__toString(), 2);
-        $query = 'DELETE FROM ' . $query[1];
-        return static::getDb()->execQuery($query, $condition->getParams());
+        return static::getDb()->execQuery($condition->forDelete(), $condition->getParams());
     }
 
     /**
