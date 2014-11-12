@@ -4,21 +4,28 @@ $(document).ready(function () {
     var DevLogger_Error = new MPF_DevLogger_Error();
     $('<div>').attr('id', 'devlogger-main').appendTo($('body')); //.addClass('alwaysvisible');
     $('<div>').attr('id', 'devlogger-title-bar').appendTo($('#devlogger-main'))
-        .html('<b>Developer Info (' + DevLogger_RunTime + 's)</b><span><a class="selected" href="#">All</a><a href="#">Error</a><a href="#">Debug</a><a href="#">Info</a><a href="#">Query</a></span>');
+        .html('<b>Developer Info (' + DevLogger_RunTime + 's)</b><b id="devlogger-title-errors"></b><span><a onclick="return MPF_DevLogger_Filter(this, \'all\');" class="selected" href="#">All</a><a onclick="return MPF_DevLogger_Filter(this, \'error;alert;critical;warning;notice;emergency\');" href="#">Error</a><a onclick="return MPF_DevLogger_Filter(this, \'debug\');" href="#">Debug</a><a onclick="return MPF_DevLogger_Filter(this, \'info\');" href="#">Info</a><a onclick="return MPF_DevLogger_Filter(this, \'debug-query\');" href="#">Query</a></span>');
     $('<div>').attr('id', 'devlogger-logs').appendTo($('#devlogger-main'));
     $('<ul>').attr('id', 'devlogger-list').appendTo($('#devlogger-logs'));
+    var errorsNumber = 0;
     $.each(DevLogger_Logs, function (index, value) {
         if (value.level == 'emergency') {
+            errorsNumber++;
             DevLogger_Assist.LogLevelEmergency(value);
         } else if (value.level == 'alert') {
+            errorsNumber++;
             DevLogger_Assist.LogLevelAlert(value);
         } else if (value.level == 'critical') {
+            errorsNumber++;
             DevLogger_Assist.LogLevelCritical(value);
         } else if (value.level == 'error') {
+            errorsNumber++;
             DevLogger_Assist.LogLevelError(value, DevLogger_Error);
         } else if (value.level == 'warning') {
+            errorsNumber++;
             DevLogger_Assist.LogLevelWarning(value, DevLogger_Error);
         } else if (value.level == 'notice') {
+            errorsNumber++;
             DevLogger_Assist.LogLevelNotice(value, DevLogger_Error);
         } else if (value.level == 'info') {
             DevLogger_Assist.LogLevelInfo(value);
@@ -32,6 +39,9 @@ $(document).ready(function () {
             $('<li>').appendTo($('#devlogger-list')).html(preText + value.message).addClass('mpf-dev-' + value.level);
         }
     });
+    if (errorsNumber) {
+        $('#devlogger-title-errors').text('( ' + errorsNumber + ' errors )');
+    }
 });
 
 
@@ -91,6 +101,20 @@ MPF_DevLogger_Assist.prototype = {
             DebugAssist.PDOConnection(value);
         } else {
             $('<li>').appendTo($('#devlogger-list')).html(this.ShowClass(value.context.fromClass + " " + value.context.logTime) + value.message).addClass('mpf-dev-debug');
+        }
+    }
+}
+
+function MPF_DevLogger_Filter(element, what) {
+    $('a', element.parentNode).removeClass('selected');
+    $(element).addClass('selected');
+    if ('all' == what) {
+        $('li', $('#devlogger-list')).show();
+    } else {
+        $('li', $('#devlogger-list')).hide();
+        var allWhat = what.split(";");
+        for (var i = 0; i < allWhat.length; i++) {
+            $('li.mpf-dev-' + allWhat[i], $('#devlogger-list')).show();
         }
     }
 }
@@ -188,10 +212,10 @@ MPF_DevLogger_Error.prototype = {
         }
         var response = "<b>File:</b><span>" + context.File + "</span><br />";
         response += "<b>Line:</b><span>" + context.Line + "</span><br />";
-        if (context.Query){
+        if (context.Query) {
             response += "<b>Query:</b><span>" + context.Query + "</span><br />";
         }
-        if (context.Params){
+        if (context.Params) {
             response += "<b>Params:</b><br />";
             $.each(context.Params, function (index, value) {
                 response += "&nbsp;&nbsp;&nbsp;&nbsp;<i>" + index + "</i>&nbsp;&nbsp;&nbsp;<span>" + value + "</span> <br />"

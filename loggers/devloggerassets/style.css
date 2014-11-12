@@ -143,3 +143,7 @@
 #devlogger-logs .devlogger-querylog-extended .mpf-dev-message-details, #devlogger-logs .devlogger-error-extended .mpf-dev-message-details{
     display:block;
 }
+
+#devlogger-title-bar b#devlogger-title-errors{
+    color: orangered;
+}
