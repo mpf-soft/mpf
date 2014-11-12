@@ -250,6 +250,7 @@ class WebApp extends base\App {
     /**
      * Set a new object to be used as access map. Object must implement \mpf\interfaces\AccessMapInterface
      * @param \mpf\interfaces\AccessMapInterface $mapObject
+     * @return WebApp
      */
     public function useAccessMap(\mpf\interfaces\AccessMapInterface $mapObject) {
         $this->accessMap = $mapObject;
