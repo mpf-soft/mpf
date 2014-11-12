@@ -75,14 +75,17 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * List of available modules. Config options for each module can be set here but be careful because
      * they won't apply for already initialized classes except \mpf\WebApp and \mpf\web\request\HTML classes.
      * Example :
-     *  array(
+     *  [
      *      'admin',
-     *      'mobile' => array(
-     *             'mpf\\WebApp' => array(
+     *      'mobile' => [
+     *             'mpf\\WebApp' => [
      *                  'title' => 'Some new Title'
-     *              )
-     *      )
-     *  )
+     *              ],
+     *             'path' => '/full/path/to/model'
+     *      ]
+     *  ]
+     * Optionally a "path" can be set for each module. In case that the path is set then a new namespace called:
+     *   \app\modules\moduleName  will be added to autoloader with basePath specified here.
      * @var string[]
      */
     public $modules = array();
@@ -177,6 +180,12 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     private $module;
 
     /**
+     * Full path to current module
+     * @var string
+     */
+    private $modulePath;
+
+    /**
      * Active action
      * @var string
      */
@@ -240,6 +249,21 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     }
 
     /**
+     * Calculates module path to be later used for viewers.
+     */
+    protected function calculateModulePath(){
+        if (!$this->module || '/' == $this->module){
+            $this->modulePath = APP_ROOT;
+        } else {
+            if (isset($this->modules[$this->module]) && isset($this->modules[$this->module]['path'])) {
+                $this->modulePath = $this->modules[$this->module]['path'];
+            } else {
+                $this->modulePath = APP_ROOT . 'modules' . DIRECTORY_SEPARATOR . $this->module . DIRECTORY_SEPARATOR;
+            }
+        }
+    }
+
+    /**
      * Calculates controller, action, model and all extra info.
      */
     protected function updateURLData() {
@@ -248,6 +272,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             $this->module = $this->defaultModule;
             $this->controller = $this->defaultController;
             $this->action = null;
+            $this->calculateModulePath();
             return;
         }
         $module = explode('/', $uri, 2); // search for module
@@ -264,6 +289,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                 break;
             }
         }
+        $this->calculateModulePath();
         if (!trim($uri)) {
             $this->controller = $this->defaultController;
             $this->action = null;
@@ -383,6 +409,11 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             $this->action = isset($_GET['action']) ? $_GET['action'] : null;
         } else {
             $this->updateURLData();
+        }
+        foreach ($this->modules as $name=>$details){
+            if (is_array($details) && isset($details['path'])){
+                WebApp::get()->autoload()->addPsr4('\\app\\modules\\'.$name, $details['path'], true);
+            }
         }
     }
 
@@ -763,6 +794,9 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * <li>forceDownload: specifies whether the file will be downloaded or shown inline, defaults to true. (Since version 1.1.9.)</li>
      * <li>addHeaders: an array of additional http headers in header-value pairs (available since version 1.1.10)</li>
      * </ul>
+     * @param string $filePath
+     * @param array $options
+     * @return null
      */
     public function xSendFile($filePath, $options = array()) {
         DevLogger::$ignoreOutput = true;
@@ -855,13 +889,13 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
 
     public function getDelete($name, $defaultValue = null) {
         if ($this->_deleteParams === null)
-            $this->_deleteParams = $this->isDeleteRequest() ? $this->getRestParams() : array();
+            $this->_deleteParams = $this->isDeleteRequest() ? $this->getRestParams() : [];
         return isset($this->_deleteParams[$name]) ? $this->_deleteParams[$name] : $defaultValue;
     }
 
     public function getPut($name, $defaultValue = null) {
         if ($this->_putParams === null)
-            $this->_putParams = $this->isPutRequest() ? $this->getRestParams() : array();
+            $this->_putParams = $this->isPutRequest() ? $this->getRestParams() : [];
         return isset($this->_putParams[$name]) ? $this->_putParams[$name] : $defaultValue;
     }
 
@@ -879,5 +913,13 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      */
     public function getCsrfValue(){
         return md5($this->getUserAgent(). Session::get()->id() . $this->csrfSalt);
+    }
+
+    /**
+     * Get full path for current module
+     * @return string
+     */
+    public function getModulePath(){
+        return $this->modulePath;
     }
 }

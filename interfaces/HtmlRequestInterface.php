@@ -197,4 +197,36 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * @return string
      */
     public function getUserAgent();
+
+    /**
+     * Get CSRF key name for POST requests.
+     * @return string
+     */
+    public function getCsrfKey();
+
+    /**
+     * If is secured connection use CSRF for validation
+     * @return string
+     */
+    public function getCsrfValue();
+
+    /**
+     * @param $name
+     * @param null $defaultValue
+     * @return mixed
+     */
+    public function getDelete($name, $defaultValue = null);
+
+    /**
+     * @param $name
+     * @param null $defaultValue
+     * @return mixed
+     */
+    public function getPut($name, $defaultValue = null);
+
+    /**
+     * Get full path for current module
+     * @return string
+     */
+    public function getModulePath();
 }
