@@ -40,8 +40,9 @@ class Installer extends Object {
             return;
         }
         self::$APP_CONFIG_DIR = dirname(dirname(dirname(dirname(__DIR__)))) . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
+        echo "Config folder " . self::$APP_CONFIG_DIR . '.. \n';
         echo "updating htdocs rights..   ";
-        chmod(dirname(dirname(self::$APP_CONFIG_DIR)). DIRECTORY_SEPARATOR.'htdocs'.DIRECTORY_SEPARATOR.'___assets', '0777');
+        chmod(dirname(dirname(self::$APP_CONFIG_DIR)). DIRECTORY_SEPARATOR.'htdocs'.DIRECTORY_SEPARATOR.'__assets', '0777');
         echo "done\n";
         $conf = SQL::loadConfig();
         self::$data['mpf\\datasources\\sql\\PDOConnection'] = [
