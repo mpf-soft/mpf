@@ -64,13 +64,13 @@ class Controller extends LogAwareObject {
      * Path to views folder.
      * @var string
      */
-    public $viewsFolder = '{APP_ROOT}{MODULE_FOLDER}views/pages/{CONTROLLER}';
+    public $viewsFolder = '{MODULE_FOLDER}views/pages/{CONTROLLER}';
 
     /**
      * Path to current layout
      * @var string
      */
-    public $layoutFolder = '{APP_ROOT}{MODULE_FOLDER}views/layout';
+    public $layoutFolder = '{MODULE_FOLDER}views/layout';
 
     /**
      * If there is no need for layout then set this to false;
@@ -143,7 +143,7 @@ class Controller extends LogAwareObject {
         if (!$this->beforeAction($this->getActiveAction())) {
             return;
         }
-        $moduleFolder = $this->request->getModule() ? \mpf\WebApp::get()->modulesNamespace . DIRECTORY_SEPARATOR . $this->request->getModule() . DIRECTORY_SEPARATOR : '';
+        $moduleFolder = $this->getRequest()->getModulePath();
         $controllerFolder = $this->request->getController();
         $result = $this->callMethod($action, $arguments ? $arguments : ($this->request ? $this->request->getParams() : array()));
         if (!$this->afterAction($this->getActiveAction(), $result)) {
@@ -168,7 +168,7 @@ class Controller extends LogAwareObject {
     /**
      * Set a request object;
      * @param \mpf\interfaces\HtmlRequestInterface $request
-     * @return static
+     * @return $this
      */
     public function setRequest(HtmlRequestInterface $request) {
         $this->request = $request;
@@ -186,6 +186,7 @@ class Controller extends LogAwareObject {
     /**
      * Set/change current action;
      * @param string $name
+     * @return $this
      */
     public function setActiveAction($name) {
         $this->currentAction = $name;
