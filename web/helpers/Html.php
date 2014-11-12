@@ -29,6 +29,7 @@
 namespace mpf\web\helpers;
 
 use mpf\web\AssetsPublisher;
+use mpf\WebApp;
 
 class Html extends \mpf\base\Helper {
     /**
@@ -226,12 +227,23 @@ class Html extends \mpf\base\Helper {
 
     /**
      * Returns a HTML link to selected URL.
-     * @param string $href
+     * @param string|array $href
      * @param string $text
      * @param array $htmlOptions
+     * @param boolean $checkAccess
      * @return string
      */
-    public function link($href, $text, $htmlOptions = array()) {
+    public function link($href, $text, $htmlOptions = [], $checkAccess = true) {
+        if ($checkAccess && is_array($href)){
+            $module = isset($href[3])?$href[3]:((isset($href[2]) && is_string($href[2]))?$href[2]:null);
+            if (!WebApp::get()->hasAccessTo($href[0], isset($href[1])?$href[1]:null, $module)){
+                return ""; // is not visible;
+            }
+        }
+        if (is_array($href)){
+            $module = isset($href[3])?$href[3]:((isset($href[2]) && is_string($href[2]))?$href[2]:null);
+            $href = WebApp::get()->request()->createURL($href[0], isset($href[1])?$href[1]:null, (isset($href[2])&&is_array($href[2]))?$href[2]:[], $module);
+        }
         $htmlOptions['href'] = $href;
         return $this->tag('a', $text, $htmlOptions);
     }
@@ -242,7 +254,7 @@ class Html extends \mpf\base\Helper {
      * @param array $htmlOptions
      * @return string
      */
-    public function image($url, $title = '', $htmlOptions = array()) {
+    public function image($url, $title = '', $htmlOptions = []) {
         $htmlOptions['title'] = $title;
         $htmlOptions['src'] = $url;
         return $this->noContentElement('img', $htmlOptions);
@@ -254,8 +266,49 @@ class Html extends \mpf\base\Helper {
      * @param array $htmlOptions
      * @return string
      */
-    public function mpfImage($name, $title = '', $htmlOptions = array()) {
+    public function mpfImage($name, $title = '', $htmlOptions = []) {
         return $this->image(AssetsPublisher::get()->mpfAssetFile('images/' . $name), $title, $htmlOptions);
     }
+
+    /**
+     * It creates a link and a hidden form. That form will be submitted where the link is setup as URL.
+     *
+     * @param string|array $url Url where form will be submitted
+     * @param string $text Visible text for the link
+     * @param array $postData List of hidden inputs that will be sent in form and the value for each.
+     * @param array $htmlOptions An associative list of htmloptions. Name and value.
+     * @param bool $checkAccess If $url is array then it will check if it has access to that page and if not it will not display the link
+     * @param bool|string $confirm Use confirmation message. Can be false or string with the message for confirmation
+     * @return string
+     */
+    public function postLink($url, $text, $postData = [], $htmlOptions = [], $checkAccess = true, $confirm = false){
+        if ($checkAccess && is_array($url)){
+            $module = isset($url[3])?$url[3]:((isset($url[2]) && is_string($url[2]))?$url[2]:null);
+            if (!WebApp::get()->hasAccessTo($url[0], isset($url[1])?$url[1]:null, $module)){
+                return ""; // is not visible;
+            }
+        }
+        if (is_array($url)){
+            $module = isset($url[3])?$url[3]:((isset($url[2]) && is_string($url[2]))?$url[2]:null);
+            $url = WebApp::get()->request()->createURL($url[0], isset($url[1])?$url[1]:null, (isset($url[2])&&is_array($url[2]))?$url[2]:[], $module);
+        }
+        $uniqueID = uniqid("post-link-form");
+
+        $htmlOptions['onclick'] = (isset($htmlOptions['onclick'])?$htmlOptions['onclick']. ' ':'') . 'document.getElementById(\''.$uniqueID.'\').submit(); return false;';
+        if ($confirm){
+            $htmlOptions['onclick'] = "if (confirm('$confirm')) { $htmlOptions[onclick] }; return false;";
+        }
+        $r = $this->link($url, $text, $htmlOptions, false);
+
+        $r .= Form::get()->openForm(['style' => 'display:none;', 'method' => 'post', 'id' => $uniqueID, 'action' => $url]);
+        foreach ($postData as $name=>$value){
+            $r .= Form::get()->hiddenInput($name, $value);
+        }
+        $r .= Form::get()->closeForm();
+
+        return $r;
+    }
+
+
 
 }
