@@ -116,7 +116,7 @@ class Form extends \mpf\base\Helper {
         foreach ($htmlOptions as $k => $v)
             $r .= "$k = '$v' ";
 
-        return $r . '>' . ((isset($htmlOptions['method']) && 'post' == $htmlOptions['method'])?$this->hiddenInput(WebApp::get()->request()->getCsrfKey(), WebApp::get()->request()->getCsrfValue()):'');
+        return $r . '>' . ((isset($htmlOptions['method']) && 'post' == strtolower($htmlOptions['method']))?$this->hiddenInput(WebApp::get()->request()->getCsrfKey(), WebApp::get()->request()->getCsrfValue()):'');
     }
 
     /**
