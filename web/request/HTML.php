@@ -395,10 +395,12 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             if (!isset($_POST[$key])){
                 $this->error('CSRF token missing!');
                 list($this->controller, $this->action) = WebApp::get()->pageAccessDenied;
+                $this->calculateModulePath();
                 return;
             } elseif ($_POST[$key] != $value){
                 $this->error('Invalid CSRF token!' . $_POST[$key] . ' != ' . $value);
                 list($this->controller, $this->action) = WebApp::get()->pageAccessDenied;
+                $this->calculateModulePath();
                 return;
             }
             unset($_POST[$key]);
@@ -407,6 +409,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             $this->module = isset($_GET['module']) ? $_GET['module'] : $this->defaultModule;
             $this->controller = isset($_GET['controller']) ? $_GET['controller'] : $this->defaultController;
             $this->action = isset($_GET['action']) ? $_GET['action'] : null;
+            $this->calculateModulePath();
         } else {
             $this->updateURLData();
         }
