@@ -395,7 +395,7 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @return int|boolean
      */
     public function insert($columns, $duplicateKey = null) {
-        if ('ignore' == strtolower($duplicateKey)){
+        if (is_string($duplicateKey) && 'ignore' == strtolower($duplicateKey)){
             $q = "INSERT IGNORE INTO {$this->table} ";
         } else {
             $q = "INSERT INTO {$this->table} ";
