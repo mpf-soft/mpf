@@ -29,7 +29,6 @@
 namespace mpf\loggers;
 
 use \mpf\cli\Helper as HCli;
-use \Psr\Log\LogLevel as Levels;
 
 class InlineCliLogger extends Logger {
 

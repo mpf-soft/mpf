@@ -144,7 +144,7 @@ class ConsoleApp extends base\App {
     /**
      * Instantiate command and check if class is correct;
      * @param string $class
-     * @return \mpf\console\Command
+     * @return \mpf\cli\Command
      */
     private function loadCommand($class) {
         $controller = new $class();

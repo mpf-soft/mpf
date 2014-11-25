@@ -29,6 +29,7 @@
 namespace mpf\cli;
 
 use \mpf\cli\Helper as HCli;
+use mpf\ConsoleApp;
 
 class NotFound extends Command {
 
@@ -38,20 +39,19 @@ class NotFound extends Command {
     }
 
     protected function getAllCommands() {
-        $path = dirname(\mpf\base\AutoLoader::get()->path($this->getNameSpace() . 'Test'));
+        $path = APP_ROOT . str_replace('\\', '/', ConsoleApp::get()->commandsNamespace) . DIRECTORY_SEPARATOR;
         if (!$path)
             return array();
         $files = scandir($path);
         echo HCli::color('Available actions: ' . "\n\n");
         foreach ($files as $file) {
-            if (in_array($file, array('.', '..')))
+            if (in_array($file, array('.', '..', '.htaccess')))
                 continue;
-
             $command = lcfirst(str_replace('.php', '', $file));
             $reflection = new \ReflectionClass($this->getClassFromFile($file));
             $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
             foreach ($methods as $method)
-                $this->present($command, $method);
+                $this->present($command, $method, $reflection);
         }
         echo "\n";
     }
@@ -62,7 +62,7 @@ class NotFound extends Command {
      * @param \ReflectionMethod $method
      * @return null
      */
-    protected function present($command, \ReflectionMethod $method) {
+    protected function present($command, \ReflectionMethod $method, \ReflectionClass $class) {
         if ($method->isStatic())
             return;
         if ('action' !== substr($method->getName(), 0, 6))
@@ -74,7 +74,9 @@ class NotFound extends Command {
 
         foreach ($params as $p)
             echo $this->paramDetails($p);
-
+        if ($class->getDocComment()) {
+            echo "\n" . $class->getDocComment();
+        }
         echo "\n\n";
     }
 
