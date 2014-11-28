@@ -9,9 +9,11 @@
 namespace mpf\cli\dev;
 
 
+use mpf\base\App;
 use mpf\base\AutoLoader;
 use mpf\base\LogAwareObject;
 use mpf\datasources\sql\DbRelations;
+use mpf\WebApp;
 
 class Creator extends LogAwareObject {
 
@@ -101,7 +103,20 @@ class {$this->class} extends DbModel {
 
 MODEL;
         echo $model;
-        $path = AutoLoader::get()->path($this->namespace . '\\' . $this->class);
+        $prefixes = App::get()->autoload()->getPrefixesPsr4();
+        $found = false;
+        foreach ($prefixes as $pref => $paths){
+            if (0 === strpos($this->namespace, $pref)){
+                $path = $paths[0] . '/' . substr($this->namespace, strlen($pref));
+                $found = true;
+                break;
+            }
+        }
+        if (!$found){
+            $this->error("Path for {$this->namespace} not found!");
+            return false;
+        }
+        $path .= '/' . $this->class . '.php';
         $this->debug('File name: ' . $path);
         if (file_exists($path)) {
             $this->error('File already exists!');
