@@ -58,9 +58,9 @@ class {$this->class} extends DbModel {
      * @return array
      */
     public static function getLabels() {
-        return array(
+        return [
              {$this->getModelLabels()}
-        );
+        ];
     }
 
     /**
@@ -68,9 +68,9 @@ class {$this->class} extends DbModel {
      * @return array
      */
     public static function getRelations(){
-        return array(
+        return [
              {$this->getModelRelations()}
-        );
+        ];
     }
 
     /**
@@ -78,9 +78,9 @@ class {$this->class} extends DbModel {
      * @return array
      */
     public static function getRules(){
-        return array(
-            array("{$this->getColumnsList(false)}", "safe", "on" => "search")
-        );
+        return [
+            ["{$this->getColumnsList(false)}", "safe", "on" => "search"]
+        ];
     }
 
     /**
@@ -88,16 +88,16 @@ class {$this->class} extends DbModel {
      * @return \mpf\datasources\sql\DataProvider
      */
     public function getDataProvider() {
-        \$condition = new ModelCondition(array('model' => __CLASS__));
+        \$condition = new ModelCondition(['model' => __CLASS__]);
 
-        foreach (array({$this->getColumnsList(true)}) as \$column) {
+        foreach ([{$this->getColumnsList(true)}] as \$column) {
             if (\$this->\$column) {
                 \$condition->compareColumn(\$column, \$this->\$column, true);
             }
         }
-        return new DataProvider(array(
+        return new DataProvider([
             'modelCondition' => \$condition
-        ));
+        ]);
     }
 }
 
@@ -174,7 +174,7 @@ MODEL;
     }
 
     protected function getModelLabels() {
-        $result = array();
+        $result = [];
         foreach ($this->labels as $column => $label) {
             $result[] = "'$column' => '$label'";
         }
