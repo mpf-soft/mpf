@@ -108,7 +108,7 @@ class Controller extends LogAwareObject {
      * @param string $file
      * @param array $vars
      */
-    public function display($file, $vars = array()) {
+    public function display($file, $vars = []) {
         if ((DIRECTORY_SEPARATOR !== $file[0]) && (':' !== $file[1])) { // get path if not full path was sent
             $moduleFolder = $this->request->getModule() ? \mpf\WebApp::get()->modulesNamespace . DIRECTORY_SEPARATOR . $this->request->getModule() . DIRECTORY_SEPARATOR : '';
             $controllerFolder = $this->request->getController();

@@ -30,14 +30,14 @@ namespace mpf\base;
 
 class Helper extends TranslatableObject {
 
-    private static $_instances = array();
+    private static $_instances = [];
 
     /**
      * Return a instance for helper.
      * @param array $config
      * @return static
      */
-    public static function get($config = array()) {
+    public static function get($config = []) {
         $key = md5(get_called_class() . serialize($config));
         if (!isset(self::$_instances[$key]))
             self::$_instances[$key] = new static($config);
