@@ -149,7 +149,7 @@ MODEL;
         );
         foreach ($this->relations as $relation) {
             $type = $types[$relation['type']];
-            $result[] = "'{$relation['name']}' => array($type, '{$relation['model']}', '{$relation['connection']}')";
+            $result[] = "'{$relation['name']}' => [$type, '{$relation['model']}', '{$relation['connection']}']";
         }
 
         return implode(",\n             ", $result);

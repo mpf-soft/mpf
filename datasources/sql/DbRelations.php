@@ -56,7 +56,7 @@ class DbRelations {
 
     /**
      * declaration model:
-     *  'relName' => array(\mpf\datasources\sql\DbRelations::BELONGS_TO, '\app\models\SecondModelName', 'columnName', ..$options)
+     *  'relName' => array(\mpf\datasources\sql\DbRelations::HAS_ONE, '\app\models\SecondModelName', 'columnName', ..$options)
      * columnName represents the name of the column from SecondModelNAme that has the same value as primary key from main model
      * example:
      *  'settings' => array(\mpf\datasources\sql\DbRelations::HAS_ONE, '\app\models\UserSettings', 'user_id')
