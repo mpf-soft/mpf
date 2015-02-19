@@ -162,6 +162,7 @@ class Form extends \mpf\base\Helper {
         }
         $opts = array();
         if (false !== $emptyValue) {
+            $selected = "";
             if (!isset($value)) {
                 $selected = 'selected="selected"';
             }
