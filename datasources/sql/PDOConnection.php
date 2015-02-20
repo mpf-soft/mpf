@@ -270,7 +270,12 @@ class PDOConnection extends \PDO {
                 continue;
             $options = explode('(', $column['Type'], 2); // get text after (
             $options = substr($options[1], 0, strlen($options[1]) - 1); // and remove ) from the end;
-            return str_getcsv($options, ',', "'");
+            $options = str_getcsv($options, ',', "'");
+            $fOptions = [];
+            foreach ($options as $opt){
+                $fOptions[$opt] = $opt;
+            }
+            return $fOptions;
         }
         throw new \Exception("Column `$columnName` not found in table `$tableName`!");
     }
