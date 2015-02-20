@@ -280,7 +280,7 @@ class PDOConnection extends \PDO {
      * @param string $tableName
      * @param string $columnName
      * @return string
-     * @throws Exception if column is not found
+     * @throws \Exception if column is not found
      */
     public function getColumnType($tableName, $columnName) {
         $columns = $this->getTableColumns($tableName);
@@ -290,7 +290,7 @@ class PDOConnection extends \PDO {
             $type = explode('(', $column['Type'], 2);
             return $type[0];
         }
-        throw new Exception("Column `$columnName` not found in table `$tableName`!");
+        throw new \Exception("Column `$columnName` not found in table `$tableName`!");
     }
 
     /**
@@ -298,7 +298,7 @@ class PDOConnection extends \PDO {
      * @param string $tableName
      * @param string $columnName
      * @return string|int|null
-     * @throws Exception if column is not found
+     * @throws \Exception if column is not found
      */
     public function getColumnDefaultValue($tableName, $columnName) {
         $columns = $this->getTableColumns($tableName);
@@ -307,7 +307,7 @@ class PDOConnection extends \PDO {
                 continue;
             return $column['Default'];
         }
-        throw new Exception("Column `$columnName` not found in table `$tableName`!");
+        throw new \Exception("Column `$columnName` not found in table `$tableName`!");
     }
 
     /**
@@ -315,7 +315,7 @@ class PDOConnection extends \PDO {
      * @param string $tableName
      * @param string $columnName
      * @return boolean
-     * @throws Exception if column is not found
+     * @throws \Exception if column is not found
      */
     public function getColumnCanBeNull($tableName, $columnName) {
         $columns = $this->getTableColumns($tableName);
@@ -324,7 +324,7 @@ class PDOConnection extends \PDO {
                 continue;
             return ($column['Null'] == 'YES');
         }
-        throw new Exception("Column `$columnName` not found in table `$tableName`!");
+        throw new \Exception("Column `$columnName` not found in table `$tableName`!");
     }
 
     /**
