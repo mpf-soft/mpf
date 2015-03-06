@@ -343,7 +343,23 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                     $this->controller = $value;
                     break;
                 case 'action':
-                    $this->action = $value;
+                    if (false !== strpos($value, '-')){
+                        $chars = str_split($value);
+                        $mustUpdate = false;
+                        foreach ($chars as $k=>$char){
+                            if ('-' == $char){
+                                $chars[$k] = '';
+                                $mustUpdate = true;
+                                continue;
+                            }
+                            if ($mustUpdate){
+                                $chars[$k] = strtoupper($char);
+                            }
+                        }
+                        $this->action = implode("", $chars);
+                    } else {
+                        $this->action = $value;
+                    }
                     break;
                 case 'params':
                     $this->_addToParamsFromString($value);
