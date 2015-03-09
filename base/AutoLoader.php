@@ -77,10 +77,16 @@ require_once LIBS_FOLDER . 'mpf' . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTOR
  *      <?php
  *      new \Foo\Bar\Qux\QuuxTest;
  *
+ * This class will only be used if case that the framework is installed without the composer. In case that composer is
+ * used to maintain packages that it will also take care of the autoload for all classes.
  * @package mpf\base
  */
 class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
 
+    /**
+     * Keeps a link to last instantiated AutoLoader class.
+     * @var AutoLoader
+     */
     private static $lastRegistered;
 
     /**
@@ -98,6 +104,13 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      */
     public $fileExists = false;
 
+    /**
+     * This key is used as base namespace for all classes from developer's project.
+     * Examples:
+     * \app\controllers\Home
+     * \app\models\User
+     * \app\components\Controller
+     */
     const APP_DEVELOPER_VENDORKEY = 'app';
 
     /**
@@ -239,17 +252,19 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
     private static $_self = array();
 
     /**
-     * Add option to select it from everywhere
+     * This method is used to get an instance of this class from anywhere without having to initialize the class each time.
+     * It will offer different instances for each config.
+     * @param string[] $config Extra config options that can be specified for each class
      * @return \mpf\base\AutoLoader
      */
-    public static function get($config = array()) {
+    public static function get($config = []) {
         if (isset(self::$_self[$hash = md5(serialize($config))]))
             return self::$_self[$hash];
         return new \mpf\base\AutoLoader($config);
     }
 
     /**
-     * Get last registered autoloader
+     * Get last registered autoloader. In most of the cases only one will be registered.
      * @return \mpf\base\AutoLoader
      */
     public static function getLastRegistered() {
@@ -258,8 +273,10 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
 
     /**
      * When initiating set value for self::$_self; so that it can be called from ::get();
+     * Multiple values will be set for that, one for each config variant that is initiated.
+     * @param string[] $config Config values that were used when the object was instantiated.
      */
-    protected function init($config = array()) {
+    protected function init($config = []) {
         $this->addNamespace(self::APP_DEVELOPER_VENDORKEY, APP_ROOT);
         self::$_self[md5(serialize($config))] = $this;
         return parent::init();
@@ -267,6 +284,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
 
     /**
      * Register this instance as a autoloader;
+     * Multiple autoload classes can be registered and somepackages will register their own autoload class. Is better to
+     * not remove this class except if you're using composer to handle the autoload process.
      */
     public function register() {
         self::$lastRegistered = $this;
