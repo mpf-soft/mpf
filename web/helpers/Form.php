@@ -311,4 +311,30 @@ class Form extends \mpf\base\Helper {
         return $return . $this->input($name, 'text', $value, $htmlOptions) . $s;
     }
 
+    /**
+     * Generates a submit button for current form.
+     * @param string $value Value in this case will be used to display a text on the button. It will also be sent when form is submitted if a name is specified.
+     * @param string $name Optional button name
+     * @param array $htmlOptions Optional extra button html options
+     * @return string
+     */
+    public function submitButton($value, $name='', $htmlOptions = []){
+        return $this->input($name, 'submit', $value, $htmlOptions);
+    }
+
+    /**
+     * Creates a button from a image. Button can be used to submit/cancel or anything else is added.
+     * @param string $src Image URL
+     * @param string $alt Text to be displayed in case that image is not loaded
+     * @param string $name Optional a name can be added
+     * @param string $value Optional a value can also be added
+     * @param array $htmlOptions Extra HTML options. Values for scr, alt, type, name, value will be replaced with first parameters of this method
+     * @return string
+     */
+    public function imageButton($src, $alt ='Submit', $name='', $value ='', $htmlOptions = []){
+        $htmlOptions['src'] = $src;
+        $htmlOptions['alt'] = $alt;
+        return $this->input($name, 'image', $value, $htmlOptions);
+    }
+
 }

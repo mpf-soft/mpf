@@ -201,6 +201,15 @@ class Controller extends LogAwareObject {
         return $this->currentAction ? $this->currentAction : $this->defaultAction;
     }
 
+    /**
+     * Used to change layout for active page. By default it will search by page name, but if this is set then the new
+     * name will be used.
+     * @param string $name
+     */
+    public function setPageLayout($name){
+        $this->pageLayout = $name;
+    }
+
     protected function beforeAction($actionName) {
         return true;
     }
