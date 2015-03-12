@@ -117,10 +117,10 @@ class Controller extends LogAwareObject {
             ), $this->viewsFolder);
             $file = $viewsFolder . $file . '.php';
         }
-        foreach ($this->_displayVars as $k=>$v){
+        foreach ($this->_displayVars as $k => $v) {
             $$k = $v;
         }
-        foreach ($vars as $k=>$v){
+        foreach ($vars as $k => $v) {
             $$k = $v;
         }
         require $file;
@@ -135,7 +135,7 @@ class Controller extends LogAwareObject {
     }
 
     public function run($arguments = array()) {
-        if ($this->getRequest()->isAjaxRequest()){
+        if ($this->getRequest()->isAjaxRequest()) {
             $this->showLayout = $this->showLayoutOnAjax;
         }
 
@@ -206,8 +206,66 @@ class Controller extends LogAwareObject {
      * name will be used.
      * @param string $name
      */
-    public function setPageLayout($name){
+    public function setPageLayout($name) {
         $this->pageLayout = $name;
+    }
+
+    /**
+     * Shortcut to request->goToPage().
+     * It will redirect user to selected page
+     * @param string $controller Controller name where it must be redirected
+     * @param string $action Action name where it must be redirected. Index is the default selected action
+     * @param array $params Optional a list of params can be added also
+     * @return bool
+     */
+    public function goToPage($controller, $action = 'index', $params = []) {
+        return $this->request->goToPage($controller, $action, $params);
+    }
+
+    /**
+     * Similar to goToPage() this will actually redirect to a action inside this controller.
+     * @param string $action
+     * @param array $params
+     * @return bool
+     */
+    public function goToAction($action, $params = []){
+        return $this->request->goToPage($this->getName(), $action, $params);
+    }
+
+
+    /**
+     * Similar to the above methods, this is another shortcut to a request method called goToURL. It will redirect the
+     * user to the selected string URL.
+     * @param string $url
+     * @return null
+     */
+    public function goToURL($url){
+        return $this->request->goToURL($url);
+    }
+
+    /**
+     * A shortcut to get web root faster from view.
+     * @return string
+     */
+    public function getWebRoot(){
+        return $this->request->getWebRoot();
+    }
+
+    /**
+     * A shortcut to get link root faster from view.
+     * @return string
+     */
+    public function getLinkRoot(){
+        return $this->request->getLinkRoot();
+    }
+
+    /**
+     * Get this controller's name. It does that by checking the name of the class currently instantiated.
+     * @return string
+     */
+    public function getName(){
+        $class = explode('\\', get_class($this));
+        return lcfirst($class[count($class) -1]);
     }
 
     protected function beforeAction($actionName) {
