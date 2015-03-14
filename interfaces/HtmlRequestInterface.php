@@ -229,4 +229,11 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * @return string
      */
     public function getModulePath();
+
+    /**
+     * Automatically called by WebApp class for modules outside app folder to set the correct path after the controller is loaded and address is known.
+     * @param string $path
+     * @return mixed
+     */
+    public function setModulePath($path);
 }

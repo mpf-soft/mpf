@@ -64,13 +64,13 @@ class Controller extends LogAwareObject {
      * Path to views folder.
      * @var string
      */
-    public $viewsFolder = '{MODULE_FOLDER}views/pages/{CONTROLLER}';
+    public $viewsFolder = '{MODULE_FOLDER}views{DIRECTORY_SEPARATOR}pages{DIRECTORY_SEPARATOR}{CONTROLLER}';
 
     /**
      * Path to current layout
      * @var string
      */
-    public $layoutFolder = '{MODULE_FOLDER}views/layout';
+    public $layoutFolder = '{MODULE_FOLDER}views{DIRECTORY_SEPARATOR}layout';
 
     /**
      * If there is no need for layout then set this to false;
@@ -149,14 +149,15 @@ class Controller extends LogAwareObject {
         if (!$this->afterAction($this->getActiveAction(), $result)) {
             return;
         }
+        $layoutFolder = "";
         if ($this->showLayout) {
-            $layoutFolder = str_replace(array('{APP_ROOT}', '{MODULE_FOLDER}', '{LIBS_FOLDER}'), array(APP_ROOT, $moduleFolder, LIBS_FOLDER), $this->layoutFolder);
+            $layoutFolder = str_replace(array('{APP_ROOT}', '{MODULE_FOLDER}', '{LIBS_FOLDER}', '{DIRECTORY_SEPARATOR}'), array(APP_ROOT, $moduleFolder, LIBS_FOLDER, DIRECTORY_SEPARATOR), $this->layoutFolder);
             $this->display($layoutFolder . DIRECTORY_SEPARATOR . 'header.php');
         }
-        $viewsFolder = str_replace(array('{APP_ROOT}', '{MODULE_FOLDER}', '{CONTROLLER}', '{LIBS_FOLDER}'), array(
-            APP_ROOT, $moduleFolder, $controllerFolder, LIBS_FOLDER
-        ), $this->viewsFolder);
+        $viewsFolder = str_replace(['{APP_ROOT}', '{MODULE_FOLDER}', '{CONTROLLER}', '{LIBS_FOLDER}', '{DIRECTORY_SEPARATOR}'],
+            [APP_ROOT, $moduleFolder, $controllerFolder, LIBS_FOLDER, DIRECTORY_SEPARATOR], $this->viewsFolder);
         $page = $this->pageLayout ? $this->pageLayout : strtolower($this->getActiveAction());
+        $this->debug("Views Folder: " . $viewsFolder);
         if (file_exists($viewsFolder . DIRECTORY_SEPARATOR . $page . '.php')) {
             $this->display($viewsFolder . DIRECTORY_SEPARATOR . $page . '.php');
         }
@@ -228,7 +229,7 @@ class Controller extends LogAwareObject {
      * @param array $params
      * @return bool
      */
-    public function goToAction($action, $params = []){
+    public function goToAction($action, $params = []) {
         return $this->request->goToPage($this->getName(), $action, $params);
     }
 
@@ -239,7 +240,7 @@ class Controller extends LogAwareObject {
      * @param string $url
      * @return null
      */
-    public function goToURL($url){
+    public function goToURL($url) {
         return $this->request->goToURL($url);
     }
 
@@ -247,7 +248,7 @@ class Controller extends LogAwareObject {
      * A shortcut to get web root faster from view.
      * @return string
      */
-    public function getWebRoot(){
+    public function getWebRoot() {
         return $this->request->getWebRoot();
     }
 
@@ -255,7 +256,7 @@ class Controller extends LogAwareObject {
      * A shortcut to get link root faster from view.
      * @return string
      */
-    public function getLinkRoot(){
+    public function getLinkRoot() {
         return $this->request->getLinkRoot();
     }
 
@@ -263,9 +264,9 @@ class Controller extends LogAwareObject {
      * Get this controller's name. It does that by checking the name of the class currently instantiated.
      * @return string
      */
-    public function getName(){
+    public function getName() {
         $class = explode('\\', get_class($this));
-        return lcfirst($class[count($class) -1]);
+        return lcfirst($class[count($class) - 1]);
     }
 
     protected function beforeAction($actionName) {

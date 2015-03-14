@@ -437,6 +437,14 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     }
 
     /**
+     * Changes path for current module. Is called by WebApp but in some exceptions it can be called by any other class.
+     * @param string $path
+     */
+    public function setModulePath($path){
+        $this->modulePath = $path;
+    }
+
+    /**
      * Return an instantiated class of HTML
      * @param string[] $options
      * @return \mpf\web\request\HTML

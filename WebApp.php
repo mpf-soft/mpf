@@ -103,6 +103,12 @@ class WebApp extends base\App {
         }
 
         $this->_controller = $controller;
+        $path = dirname(dirname($this->autoload()->findFile(get_class($controller)))) . DIRECTORY_SEPARATOR;
+        if ($path != $this->request()->getModulePath()){
+            $this->request()->setModulePath($path);
+        }
+        $this->debug(dirname(dirname($path)));
+
 
         $controller->setActiveAction($this->request()->getAction())
             ->setRequest($this->request())
