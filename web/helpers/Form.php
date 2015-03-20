@@ -154,6 +154,9 @@ class Form extends \mpf\base\Helper {
 
     public function select($name, $options, $value = null, $htmlOptions = array(), $emptyValue = false) {
         $htmlOptions['name'] = $name;
+        if (isset($htmlOptions['multiple'])){
+            $htmlOptions['name'] .= '[]';
+        }
         if (is_null($value)) {
             $value = $this->getArrayValue($_POST, $name);
             if (is_null($value)) {
