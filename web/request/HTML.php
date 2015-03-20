@@ -251,8 +251,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     /**
      * Calculates module path to be later used for viewers.
      */
-    protected function calculateModulePath(){
-        if (!$this->module || '/' == $this->module){
+    protected function calculateModulePath() {
+        if (!$this->module || '/' == $this->module) {
             $this->modulePath = APP_ROOT;
         } else {
             if (isset($this->modules[$this->module]) && isset($this->modules[$this->module]['path'])) {
@@ -339,20 +339,28 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                 continue; // skip  extra matches;
             }
             switch ($name) {
+                case 'module':
+                    $this->debug("Module matched: $value");
+                    $this->module = $value;
+                    if (isset($this->modules[$value])) {
+                        $this->applyModuleConfig($this->modules[$value]);
+                    }
+                    break;
                 case 'controller':
+                    $this->debug("Controller matched: $value");
                     $this->controller = $value;
                     break;
                 case 'action':
-                    if (false !== strpos($value, '-')){
+                    if (false !== strpos($value, '-')) {
                         $chars = str_split($value);
                         $mustUpdate = false;
-                        foreach ($chars as $k=>$char){
-                            if ('-' == $char){
+                        foreach ($chars as $k => $char) {
+                            if ('-' == $char) {
                                 $chars[$k] = '';
                                 $mustUpdate = true;
                                 continue;
                             }
-                            if ($mustUpdate){
+                            if ($mustUpdate) {
                                 $chars[$k] = strtoupper($char);
                             }
                         }
@@ -360,11 +368,13 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                     } else {
                         $this->action = $value;
                     }
+                    $this->debug("Action matched: {$this->action}");
                     break;
                 case 'params':
                     $this->_addToParamsFromString($value);
                     break;
                 default:
+                    $this->debug("$name matched: $value");
                     $this->params[$name] = $value;
             }
         }
@@ -405,15 +415,15 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         self::$_instances[md5(serialize($options))] = $this;
         $this->normalizeRequest();
         $this->calculateCurrentURL();
-        if ($this->secure && isset($_POST) && count($_POST)){
+        if ($this->secure && isset($_POST) && count($_POST)) {
             $key = $this->getCsrfKey();
             $value = $this->getCsrfValue();
-            if (!isset($_POST[$key])){
+            if (!isset($_POST[$key])) {
                 $this->error('CSRF token missing!');
                 list($this->controller, $this->action) = WebApp::get()->pageAccessDenied;
                 $this->calculateModulePath();
                 return;
-            } elseif ($_POST[$key] != $value){
+            } elseif ($_POST[$key] != $value) {
                 $this->error('Invalid CSRF token!' . $_POST[$key] . ' != ' . $value);
                 list($this->controller, $this->action) = WebApp::get()->pageAccessDenied;
                 $this->calculateModulePath();
@@ -429,9 +439,9 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         } else {
             $this->updateURLData();
         }
-        foreach ($this->modules as $name=>$details){
-            if (is_array($details) && isset($details['path'])){
-                WebApp::get()->autoload()->addPsr4('\\app\\modules\\'.$name, $details['path'], true);
+        foreach ($this->modules as $name => $details) {
+            if (is_array($details) && isset($details['path'])) {
+                WebApp::get()->autoload()->addPsr4('\\app\\modules\\' . $name, $details['path'], true);
             }
         }
     }
@@ -440,7 +450,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Changes path for current module. Is called by WebApp but in some exceptions it can be called by any other class.
      * @param string $path
      */
-    public function setModulePath($path){
+    public function setModulePath($path) {
         $this->modulePath = $path;
     }
 
@@ -481,15 +491,19 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
 
         $url = $this->getLinkRoot();
         if ((!is_null($module)) && $module != $this->module) {
-            if ($this->module != $this->defaultModule){
+            if ($this->module != $this->defaultModule) {
                 if ($module = $this->defaultModule) {
                     $url = str_replace('/' . $this->module . '/', '/', $url);
                 } else {
                     $url = str_replace('/' . $this->module . '/', '/' . $module . '/', $url);
+                    $params['module'] = $this->module;
                 }
             } elseif ($module != $this->defaultModule) {
-                $url .= $module.'/';
+                $url .= $module . '/';
+                $params['module'] = $module;
             }
+        } elseif ($this->module) {
+            $params['module'] = $this->module;
         }
 
         return $this->_createURL($url, $controller, $action, $this->_prepareParams($params));
@@ -525,6 +539,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         $params['controller'] = $controller;
         $params['action'] = $action;
         foreach ($this->urlRoutes as $route => $defined) { // first check those with strict params.
+            $cBase = $base;
             $preparedParams = $params;
             if ($searchDefined) {
                 if (is_numeric($route)) {
@@ -536,6 +551,11 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                         $match = false;
                     } else {
                         unset($preparedParams[$def]);
+                        if ('module' == $def) {
+                            if (substr($cBase, -1 * strlen($value . '/')) == $value . '/') { // remove module from base url if it's there
+                                $cBase = substr($cBase, 0, strlen($cBase) - strlen($value.'/'));
+                            }
+                        }
                     }
                 }
                 if (!$match) {
@@ -559,7 +579,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             }
 
             if ($match) {
-                return $base . str_replace(array_keys($toReplace), array_values($toReplace), is_numeric($route) ? $defined : $route) . $this->_params2string($preparedParams) . '.html';
+                unset($preparedParams['module']);
+                return $cBase . str_replace(array_keys($toReplace), array_values($toReplace), is_numeric($route) ? $defined : $route) . $this->_params2string($preparedParams) . '.html';
             }
         }
         if ($searchDefined) {
@@ -930,7 +951,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get csrf token key
      * @return string
      */
-    public function getCsrfKey(){
+    public function getCsrfKey() {
         return $this->csrfKey;
     }
 
@@ -938,15 +959,15 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get csrf token value
      * @return string
      */
-    public function getCsrfValue(){
-        return md5($this->getUserAgent(). Session::get()->id() . $this->csrfSalt);
+    public function getCsrfValue() {
+        return md5($this->getUserAgent() . Session::get()->id() . $this->csrfSalt);
     }
 
     /**
      * Get full path for current module
      * @return string
      */
-    public function getModulePath(){
+    public function getModulePath() {
         return $this->modulePath;
     }
 }
