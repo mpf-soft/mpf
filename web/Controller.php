@@ -150,7 +150,6 @@ class Controller extends LogAwareObject {
             return;
         }
         $layoutFolder = "";
-        $this->debug("APP ROOT: ". APP_ROOT);
         if ($this->showLayout) {
             $layoutFolder = str_replace(array('{APP_ROOT}', '{MODULE_FOLDER}', '{LIBS_FOLDER}', '{DIRECTORY_SEPARATOR}'), array(APP_ROOT, $moduleFolder, LIBS_FOLDER, DIRECTORY_SEPARATOR), $this->layoutFolder);
             $this->display($layoutFolder . DIRECTORY_SEPARATOR . 'header.php');
@@ -243,6 +242,14 @@ class Controller extends LogAwareObject {
      */
     public function goToURL($url) {
         return $this->request->goToURL($url);
+    }
+
+    /**
+     * Shortcut to request::goBack() method;
+     * @return null
+     */
+    public function goBack(){
+        return $this->request->goBack();
     }
 
     /**
