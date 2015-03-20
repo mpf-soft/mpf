@@ -783,12 +783,9 @@ abstract class DbModel extends BaseModel implements ModelInterface {
                 '_db' => static::getDb()
             )
         ));
-        //@TODO: write the cod to select all relations together
-        if ($condition->together) {
-            $joins = $condition->getParsedJoins();
-            foreach ($joins as $name => $details) {
-                self::selectRelation($name, $details, $joins, $models);
-            }
+        $joins = $condition->getParsedJoins();
+        foreach ($joins as $name => $details) {
+            self::selectRelation($name, $details, $joins, $models);
         }
         return $models;
     }
