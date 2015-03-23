@@ -275,8 +275,8 @@ abstract class DbModel extends BaseModel implements ModelInterface {
         }
     }
 
-    public function relationIsSet($relatinName) {
-        return isset($this->_relations[$relatinName]);
+    public function relationIsSet($relationName) {
+        return isset($this->_relations[$relationName]);
     }
 
     /**
@@ -285,7 +285,7 @@ abstract class DbModel extends BaseModel implements ModelInterface {
      * @return mixed
      */
     public function __get($name) {
-        if (isset($this->_attributes[$name])) {
+        if (array_key_exists($name, $this->_attributes)) {
             return $this->_attributes[$name];
         }
         foreach ($this->_columns as $column) { // check for columns that were not read yet [ useful for search and not only ]
