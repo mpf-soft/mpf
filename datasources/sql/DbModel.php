@@ -426,6 +426,7 @@ abstract class DbModel extends BaseModel implements ModelInterface {
             return false;
         }
         $originalBackup = $this->_originalPk;
+        unset($this->_attributes[$this->_pk]);
         $this->_originalPk = $this->_db->table($this->_tableName)->insert($this->_attributes);
         if (!$this->_originalPk) {
             $this->_originalPk = $originalBackup;
