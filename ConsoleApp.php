@@ -134,11 +134,11 @@ class ConsoleApp extends base\App {
             return $this->commandAliases[$command];
         }
         if (!$module) {
-            return '\\' . base\AutoLoader::APP_DEVELOPER_VENDORKEY . '\\' . $this->commandsNamespace . '\\' . ucfirst($command);
+            return '\\app\\' . $this->commandsNamespace . '\\' . ucfirst($command);
         } elseif (isset($this->modulesAliases[$module])) {
             return '\\' . $this->modulesAliases[$module] . '\\' . $this->commandsNamespace . '\\' . ucfirst($command);
         }
-        return '\\' . base\AutoLoader::APP_DEVELOPER_VENDORKEY . '\\' . $this->modulesNamespace . '\\' . $module . '\\' . $this->commandsNamespace . '\\' . ucfirst($command);
+        return '\\app\\' . $this->modulesNamespace . '\\' . $module . '\\' . $this->commandsNamespace . '\\' . ucfirst($command);
     }
 
     /**
