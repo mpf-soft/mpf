@@ -398,6 +398,7 @@ abstract class DbModel extends BaseModel implements ModelInterface {
         $r = (bool)$this->_db->table($this->_tableName)
             ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
             ->update($this->_updatedAttributes);
+        $this->_originalPk = $this->{$this->_pk};
         if ($r) { // in case it saved the data then make it look like new.
             $this->_updatedAttributes = array();
         }
