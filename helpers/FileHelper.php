@@ -13,7 +13,15 @@ use mpf\base\Helper;
 
 class FileHelper extends Helper{
     public function isImage($path){
-        return true;
+        if (function_exists('finfo_open')){
+
+        } elseif (function_exists('getimagesize')){
+
+        } elseif (function_exists('exif_imagetype')){
+
+        } elseif (function_exists('mime_content_type')){
+
+        }
     }
 
     public function upload($name, $location){
