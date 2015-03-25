@@ -125,7 +125,8 @@ class DbRelations {
         unset($rn[count($rn) - 1]);
         $parentTable = count($rn) ? implode('_', $rn) : 't';
         $relationName = str_replace('.', '__', $relationName);
-        $condition = "`$relationName`." . $relationDetails[2] . " = `$parentTable`.`" . WebApp::get()->sql()->getTablePk($model::getTableName()) . "`";
+        $tableColumn = isset($relationDetails['tableColumn'])?$relationDetails['tableColumn']:WebApp::get()->sql()->getTablePk($model::getTableName());
+        $condition = "`$relationName`." . $relationDetails[2] . " = `$parentTable`.`$tableColumn`";
         return "LEFT JOIN `" . $extModel::getTableName() . "` as `$relationName` ON $condition";
     }
 
