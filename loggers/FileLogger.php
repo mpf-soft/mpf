@@ -7,6 +7,15 @@ use mpf\WebApp;
 
 class FileLogger extends Logger{
 
+    public $visibleLevels = array(
+        Levels::EMERGENCY,
+        Levels::CRITICAL,
+        Levels::ALERT,
+        Levels::ERROR,
+        Levels::WARNING,
+        Levels::NOTICE,
+        Levels::INFO
+    );
     /**
      * Path for file where to save the logs
      * Can use key words like {MODULE}, {CONTROLLER} for web apps and {APP_ROOT} for all.
@@ -71,7 +80,7 @@ class FileLogger extends Logger{
                 }
             }
         }
-        if (false === @file_put_contents($this->_path, $details . "\n")){
+        if (false === @file_put_contents($this->_path, $details . "\n", FILE_APPEND)){
             $this->_writeFailure = true;
         }
     }
