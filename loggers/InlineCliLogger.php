@@ -67,12 +67,12 @@ class InlineCliLogger extends Logger {
 
     /**
      * Records the number of logs for every type;
-     * @var string[]
+     * @var int[]
      */
     protected $numbers = array();
 
     public function getLogs() {
-        return array();
+        return [];
     }
 
     public function log($level, $message, array $context = array()) {
@@ -104,7 +104,6 @@ class InlineCliLogger extends Logger {
             } else {
                 $details .= " $k => " . print_r($v, true);
             }
-
         }
         echo $r . HCli::get()->color($details, $this->detailsColor);
     }
