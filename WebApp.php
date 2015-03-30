@@ -279,6 +279,9 @@ class WebApp extends base\App {
         if (!$this->accessMap) {
             return true; // if no access map is defined then it has access everywhere
         }
+        if (is_null($module)){
+            $module = $this->request()->getModule();
+        }
         return $this->accessMap->canAccess($controller, $action, $module);
     }
 
