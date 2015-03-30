@@ -84,7 +84,6 @@ class AccessMap extends \mpf\base\LogAwareObject implements \mpf\interfaces\Acce
             return true;
         }
         if ('@' == $rights[0]) {
-            $this->debug("can't access: $module/$controller/$action");
             return !\mpf\WebApp::get()->user()->isGuest();
         }
         $hasRights = false;
