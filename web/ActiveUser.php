@@ -120,7 +120,7 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * @param string $value
      * @return $this
      */
-    protected function setState($name, $value) {
+    public function setState($name, $value) {
         $this->_userData[$name] = $value;
         Session::get()->updateListItem(App::get()->shortName . $this->sessionKey, 'vars', $this->_userData, array('vars' => array(), 'rights' => array()));
         return $this;
