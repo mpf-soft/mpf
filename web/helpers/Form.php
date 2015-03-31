@@ -172,15 +172,31 @@ class Form extends \mpf\base\Helper {
             $opts[] = "<option value='' $selected>$emptyValue</option>";
         }
         foreach ($options as $val => $label) {
-            if (!isset($value)) {
-                $selected = '';
-            } else {
-                $selected = (is_array($value) ? in_array($val, $value) : $value == $val) ? 'selected="selected"' : '';
-                if (!$value && ($value !== $val) && is_int($val) && ('' === $value)) {
-                    $selected = '';
+            if (is_array($label)){
+                $opts[] = "<optgroup label='$val'>";
+                foreach ($label as $k=>$v){
+                    if (!isset($value)) {
+                        $selected = '';
+                    } else {
+                        $selected = (is_array($value) ? in_array($k, $value) : $value == $k) ? 'selected="selected"' : '';
+                        if (!$value && ($value !== $k) && is_int($k) && ('' === $value)) {
+                            $selected = '';
+                        }
+                    }
+                    $opts[] = "<option value='$k' $selected>$v</option>";
                 }
+                $opts[] = "</optgroup>";
+            } else {
+                if (!isset($value)) {
+                    $selected = '';
+                } else {
+                    $selected = (is_array($value) ? in_array($val, $value) : $value == $val) ? 'selected="selected"' : '';
+                    if (!$value && ($value !== $val) && is_int($val) && ('' === $value)) {
+                        $selected = '';
+                    }
+                }
+                $opts[] = "<option value='$val' $selected>$label</option>";
             }
-            $opts[] = "<option value='$val' $selected>$label</option>";
         }
         $options = implode("\n", $opts);
         return Html::get()->tag('select', $options, $htmlOptions);
