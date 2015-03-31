@@ -22,6 +22,7 @@ class FileHelper extends Helper{
         } elseif (function_exists('mime_content_type')){
 
         }
+        return true;
     }
 
     public function upload($name, $location){
