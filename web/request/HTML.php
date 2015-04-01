@@ -660,16 +660,6 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         return $this->module;
     }
 
-    public function getModuleNamespace(){
-        if (!$this->module){
-            return "\\app\\";
-        }
-        if (isset($this->modules[$this->module]['namespace'])){
-            return $this->modules[$this->module]['namespace'];
-        }
-        return "\\app\\modules\\{$this->module}\\";
-    }
-
     /**
      * Get an associative list of parameters and values;
      * @return array
@@ -687,10 +677,13 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     }
 
     /**
-     * Redirect to generated internal URL;
-     * @return null
+     * @param string $controller
+     * @param string $action
+     * @param string[] $params
+     * @param string $module
+     * @return void
      */
-    public function goToPage($controller, $action = null, $params = array(), $module = null) {
+    public function goToPage($controller, $action = null, $params = [], $module = null) {
         $this->goToURL($this->createURL($controller, $action, $params, $module));
     }
 

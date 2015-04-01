@@ -2,6 +2,8 @@
 
 namespace mpf;
 
+use mpf\interfaces\AccessMapInterface;
+
 class WebApp extends base\App {
 
     /**
@@ -263,7 +265,7 @@ class WebApp extends base\App {
      * @param \mpf\interfaces\AccessMapInterface $mapObject
      * @return WebApp
      */
-    public function useAccessMap(\mpf\interfaces\AccessMapInterface $mapObject) {
+    public function useAccessMap(AccessMapInterface $mapObject) {
         $this->accessMap = $mapObject;
         return $this;
     }
