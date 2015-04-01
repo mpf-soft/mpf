@@ -449,6 +449,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     /**
      * Changes path for current module. Is called by WebApp but in some exceptions it can be called by any other class.
      * @param string $path
+     * @return void
      */
     public function setModulePath($path) {
         $this->modulePath = $path;
@@ -657,6 +658,16 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      */
     public function getModule() {
         return $this->module;
+    }
+
+    public function getModuleNamespace(){
+        if (!$this->module){
+            return "\\app\\";
+        }
+        if (isset($this->modules[$this->module]['namespace'])){
+            return $this->modules[$this->module]['namespace'];
+        }
+        return "\\app\\modules\\{$this->module}\\";
     }
 
     /**
