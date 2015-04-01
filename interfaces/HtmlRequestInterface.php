@@ -59,6 +59,13 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * @return string
      */
     public function getModule();
+
+    /**
+     * Returns the active module namespace. If you need to use a module from a different package in config a "namespace" can be set for
+     * that module. If composer is not used then even a path can be specified. If not that path will be ignore and composer autoload is used.
+     * @return mixed
+     */
+    public function getModuleNamespace();
     
     /**
      * Get url to the selected page;

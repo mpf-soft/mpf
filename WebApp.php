@@ -36,18 +36,10 @@ class WebApp extends base\App {
 
     /**
      * Name of the modules namespace. Same name must be used by folder that
-     * contains all modules;
+     * contains all modules that don't have a specific namespace specified;
      * @var string
      */
     public $modulesNamespace = 'modules';
-
-    /**
-     * Here can be defined namespaces for modules from other sources.
-     * If folder it's outside the "libs" folder then an alias must be set in
-     * Autoload for vendor location;
-     * @var string[]
-     */
-    public $modulesAliases = array();
 
     /**
      * List of Controller & Action replacement page in case that the requeste page was not found.
@@ -199,15 +191,10 @@ class WebApp extends base\App {
      * @return string
      */
     public function getControllerClassFromNameAndModule($controller, $module) {
-        if (isset($this->controllerAliases[$module ? $module . '/' . $controller : $controller])) { // check for controller aliases first
+        if (isset($this->controllerAliases[$module ? $module . '/' . $controller : $controller])) { // check for controller alias first
             return $this->controllerAliases[$module ? $module . '/' . $controller : $controller];
         }
-        if (!$module) {
-            return '\\app\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
-        } elseif (isset($this->modulesAliases[$module])) {
-            return '\\' . $this->modulesAliases[$module] . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
-        }
-        return '\\app\\' . $this->modulesNamespace . '\\' . $module . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
+        return $this->request()->getModuleNamespace() . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
     }
 
     /**

@@ -243,6 +243,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             }
         }
         foreach ($config as $class => $options) {
+            if (in_array($class, ['namespace', 'path'])) // this are keywords for module itself not other classes
+                continue;
             Config::get()->set($class, $options);
         }
         return $this;
@@ -658,6 +660,20 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      */
     public function getModule() {
         return $this->module;
+    }
+
+    /**
+     * Get current module namespace.
+     * @return string
+     */
+    public function getModuleNamespace(){
+        if (!$this->module || '\\' == $this->module || '/' == $this->module){
+            return '\app';
+        }
+        if (isset($this->modules[$this->module]['namespace'])){
+            return $this->modules[$this->module]['namespace'];
+        }
+        return '\app\modules\\' . $this->module;
     }
 
     /**
