@@ -575,6 +575,15 @@ abstract class DbModel extends BaseModel implements ModelInterface {
     }
 
     /**
+     * Allows quick call for PK
+     * @param $pk
+     * @return static
+     */
+    public function __invoke($pk){
+        return self::findByPk($pk);
+    }
+
+    /**
      * Get an instance of the model for selected action. Default is search.
      * @param string $action
      * @return static
