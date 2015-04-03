@@ -114,7 +114,11 @@ class DbRelations {
         unset($rn[count($rn) - 1]);
         $parentTable = count($rn) ? implode('_', $rn) : 't';
         $relationName = str_replace('.', '__', $relationName);
-        $condition = "`$relationName`." . $relationDetails[2] . " = `$parentTable`.`" . WebApp::get()->sql()->getTablePk($model::getTableName()) . "`";
+        if (false !== strpos($relationDetails[2], ' ') || false !== strpos($relationDetails[2], '=')){
+            $condition = $relationDetails[2];
+        } else {
+            $condition = "`$relationName`." . $relationDetails[2] . " = `$parentTable`.`" . WebApp::get()->sql()->getTablePk($model::getTableName()) . "`";
+        }
         return "LEFT JOIN `" . $extModel::getTableName() . "` as `$relationName` ON $condition";
 
     }
@@ -125,8 +129,12 @@ class DbRelations {
         unset($rn[count($rn) - 1]);
         $parentTable = count($rn) ? implode('_', $rn) : 't';
         $relationName = str_replace('.', '__', $relationName);
-        $tableColumn = isset($relationDetails['tableColumn'])?$relationDetails['tableColumn']:WebApp::get()->sql()->getTablePk($model::getTableName());
-        $condition = "`$relationName`." . $relationDetails[2] . " = `$parentTable`.`$tableColumn`";
+        //$tableColumn = isset($relationDetails['tableColumn'])?$relationDetails['tableColumn']:WebApp::get()->sql()->getTablePk($model::getTableName());
+        if (false !== strpos($relationDetails[2], ' ') || false !== strpos($relationDetails[2], '=')){
+            $condition = $relationDetails[2];
+        } else {
+            $condition = "`$relationName`." . $relationDetails[2] . " = `$parentTable`.`" . WebApp::get()->sql()->getTablePk($model::getTableName()) . "`";
+        }
         return "LEFT JOIN `" . $extModel::getTableName() . "` as `$relationName` ON $condition";
     }
 
