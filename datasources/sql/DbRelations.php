@@ -104,7 +104,11 @@ class DbRelations {
         unset($rn[count($rn) - 1]);
         $parentTable = count($rn) ? implode('_', $rn) : 't';
         $relationName = str_replace('.', '__', $relationName);
-        $condition = "`$parentTable`." . $relationDetails[2] . " = `$relationName`.`" . WebApp::get()->sql()->getTablePk($extModel::getTableName()) . "`";
+        if (false !== strpos($relationDetails[2], ' ') || false !== strpos($relationDetails[2], '=')){
+            $condition = $relationDetails[2];
+        } else {
+            $condition = "`$parentTable`." . $relationDetails[2] . " = `$relationName`.`" . WebApp::get()->sql()->getTablePk($extModel::getTableName()) . "`";
+        }
         return "LEFT JOIN `" . $extModel::getTableName() . "` as `$relationName` ON $condition";
     }
 
