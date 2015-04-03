@@ -31,6 +31,7 @@ namespace mpf\web;
 use mpf\base\AdvancedMethodCallTrait;
 use mpf\base\LogAwareObject;
 use mpf\interfaces\HtmlRequestInterface;
+use mpf\WebApp;
 
 class Controller extends LogAwareObject {
 
@@ -110,12 +111,12 @@ class Controller extends LogAwareObject {
      */
     public function display($file, $vars = []) {
         if ((DIRECTORY_SEPARATOR !== $file[0]) && (':' !== $file[1])) { // get path if not full path was sent
-            $moduleFolder = $this->request->getModule() ? \mpf\WebApp::get()->modulesNamespace . DIRECTORY_SEPARATOR . $this->request->getModule() . DIRECTORY_SEPARATOR : '';
+            $moduleFolder = $this->request->getModulePath();
             $controllerFolder = $this->request->getController();
-            $viewsFolder = str_replace(array('{APP_ROOT}', '{MODULE_FOLDER}', '{CONTROLLER}', '{LIBS_FOLDER}'), array(
-                APP_ROOT, $moduleFolder, $controllerFolder, LIBS_FOLDER
-            ), $this->viewsFolder);
-            $file = $viewsFolder . $file . '.php';
+            $viewsFolder = str_replace(['{APP_ROOT}', '{MODULE_FOLDER}', '{CONTROLLER}', '{LIBS_FOLDER}', '{DIRECTORY_SEPARATOR}'], [
+                APP_ROOT, $moduleFolder, $controllerFolder, LIBS_FOLDER, DIRECTORY_SEPARATOR
+            ], $this->viewsFolder);
+            $file = $viewsFolder . DIRECTORY_SEPARATOR . $file . '.php';
         }
         foreach ($this->_displayVars as $k => $v) {
             $$k = $v;
