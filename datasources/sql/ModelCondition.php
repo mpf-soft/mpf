@@ -192,15 +192,16 @@ class ModelCondition extends \mpf\base\LogAwareObject {
 
     /**
      * Get full select query from current condition;
+     * @param bool $count
      * @return string
      */
-    public function __toString() {
+    public function __toString($count = false) {
         $table=$model=null;
         if ($this->model) {
             $model = $this->model;
             $table = $model::getTableName();
         }
-        $join = $this->getJoin();
+        $join = $this->getJoin($count);
         $group = ($group = $this->getGroup()) ? ' GROUP BY ' . $group : '';
         $having = ($having = $this->getHaving()) ? ' HAVING ' . $having : '';
         $order = ($order = $this->getOrder()) ? ' ORDER BY ' . $order : '';
@@ -394,14 +395,22 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     }
 
     /**
+     * @var RelationsParser
+     */
+    protected $relationsParser;
+
+    /**
      * Get join info query for current condition;
+     * @param bool $forCount
      * @return string
      */
-    public function getJoin() {
+    public function getJoin($forCount = false) {
         if (!$this->with) {
             return $this->join;
         }
-        return $this->join . $this->getJoinsFromRelations();
+        $this->relationsParser = RelationsParser::parse($this->model, $this, $this->conditionColumns);
+        return $this->join . $forCount?$this->relationsParser->getForCount():$this->relationsParser->getForMainSelect();
+        //return $this->join . $this->getJoinsFromRelations();
     }
 
     protected function getJoinsFromRelations() {
@@ -676,7 +685,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
                 $currentTable = $table;
                 do {
                     $rel = substr($currentTable, 0, strpos($currentTable, '.'));
-                    $rels = $model::getRelations();
+                    $rels = $currentModel::getRelations();
                     if (!isset($rels[$rel]))
                         throw new \Exception('Invalid column ' . $name . ' !(relation not found)');
                     $rel = $rels[$rel];

@@ -36,7 +36,7 @@ use mpf\tools\Validator;
  *
  * @author mirel
  */
-abstract class DbModel extends BaseModel implements ModelInterface {
+abstract class DbModel extends BaseModel {
 
     private $_initiated = false;
 
@@ -607,7 +607,7 @@ abstract class DbModel extends BaseModel implements ModelInterface {
         /* @var $condition ModelCondition */
         $condition->fields = 'COUNT(*) as number';
         $condition->setParams($params);
-        $number = static::getDb()->queryAssoc($condition->__toString(), $condition->getParams());
+        $number = static::getDb()->queryAssoc($condition->__toString(true), $condition->getParams());
         return $number[0]['number'];
     }
 
