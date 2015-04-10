@@ -215,6 +215,14 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     }
 
     /**
+     * Get full select query for count;
+     * @return string
+     */
+    public function getCountQuery(){
+        return $this->__toString(true);
+    }
+
+    /**
      * Get query For Delete
      * @param array $deleteOptions Possible Options: LOW_PRIORITY, QUICK or IGNORE
      * @return string
@@ -373,6 +381,28 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     }
 
     /**
+     * Checks if a column is null
+     * @param string $column
+     * @return ModelCondition
+     * @throws \Exception
+     */
+    public function addIsNullCondition($column){
+        $this->conditionColumns[] = $column;
+        return $this->addCondition($this->_column($column) . " IS NULL");
+    }
+
+    /**
+     * Checks if a column is not null
+     * @param string $column
+     * @return ModelCondition
+     * @throws \Exception
+     */
+    public function addIsNotNullCondition($column){
+        $this->conditionColumns[] = $column;
+        return $this->addCondition($this->_column($column) . " IS NOT NULL");
+    }
+
+    /**
      * Adds another condition to the current one.
      *
      * @param string $condition Condition to be added. Can be a string or an associative array column=>value
@@ -408,80 +438,11 @@ class ModelCondition extends \mpf\base\LogAwareObject {
         if (!$this->with) {
             return $this->join;
         }
-        $this->relationsParser = RelationsParser::parse($this->model, $this, $this->conditionColumns);
-        return $this->join . $forCount?$this->relationsParser->getForCount():$this->relationsParser->getForMainSelect();
+        if (!$this->relationsParser) {
+            $this->relationsParser = RelationsParser::parse($this->model, $this, $this->conditionColumns);
+        }
+        return $this->join . ($forCount?$this->relationsParser->getForCount():$this->relationsParser->getForMainSelect());
         //return $this->join . $this->getJoinsFromRelations();
-    }
-
-    protected function getJoinsFromRelations() {
-        $this->parsedJoins = array();
-        $with = is_array($this->with) ? $this->with : explode(',', $this->with);
-        $join = $required = array();
-        foreach ($this->conditionColumns as $column) {
-            $column = explode('.', $column);
-            unset($column[count($column) - 1]);
-            $required[] = implode('.', $column);
-        }
-        foreach ($with as $name) {
-            $name = explode('.', trim($name));
-            $join[] = $this->processWithItemForMain($name, $required);
-        }
-        return implode(' ', $join);
-    }
-
-    /**
-     * Get JOIN query for selected relation. Only works if model was selected;
-     * @param string $path
-     * @param string[] $requiredRelations
-     * @return string
-     * @throws \Exception
-     */
-    public function processWithItemForMain($path, $requiredRelations) {
-        $isRequired = in_array($path, $requiredRelations);
-        if (!$isRequired) {
-            foreach ($requiredRelations as $rel) {
-                if (false !== strpos($rel, implode('.', $path))) {
-                    $isRequired = true;
-                    break;
-                }
-            }
-        }
-        $currentModel = $this->model;
-        $currentName = '';
-        $join = array();
-        $notIncluded = false;
-        $multipleParent = false;
-        foreach ($path as $name) {
-            /* @var $currentModel DbModel */
-            $currentName = ('' == $currentName) ? $name : $currentName . '.' . $name;
-            if (isset($this->parsedJoins[$currentName])) {
-                $currentModel = $this->parsedJoins[$currentName]['model'];
-                $notIncluded = $notIncluded || !$this->parsedJoins[$currentName]['included'];
-                $multipleParent = $multipleParent || !$this->parsedJoins[$currentName]['selected'];
-                continue;
-            }
-            $relations = $currentModel::getRelations();
-            if (!isset($relations[$name])) {
-                throw new \Exception("Relation `$name` not found in model $currentModel!");
-            }
-            $this->parsedJoins[$currentName] = array(
-                'included' => $notIncluded ? false : (DbRelations::isSelectedTogether($relations[$name][0]) || $isRequired),
-                'selected' => $multipleParent ? false : ($notIncluded ? false : DbRelations::isSelectedTogether($relations[$name][0])),
-                'model' => $relations[$name][1],
-                'details' => $relations[$name]
-            );
-            $currentModel = $relations[$name][1];
-            if (!$multipleParent && !$this->parsedJoins[$currentName]['selected']) {
-                $multipleParent = true;
-            }
-            if (!$this->parsedJoins[$currentName]['included']) {
-                $notIncluded = true;
-                continue;
-            }
-
-            $join[] = DbRelations::getJoinFromRelation($currentName, $relations[$name], $currentModel);
-        }
-        return implode(' ', $join);
     }
 
     /**
@@ -489,15 +450,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @return array
      */
     public function getExtraRelations() {
-        $with = is_array($this->with) ? $this->with : explode(',', $this->with);
-        $leftOut = array();
-        foreach ($with as $rel) {
-            $rel = trim($rel);
-            if (!in_array($rel, $this->_inQueryWith)) {
-                $leftOut[] = $rel;
-            }
-        }
-        return $leftOut;
+        return $this->relationsParser->getRelationsToBeSelectedSeparately();
     }
 
     /**

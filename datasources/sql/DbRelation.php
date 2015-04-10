@@ -78,35 +78,36 @@ class DbRelation extends LogAwareObject {
 
     /**
      * Set a conditions that those two columns must be equal. Also when it searches relations for more models it will
-     * automatically change it in a "in" condition.
-     * @param string|string[] $c1 If a list of two or more columns is sent then it will compare c2 with this list. From main model
-     * @param string|string[] $c2 If a list of two or more columns is sent then it will compare c1 with this list. From relation
+     * automatically change it in a "in" condition. If another table or relation is used  and some column can't be from
+     * model or relation then it can be sent as "otherTableOrAlias.column"
+     * @param string|string[] $modelColumn If a list of two or more columns is sent then it will compare c2 with this list. From main model
+     * @param string|string[] $relationColumn If a list of two or more columns is sent then it will compare c1 with this list. From relation
      * @return $this
      */
-    public function columnsEqual($c1, $c2) {
-        $this->conditions[] = ["=", $c1, $c2];
+    public function columnsEqual($modelColumn, $relationColumn) {
+        $this->conditions[] = ["=", $modelColumn, $relationColumn];
         return $this;
     }
 
     /**
      * Same as columnsEqual but it will make sure that they are different.(/ NOT IN)
-     * @param string|string[] $c1
-     * @param string|string[] $c2
+     * @param string|string[] $modelColumn
+     * @param string|string[] $relationColumn
      * @return $this
      */
-    public function columnsDifferent($c1, $c2) {
-        $this->conditions[] = ["!=", $c1, $c2];
+    public function columnsDifferent($modelColumn, $relationColumn) {
+        $this->conditions[] = ["!=", $modelColumn, $relationColumn];
         return $this;
     }
 
     /**
      * It will compare selected column with the exact given value.
-     * @param string $column
+     * @param string $relationColumn
      * @param string|int $value
      * @return $this
      */
-    public function hasValue($column, $value) {
-        $this->conditions[] = ["==", $column, $value];
+    public function hasValue($relationColumn, $value) {
+        $this->conditions[] = ["==", $relationColumn, $value];
         return $this;
     }
 
@@ -145,28 +146,33 @@ class DbRelation extends LogAwareObject {
         return $this;
     }
 
+    public function hasSingleResult(){
+        if (in_array($this->type, [DbRelations::BELONGS_TO, DbRelations::HAS_ONE])){
+            return true;
+        }
+    }
+
     /**
      * @param DbModel $parentModel
      * @param string $fullName
      * @return string
      */
-    public function getSingular($parentModel, $fullName = 't') {
-        return $this->joinType . ' ' . $this->getRelationTableForJoin($fullName) . ' ON ' . $this->getCondition(true, $parentModel, $fullName);
+    public function getWithParent($parentModel, $fullName = 't') {
+        return $this->joinType . ' ' . $this->getRelationTableForJoin($fullName) . ' ON ' . $this->getCondition($parentModel, $fullName);
     }
 
     /**
-     * @param bool $singular
      * @param string $parentModel
      * @param string $fullName
      * @return string
      */
-    public function getCondition($singular, $parentModel, $fullName) {
+    public function getCondition($parentModel, $fullName) {
         $finalCondition = [];
         foreach ($this->conditions as $condition) {
             switch ($condition[0]) {
                 case "=":
                 case "!=":
-                    $finalCondition[] = $singular ? $this->getColumnEqualSingular($condition, $parentModel, $fullName) : $this->getColumnEqualForList($condition, $parentModel, $fullName);
+                    $finalCondition[] = $this->getColumnEqualWithParent($condition, $parentModel, $fullName);
                     break;
                 case "==":
 
@@ -186,11 +192,11 @@ class DbRelation extends LogAwareObject {
      * @param string $fullName
      * @return string
      */
-    protected function getColumnEqualSingular($condition, $parentModel, $fullName) {
+    protected function getColumnEqualWithParent($condition, $parentModel, $fullName) {
         if (is_array($condition[1]) && is_array($condition[2])) {
             $conditions = [];
             foreach ($condition[1] as $c1) {
-                $conditions[] = $this->getColumnEqualSingular([$condition[0], $c1, $condition[2]], $parentModel, $fullName);
+                $conditions[] = $this->getColumnEqualWithParent([$condition[0], $c1, $condition[2]], $parentModel, $fullName);
             }
             return "(" . implode(") OR (", $conditions) . ")";
         }

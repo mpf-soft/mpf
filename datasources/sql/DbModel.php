@@ -797,6 +797,8 @@ abstract class DbModel extends BaseModel {
         if (!$models){
             return [];
         }
+        $extra = $condition->getExtraRelations();
+
         $joins = $condition->getParsedJoins();
         foreach ($joins as $name => $details) {
             self::selectRelation($name, $details, $joins, $models);
@@ -854,7 +856,7 @@ abstract class DbModel extends BaseModel {
      * @return array
      */
     public static function getRules() {
-        return array();
+        return [];
     }
 
     /**
@@ -867,14 +869,14 @@ abstract class DbModel extends BaseModel {
      * @return array
      */
     public static function getRelations() {
-        return array();
+        return [];
     }
 
     /**
      * @return array
      */
     public static function getLabels() {
-        return array();
+        return [];
     }
 
     /**

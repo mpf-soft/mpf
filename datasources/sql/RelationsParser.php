@@ -34,6 +34,12 @@ class RelationsParser extends LogAwareObject{
     public $conditionColumns;
 
     /**
+     * It will keep here a list of names for relations that must be selected separately(from this level only).
+     * @var array
+     */
+    protected $toBeSelectedSeparately = [];
+
+    /**
      *
      * @param string $modelClass
      * @param ModelCondition $condition
@@ -71,7 +77,7 @@ class RelationsParser extends LogAwareObject{
         $join = [];
         foreach ($this->condition->with as $name){
             if ($this->relations[$name]->isRequiredForCount() || $this->existsInCondition($name)){
-                $join[] = $this->relations[$name]->getSingular($this->modelClass, $name);
+                $join[] = $this->relations[$name]->getWithParent($this->modelClass, $name);
             }
         }
         return implode(" ", $join);
@@ -81,6 +87,38 @@ class RelationsParser extends LogAwareObject{
      * @return string
      */
     public function getForMainSelect(){
-        return "";
+        $join = [];
+        foreach ($this->condition->with as $name){
+            if ($this->hasSingleResult($name) || $this->existsInCondition($name)){
+                $join[] = $this->relations[$name]->getWithParent($this->modelClass, $name);
+            }
+        }
+        return implode(" ", $join);
+    }
+
+    public function getAsConditionForModels(){
+
+    }
+
+    /**
+     * Checks if the relation returns a single result. It also checks for parents if it's a relation of a relation.
+     * @param $name
+     * @return bool
+     */
+    public function hasSingleResult($name){
+        $parts  = explode(".", $name);
+        $nameSoFar = "";
+        foreach ($parts as $part){
+            $nameSoFar = ($nameSoFar?'.':'').$part;
+            if (!$this->relations[$name]->hasSingleResult()){
+                $this->toBeSelectedSeparately[] = $name; // also keep name for separate select
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function getRelationsToBeSelectedSeparately(){
+        return $this->toBeSelectedSeparately;
     }
 }
