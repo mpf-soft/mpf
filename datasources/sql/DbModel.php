@@ -106,11 +106,15 @@ abstract class DbModel extends BaseModel {
     protected $_validator;
 
     /**
-     * List of attributes for each relation.
-     * If there is an attribute for subrelation then it will be saved as relation.subrelation => attrs..
      * @var array
      */
-    private $_attributesForRelations = array();
+    private $_attributesForRelations = [];
+
+    /**
+     * @var RelationsParser
+     */
+    private $relationsParser;
+
 
     /**
      * !! THIS METHOD IS CALLED AUTOMATICALLY BY "Validator" object !!
@@ -245,21 +249,25 @@ abstract class DbModel extends BaseModel {
 
     /**
      * Reads all relations for current model.
-     * @param $details
-     * @return DbModel[]
+     * @param $name
+     * @return DbModel[]|DbModel
      */
-    private function getRelationFromDb($details) {
-        $relations = DbRelations::getRelations(array($this), $details);
-        return $relations[0];
+    private function getRelationFromDb($name) {
+        if (!$this->relationsParser) {
+            $this->relationsParser = RelationsParser::parse(get_class($this), new ModelCondition(['model' => get_class($this)]), '*');
+        }
+        return $this->relationsParser->getForSingleModel($this, $name);
     }
 
     private function applyRelationsAttributes() {
         foreach ($this->_attributesForRelations as $relation => $attributes) {
             $relation = explode('.', $relation);
             $model = $this;
+            $path = '';
             foreach ($relation as $current) {
+                $path .= ($path?'.':'') . $current;
                 $relations = $model::getRelations();
-                $class = $relations[$current][1];
+                $class = is_array($relations[$current]) ? $relations[$current][1] : $relations[$current]->model;
                 if (!$model->relationIsSet($current)) {
                     $model->$current = new $class(array(
                         '_pk' => static::getDb()->getTablePk($class::getTableName()),
@@ -267,7 +275,7 @@ abstract class DbModel extends BaseModel {
                         '_action' => 'update',
                         '_tableName' => $class::getTableName(),
                         '_db' => $class::getDb(),
-                        '_attributes' => isset($this->_attributesForRelations[$current]) ? $this->_attributesForRelations[$current] : array()
+                        '_attributes' => isset($this->_attributesForRelations[$path]) ? $this->_attributesForRelations[$path] : array()
                     ));
                 }
                 $model = $model->$current;
@@ -304,10 +312,10 @@ abstract class DbModel extends BaseModel {
         $relations = static::getRelations();
         if (isset($relations[$name])) {
             $this->_searchedRelations[$name] = true;
-            return $this->_relations[$name] = $this->getRelationFromDb($relations[$name]);
+            return $this->_relations[$name] = $this->getRelationFromDb($name);
         }
 
-        trigger_error('Invalid attribute `' . $name . '`! A column or relation with that name was not found!');
+        trigger_error('Invalid attribute `' . $name . '`! A column or relation with that name was not found for class ' . get_class($this) . '!');
     }
 
     /**
@@ -362,8 +370,7 @@ abstract class DbModel extends BaseModel {
             $this->_relations[$name] = $value;
             return;
         }
-        echo "\nInvalid attribute `$originalName`! A column or relation with that name was not found!\n";
-        trigger_error('Invalid attribute `' . $originalName . '`! A column or relation with that name was not found!');
+        trigger_error('Invalid attribute `' . $originalName . '`! A column or relation with that name was not found for class ' . get_class($this) . '!');
     }
 
     /**
@@ -383,7 +390,7 @@ abstract class DbModel extends BaseModel {
 
         if ($this->_isNewRecord) {
             $this->{$this->_pk} = $this->_db->table($this->_tableName)->insert($this->_updatedAttributes);
-            $this->_originalPk =$this->{$this->_pk};
+            $this->_originalPk = $this->{$this->_pk};
             $this->_isNewRecord = false; // so that the next save won't do another insert
             $this->reload();  // to get extra default values.
             if (!$this->{$this->_pk}) {
@@ -445,7 +452,8 @@ abstract class DbModel extends BaseModel {
         if ($this->beforeDelete()) {
             if ((bool)$this->_db->table($this->_tableName)
                 ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
-                ->delete()) {
+                ->delete()
+            ) {
                 return $this->afterDelete();
             }
         }
@@ -537,11 +545,11 @@ abstract class DbModel extends BaseModel {
         return true;
     }
 
-    public function beforeDelete(){
+    public function beforeDelete() {
         return true;
     }
 
-    public function afterDelete(){
+    public function afterDelete() {
         return true;
     }
 
@@ -579,7 +587,7 @@ abstract class DbModel extends BaseModel {
      * @param $pk
      * @return static
      */
-    public function __invoke($pk){
+    public function __invoke($pk) {
         return self::findByPk($pk);
     }
 
@@ -696,7 +704,7 @@ abstract class DbModel extends BaseModel {
     public static function findAllByAttributes($attributes, $condition = null, $params = array()) {
         $class = get_called_class();
         $condition = ModelCondition::getFrom($condition, $class);
-        foreach ($attributes as $name=>$value) {
+        foreach ($attributes as $name => $value) {
             $condition->compareColumn($name, $value);
         }
         return self::findAll($condition, $params);
@@ -794,18 +802,26 @@ abstract class DbModel extends BaseModel {
                 '_db' => static::getDb()
             )
         ));
-        if (!$models){
+        if (!$models) {
             return [];
         }
-        $extra = $condition->getExtraRelations();
-
+        $condition->getExtraRelations($models);
+        return $models;
+        /*
         $joins = $condition->getParsedJoins();
         foreach ($joins as $name => $details) {
             self::selectRelation($name, $details, $joins, $models);
         }
-        return $models;
+        return $models;*/
     }
 
+    /**
+     * @TODO: Delete this after the new method is implemented
+     * @param $name
+     * @param $details
+     * @param $joins
+     * @param $models
+     */
     private static function selectRelation($name, $details, $joins, $models) {
         if ($details['selected']) { // was already selected;
             return;
@@ -894,11 +910,11 @@ abstract class DbModel extends BaseModel {
      * @param string $action
      * @return array
      */
-    public static function getRequiredAttributes($action = 'insert'){
+    public static function getRequiredAttributes($action = 'insert') {
         return self::getAttributesByRule($action, 'require');
     }
 
-    protected static function getAttributesByRule($action, $rule){
+    protected static function getAttributesByRule($action, $rule) {
         if (!count(static::getRules())) {
             return array();
         }

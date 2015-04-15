@@ -134,14 +134,20 @@ class PDOConnection extends \PDO {
      */
     public function queryClass($statement, $classname, $params = array(), $ctorargs = array()) {
         $start = microtime(true);
-        $statement = $this->prepare($q = $statement . '');
+        $q = $statement . '';
+        if (is_a($statement, ModelCondition::className())){
+            foreach ($statement->getJoinParams() as $k=>$v){
+                $params[$k] = $v;
+            }
+        }
+        $statement = $this->prepare($q);
         try {
             $statement->execute($params);
         } catch (\PDOException $e){
             $this->error($e->getMessage(), array(
                 'File' => __FILE__,
                 'Line' => __LINE__ - 4,
-                'Query' => $statement .'',
+                'Query' => $q,
                 'Params' => $params,
                 'Trace' => $e->getTraceAsString()
             ));
@@ -236,7 +242,7 @@ class PDOConnection extends \PDO {
     /**
      * Return a list of details about table columns;
      * @param string $tableName
-     * @return string[string][]
+     * @return array
      */
     public function getTableColumns($tableName) {
         if (!$this->tableColumns){

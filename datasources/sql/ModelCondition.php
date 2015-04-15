@@ -192,16 +192,24 @@ class ModelCondition extends \mpf\base\LogAwareObject {
 
     /**
      * Get full select query from current condition;
-     * @param bool $count
      * @return string
      */
-    public function __toString($count = false) {
+    public function __toString() {
+        return $this->getAsQuery();
+    }
+
+    /**
+     * Get as string query.
+     * @param bool $forCount
+     * @return string
+     */
+    public function getAsQuery($forCount = false){
         $table=$model=null;
         if ($this->model) {
             $model = $this->model;
             $table = $model::getTableName();
         }
-        $join = $this->getJoin($count);
+        $join = $this->getJoin($forCount);
         $group = ($group = $this->getGroup()) ? ' GROUP BY ' . $group : '';
         $having = ($having = $this->getHaving()) ? ' HAVING ' . $having : '';
         $order = ($order = $this->getOrder()) ? ' ORDER BY ' . $order : '';
@@ -442,15 +450,28 @@ class ModelCondition extends \mpf\base\LogAwareObject {
             $this->relationsParser = RelationsParser::parse($this->model, $this, $this->conditionColumns);
         }
         return $this->join . ($forCount?$this->relationsParser->getForCount():$this->relationsParser->getForMainSelect());
-        //return $this->join . $this->getJoinsFromRelations();
+    }
+
+    public function getJoinParams(){
+        if (!$this->relationsParser)
+            return [];
+        return $this->relationsParser->getConditionParams();
     }
 
     /**
      * Return list of relations that were not selected in main query.
+     * @param DbModel[] $models
      * @return array
      */
-    public function getExtraRelations() {
-        return $this->relationsParser->getRelationsToBeSelectedSeparately();
+    public function getExtraRelations($models) {
+        if (!$this->relationsParser){
+            return [];
+        }
+        $relationsLeft = $this->relationsParser->getRelationsToBeSelectedSeparately();
+        foreach ($relationsLeft as $path => $details){
+            $this->relationsParser->getChildrenForModels($models, $path, $details, $this->fields);
+        }
+
     }
 
     /**
@@ -459,7 +480,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @return string
      */
     public function getSelect() {
-        if ($this->fields && $this->fields != '*') {
+        if ($this->fields && $this->fields != '*' && (!(is_string($this->fields) && '*' == $this->fields[0] && 'END) AS `__parentRelationKey`' == substr($this->fields, -29)))) {
             if (is_string($this->fields)) {
                 return $this->fields;
             }
@@ -469,7 +490,11 @@ class ModelCondition extends \mpf\base\LogAwareObject {
             }
             return implode(', ', $columns);
         }
-        return implode(', ', $this->getAllColumnsForSelect());
+        if ((is_string($this->fields) && '*' == $this->fields[0] && 'END) AS `__parentRelationKey`' == substr($this->fields, -29))){
+            return implode(', ', $this->getAllColumnsForSelect()) . substr($this->fields, 1);
+        } else {
+            return implode(', ', $this->getAllColumnsForSelect());
+        }
     }
 
     /**
@@ -556,7 +581,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * Set a single parameter used for query.
      * @param string $name
      * @param string|int $value
-     * @return \mpf\datasources\sql\DbCondition
+     * @return $this
      */
     public function setParam($name, $value) {
         $this->params[$name] = $value;
@@ -566,7 +591,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     /**
      * Set multiple parameters used by the query
      * @param string [string] $params
-     * @return \mpf\datasources\sql\DbCondition
+     * @return $this
      */
     public function setParams($params) {
         foreach ($params as $name => $value)
@@ -705,16 +730,12 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     protected function getAllColumnsForSelect() {
         $with = is_array($this->with) ? $this->with : ($this->with ? explode(',', $this->with) : array());
         if (!count($with))
-            return array('*');
+            return ['*'];
         $model = $this->model;
         $db = $model::getDb();
-        $columns = $this->_columnsForTable($model::getTableName(), 't', $db);
-        foreach ($this->parsedJoins as $name => $details) {
-            if (!$details['selected']) {
-                continue;
-            }
-            $model = $details['model'];
-            $cols = $this->_columnsForTable($model::getTableName(), $name, $db);
+        $columns = $this->_columnsForModel($model::getTableName(), $db);
+        foreach ($this->relationsParser->getListOfSelectedRelations() as $name=>$relation){
+            $cols = $this->_columnsForRelation($relation, $db, $name);
             foreach ($cols as $column) {
                 $columns[] = $column;
             }
@@ -722,13 +743,21 @@ class ModelCondition extends \mpf\base\LogAwareObject {
         return $columns;
     }
 
-    protected function _columnsForTable($tableName, $relationPath, PDOConnection $connection) {
-        $sqlColumns = $connection->getTableColumns($tableName);
-        $tableAlias = str_replace('.', '_', $relationPath);
-        $columnAlias = str_replace('.', '_', str_replace('_', '__', $relationPath));
-        $columns = array();
+    protected function _columnsForModel($tableName, PDOConnection $db){
+        $sqlColumns = $db->getTableColumns($tableName);
+        $columns = [];
+        foreach ($sqlColumns as $column){
+            $columns[] = "`t`.`{$column['Field']}` as ___t___{$column['Field']}";
+        }
+        return $columns;
+    }
+
+    protected function _columnsForRelation(DbRelation $relation, PDOConnection $connection, $relationName) {
+        $sqlColumns = $connection->getTableColumns($relation->getTableName());
+        $columnAlias = str_replace('.', '_', str_replace('_', '__', $relationName));
+        $columns = [];
         foreach ($sqlColumns as $column) {
-            $columns[] = "`$tableAlias` . `{$column['Field']}` as ___{$columnAlias}___{$column['Field']}";
+            $columns[] = "`{$relation->getTableAlias()}`.`{$column['Field']}` as ___{$columnAlias}___{$column['Field']}";
         }
         return $columns;
     }
