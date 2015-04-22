@@ -281,7 +281,7 @@ class DbRelation extends LogAwareObject {
             $class = $this->model;
             $this->tableName = $class::getTableName();
         }
-        return $this->tableName . " as  " . ($this->tableAlias = str_replace('.', '_', $fullName));
+        return "`" . $this->tableName . "` as  `" . ($this->tableAlias = str_replace('.', '_', $fullName)) . "`";
     }
 
     /**

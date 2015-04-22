@@ -87,7 +87,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @example "child1, child2, child2.subchild2"
      * @var mixed
      */
-    public $with;
+    public $with = [];
 
     /**
      * Fields to be selected; Can be an array of field or a string with columns /
@@ -151,24 +151,6 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @var string[string]
      */
     protected $params = array();
-
-    /**
-     * List of with relations parsed.
-     * Used to not include twice the same table when relations like :
-     *   user.right, user.title
-     * are include in the same with property it will make sure that user table is not included twice
-     *
-     * It will remember:
-     *   array(
-     *       'relationName' => array(
-     *                            'model' => 'class',
-     *                            'included' => true, // included in main query or not
-     *                            'selected' => true // remembers if must select that relation or not in main query
-     *                      ) // table alias will always be model with _ separated.
-     *   )
-     * @var array
-     */
-    protected $parsedJoins = array();
 
     /**
      * List of relations used in columns conditions
@@ -598,10 +580,6 @@ class ModelCondition extends \mpf\base\LogAwareObject {
             $this->setParam($name, $value);
 
         return $this;
-    }
-
-    public function getParsedJoins() {
-        return $this->parsedJoins;
     }
 
     /**

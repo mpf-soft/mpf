@@ -28,6 +28,7 @@
 
 namespace mpf\datasources\sql;
 
+use mpf\base\App;
 use mpf\datasources\BaseModel;
 use mpf\tools\Validator;
 
@@ -88,17 +89,17 @@ abstract class DbModel extends BaseModel {
      * List of instantiated relations.
      * @var ModelInterface[string]
      */
-    protected $_relations;
+    protected $_relations = [];
     /**
      * List of relations that were searched and not found.
      * @var array
      */
-    protected $_searchedRelations = array();
+    protected $_searchedRelations = [];
     /**
      * List of errors for current record
      * @var string[string]
      */
-    protected $_errors;
+    protected $_errors = [];
 
     /**
      * @var \mpf\tools\Validator
@@ -259,24 +260,41 @@ abstract class DbModel extends BaseModel {
         return $this->relationsParser->getForSingleModel($this, $name);
     }
 
+    /**
+     * Extracts only searched relations for specified path.
+     * @param string $path
+     * @return array
+     */
+    private function getSearchRelationsForPath($path) {
+        $matched = [];
+        foreach ($this->_searchedRelations as $relation) {
+            if (0 === strpos($relation, $path . '.')) {
+                $matched[substr($relation, strlen($path . '.'))] = substr($relation, strlen($path . '.'));
+            }
+        }
+        $this->debug($path . ': ' . implode("|||", $matched));
+        return $matched;
+    }
+
     private function applyRelationsAttributes() {
         foreach ($this->_attributesForRelations as $relation => $attributes) {
             $relation = explode('.', $relation);
             $model = $this;
             $path = '';
             foreach ($relation as $current) {
-                $path .= ($path?'.':'') . $current;
+                $path .= ($path ? '.' : '') . $current;
                 $relations = $model::getRelations();
                 $class = is_array($relations[$current]) ? $relations[$current][1] : $relations[$current]->model;
                 if (!$model->relationIsSet($current)) {
-                    $model->$current = new $class(array(
+                    $model->$current = new $class([
                         '_pk' => static::getDb()->getTablePk($class::getTableName()),
                         '_isNewRecord' => false,
                         '_action' => 'update',
                         '_tableName' => $class::getTableName(),
                         '_db' => $class::getDb(),
-                        '_attributes' => isset($this->_attributesForRelations[$path]) ? $this->_attributesForRelations[$path] : array()
-                    ));
+                        '_attributes' => isset($this->_attributesForRelations[$path]) ? $this->_attributesForRelations[$path] : [],
+                        '_searchedRelations' => $this->getSearchRelationsForPath($path)
+                    ]);
                 }
                 $model = $model->$current;
             }
@@ -311,6 +329,7 @@ abstract class DbModel extends BaseModel {
 
         $relations = static::getRelations();
         if (isset($relations[$name])) {
+            $this->debug("Searching relation $name for " . get_class($this));
             $this->_searchedRelations[$name] = true;
             return $this->_relations[$name] = $this->getRelationFromDb($name);
         }
@@ -691,7 +710,7 @@ abstract class DbModel extends BaseModel {
      * @return \mpf\datasources\sql\PDOConnection
      */
     public static function getDb() {
-        return \mpf\base\App::get()->sql();
+        return App::get()->sql();
     }
 
     /**
@@ -701,7 +720,7 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return static[]
      */
-    public static function findAllByAttributes($attributes, $condition = null, $params = array()) {
+    public static function findAllByAttributes($attributes, $condition = null, $params = []) {
         $class = get_called_class();
         $condition = ModelCondition::getFrom($condition, $class);
         foreach ($attributes as $name => $value) {
@@ -717,7 +736,7 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return static[]
      */
-    public static function findAllByPk($pk, $condition = null, $params = array()) {
+    public static function findAllByPk($pk, $condition = null, $params = []) {
         $class = get_called_class();
         $condition = ModelCondition::getFrom($condition, $class);
         $condition->compareColumn($class::getDb()->getTablePk($class::getTableName()), $pk);
@@ -731,13 +750,13 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return null|static
      */
-    public static function findByAttributes($attributes, $condition = null, $params = array()) {
+    public static function findByAttributes($attributes, $condition = null, $params = []) {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition'))
             $condition = ModelCondition::getFrom($condition, get_called_class());
         /* @var $condition \mpf\datasources\sql\ModelCondition */
         $oldLimit = $condition->limit;
         $condition->limit = 1;
-        $models = static::findAllByAttributes($attributes, $condition, array());
+        $models = static::findAllByAttributes($attributes, $condition, $params);
         $condition->limit = $oldLimit;
         return isset($models[0]) ? $models[0] : null;
     }
@@ -792,6 +811,12 @@ abstract class DbModel extends BaseModel {
             $condition->model = $condition->model ? $condition->model : get_called_class();
         }
         $condition->setParams($params);
+        $searchedRelations = [];
+        if (is_array($condition->with)){
+            foreach ($condition->with as $k){
+                $searchedRelations[$k] = $k;
+            }
+        }
         $models = static::getDb()->queryClass($condition, get_called_class(), $condition->getParams(), array(
             array(
                 '_columns' => static::getDb()->getTableColumns(static::getTableName()),
@@ -799,7 +824,8 @@ abstract class DbModel extends BaseModel {
                 '_isNewRecord' => false,
                 '_action' => 'update',
                 '_tableName' => static::getTableName(),
-                '_db' => static::getDb()
+                '_db' => static::getDb(),
+                '_searchedRelations' => $searchedRelations
             )
         ));
         if (!$models) {
@@ -807,60 +833,6 @@ abstract class DbModel extends BaseModel {
         }
         $condition->getExtraRelations($models);
         return $models;
-        /*
-        $joins = $condition->getParsedJoins();
-        foreach ($joins as $name => $details) {
-            self::selectRelation($name, $details, $joins, $models);
-        }
-        return $models;*/
-    }
-
-    /**
-     * @TODO: Delete this after the new method is implemented
-     * @param $name
-     * @param $details
-     * @param $joins
-     * @param $models
-     */
-    private static function selectRelation($name, $details, $joins, $models) {
-        if ($details['selected']) { // was already selected;
-            return;
-        }
-        $name = explode('.', $name);
-        if (count($name) > 1) {
-            $parent = $name;
-            unset($parent[count($parent) - 1]);
-            $sparent = implode('.', $parent);
-            if (!isset($joins[$sparent])) {
-                trigger_error("Can't select relation " . implode('.', $name) . "! (parent not found in 'with' list)");
-                return;
-            }
-            if (!$joins[$sparent]['selected']) { // if parent wasn't selected then select it now
-                self::selectRelation($sparent, $joins[$sparent], $joins, $models);
-            }
-
-            foreach ($parent as $step) {
-                $newModels = array();
-                foreach ($models as $model) {
-                    if (!$model->$step)
-                        continue;
-                    if (is_array($model->$step)) {
-                        foreach ($model->$step as $m) {
-                            $newModels[] = $m;
-                        }
-                    } else {
-                        $newModels[] = $model->$step;
-                    }
-                }
-                $models = $newModels;
-            }
-        }
-        $name = $name[count($name) - 1];
-        $allRelations = DbRelations::getRelations($models, $details['details']);
-
-        foreach ($models as $k => $model) {
-            $model->$name = is_array($allRelations[$k]) ? array_values($allRelations[$k]) : $allRelations[$k];
-        }
     }
 
     /**
@@ -916,7 +888,7 @@ abstract class DbModel extends BaseModel {
 
     protected static function getAttributesByRule($action, $rule) {
         if (!count(static::getRules())) {
-            return array();
+            return [];
         }
 
         $rules = static::getRules();
@@ -929,7 +901,7 @@ abstract class DbModel extends BaseModel {
             array_walk($conditions, function (&$item) {
                 $item = trim($item);
             });
-            $actions = isset($details['on']) ? explode(',', $details['on']) : array();
+            $actions = isset($details['on']) ? explode(',', $details['on']) : [];
             array_walk($actions, function (&$item) {
                 $item = trim($item);
             });
