@@ -338,10 +338,10 @@ class DbRelation extends LogAwareObject {
                 case "==":
                 case "=attribute":
                     if ($condition[0] == '=attribute') { // for attribute read the value
-                        $parentModel = get_class(current($models));
+                        $parentModel = get_class($model);
                         $c = $condition[2];
                         if (false === strpos($c, '(')) {
-                            $condition[2] = $parentModel::$c;
+                            $condition[2] = $parentModel::$$c;
                         } else { // for method call it and get the value;
                             $c = substr($c, 0, strlen($c) - 2);
                             $condition[2] = call_user_func("$parentModel::$c");
