@@ -291,6 +291,9 @@ class DbRelation extends LogAwareObject {
      */
     public function getConditionForModel(DbModel $model) {
         $mCondition = new ModelCondition(['model' => $this->model]);
+        foreach ($this->joins as $join){
+
+        }
         foreach ($this->conditions as $ck => $condition) {
             switch ($condition[0]) {
                 case "=":
@@ -326,8 +329,12 @@ class DbRelation extends LogAwareObject {
                         $mCondition->setParam($paramKey . $parentColumn, $model->$parentColumn);
                         $conditionParts[] = $paramKey . $parentColumn . ('!=' == $condition[0] ? 'NOT' : '') . " IN ($relationColumnListForIn)";
                     } else {
-                        $mCondition->setParam($paramKey . $relationColumn, $model->$parentColumn);
-                        $conditionParts[] = $paramKey . $relationColumn;
+                        if (false !== strpos($parentColumn, '.')){
+                            $mCondition->compareColumns($paramKey.$relationColumn, $parentColumn);
+                        } else {
+                            $mCondition->setParam($paramKey . $relationColumn, $model->$parentColumn);
+                            $conditionParts[] = $paramKey . $relationColumn;
+                        }
                     }
                     if (is_string($parentColumn) && is_string($relationColumn)) {
                         $mCondition->addCondition($this->_column($relationColumn, true) . ('!=' == $condition[0] ? 'NOT' : '') . " IN (" . implode(', ', $conditionParts) . ")");

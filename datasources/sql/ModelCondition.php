@@ -305,7 +305,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
         $operators = array('>=', '<=', '!=', '>', '<');
         $matched = false;
         foreach ($operators as $operator) {
-            if ($operator == substr($column2, 0, stlren($operator))) {
+            if ($operator == substr($column2, 0, strlen($operator))) {
                 $column2 = trim(substr($column2, strlen($operator)));
                 $matched = true;
                 break;

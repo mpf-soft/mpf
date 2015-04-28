@@ -74,7 +74,8 @@ class RelationsParser extends LogAwareObject {
                         $this->relations[$name] = DbRelation::hasOne($details[1])->columnsEqual($modelClass::getDb()->getTablePk($modelClass::getTableName()), $details[2]);
                         break;
                     case DbRelations::HAS_MANY:
-                        $this->relations[$name] = DbRelation::hasMany($details[1])->columnsEqual($modelClass::getDb()->getTablePk($modelClass::getTableName()), $details[2]);
+                        $this->relations[$name] = DbRelation::hasMany($details[1])->
+                                    columnsEqual($modelClass::getDb()->getTablePk($modelClass::getTableName()), $details[2]);
                         break;
                     case DbRelations::MANY_TO_MANY:
                         //table_name(model_column, relation_column)
@@ -82,7 +83,8 @@ class RelationsParser extends LogAwareObject {
                         $columns = explode(',', substr($columns, 0, strlen($columns) - 1));
                         $this->relations[$name] = DbRelation::manyToMany($details[1])->join([$tableName => $name . '_' . $tableName],
                             [$modelClass::getDb()->getTablePk($modelClass::getTableName()) => trim($columns[0])]
-                        )->columnsEqual($name . '_' . $tableName . '.' . trim($columns[1]), $relationClass::getDb()->getTablePk($relationClass::getTableName()));
+                        )->columnsEqual($name . '_' . $tableName . '.' . trim($columns[1]),
+                            $relationClass::getDb()->getTablePk($relationClass::getTableName()));
                         break;
                     default:
                         trigger_error("Invalid relation type {$details[0]}!");
