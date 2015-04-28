@@ -309,6 +309,46 @@ class Html extends \mpf\base\Helper {
         return $r;
     }
 
+    /**
+     * Generates a link that sends data using an ajax request to the selected url. On success it will call $callbackFunction and it will send 3
+     * params: the received data, postData and clicked element.
+     *
+     * @param string|array $url
+     * @param string $text
+     * @param string $callbackFunction
+     * @param array $postData
+     * @param array $htmlOptions
+     * @param bool $checkAccess
+     * @param bool $confirm
+     * @return string
+     */
+    public function ajaxLink($url, $text, $callbackFunction, $postData = [], $htmlOptions = [], $checkAccess = true, $confirm  =false){
+        if ($checkAccess && is_array($url)){
+            $module = isset($url[3])?$url[3]:((isset($url[2]) && is_string($url[2]))?$url[2]:null);
+            if (!WebApp::get()->hasAccessTo($url[0], isset($url[1])?$url[1]:null, $module)){
+                return ""; // is not visible;
+            }
+        }
 
+        $id = isset($htmlOptions['id'])?$htmlOptions['id']:'ajax-link-1';
+        $htmlOptions['id'] = $id;
+        if (is_array($url)){
+            $module = isset($url[3])?$url[3]:((isset($url[2]) && is_string($url[2]))?$url[2]:null);
+            $url = WebApp::get()->request()->createURL($url[0], isset($url[1])?$url[1]:null, (isset($url[2])&&is_array($url[2]))?$url[2]:[], $module);
+        }
+        $postData = json_encode($postData);
+        $confirm = $confirm?'if (!confirm(\''.$confirm.'\')) { return false; }':'';
+        $script = <<<SCRIPT
+$('#$id').click(function(){
+    $confirm
+    var _self = this;
+    $.post('$url', json_decode('$postData'), function(data){
+        return $callbackFunction(data, json_decode('$postData'), _self);
+    });
+    return false;
+});
+SCRIPT;
+        return $this->link($url, $text, $htmlOptions, false) . $this->script($script);
+    }
 
 }
