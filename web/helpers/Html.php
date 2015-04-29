@@ -299,7 +299,6 @@ class Html extends \mpf\base\Helper {
             $htmlOptions['onclick'] = "if (confirm('$confirm')) { $htmlOptions[onclick] }; return false;";
         }
         $r = $this->link($url, $text, $htmlOptions, false);
-
         $r .= Form::get()->openForm(['style' => 'display:none;', 'method' => 'post', 'id' => $uniqueID, 'action' => $url]);
         foreach ($postData as $name=>$value){
             $r .= Form::get()->hiddenInput($name, $value);
@@ -308,6 +307,8 @@ class Html extends \mpf\base\Helper {
 
         return $r;
     }
+
+    protected $ajaxLinkCount = 1;
 
     /**
      * Generates a link that sends data using an ajax request to the selected url. On success it will call $callbackFunction and it will send 3
@@ -329,26 +330,28 @@ class Html extends \mpf\base\Helper {
                 return ""; // is not visible;
             }
         }
-
-        $id = isset($htmlOptions['id'])?$htmlOptions['id']:'ajax-link-1';
+        $this->ajaxLinkCount++;
+        $id = isset($htmlOptions['id'])?$htmlOptions['id']:'ajax-link-' . $this->ajaxLinkCount;
         $htmlOptions['id'] = $id;
         if (is_array($url)){
             $module = isset($url[3])?$url[3]:((isset($url[2]) && is_string($url[2]))?$url[2]:null);
             $url = WebApp::get()->request()->createURL($url[0], isset($url[1])?$url[1]:null, (isset($url[2])&&is_array($url[2]))?$url[2]:[], $module);
         }
+        $postData[WebApp::get()->request()->getCsrfKey()] = WebApp::get()->request()->getCsrfValue();
         $postData = json_encode($postData);
         $confirm = $confirm?'if (!confirm(\''.$confirm.'\')) { return false; }':'';
         $script = <<<SCRIPT
 $('#$id').click(function(){
     $confirm
     var _self = this;
-    $.post('$url', json_decode('$postData'), function(data){
-        return $callbackFunction(data, json_decode('$postData'), _self);
+    var postData = $.parseJSON('$postData');
+    $.post('$url', postData, function(data){
+        return $callbackFunction(data, postData, _self);
     });
     return false;
 });
 SCRIPT;
-        return $this->link($url, $text, $htmlOptions, false) . $this->script($script);
+        return $this->link('#', $text, $htmlOptions, false) . $this->script($script);
     }
 
 }
