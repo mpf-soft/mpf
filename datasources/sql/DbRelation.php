@@ -291,55 +291,101 @@ class DbRelation extends LogAwareObject {
      */
     public function getConditionForModel(DbModel $model) {
         $mCondition = new ModelCondition(['model' => $this->model]);
+        $joinString = [];
+        $joinParams = [];
         foreach ($this->joins as $join){
+            if (is_array($join[0])) {
+                $cJoinString = $join[3] . " `" . key($join[0]) . "` as `" . current($join[0]) . '`';
+                $tName = "`".current($join[0])."`";
+            } else {
+                $cJoinString = $join[3] . " `" . $join[0] . "`";
+                $tName = $join[0];
+            }
+            $cJoinString .= " ON ";
+            $cJoinConditions = [];
+            foreach ($join[1] as $column1=>$column2){ // c1 -> from parent; c2 -> from table;
+                if (false === strpos($column1, '.')){ // is parent here
+                    $joinParams[":t_".$column1] = $model->$column1;
+                    $column1 = ":t_".$column1;
+                }
+                if (false === strpos($column2, '.')){
+                    $column2 =  $tName . '.' . $column2;
+                }
+                $cJoinConditions[] = $column1 . ' = ' . $column2;
+            }
 
+            foreach ($join[2] as $column=>$value) {
+                $pName = ':';
+                if (false === strpos($column, '.')){
+                    $pName .= str_replace('.', '_', "$tName.$column");
+                    $cJoinConditions[] = "`$tName`.`$column` = :$pName";
+                } else {
+                    $pName .= str_replace('.', '_', $column);
+                    $cJoinConditions[] = "$column = :$pName";
+                }
+                $joinParams[$pName] = $value;
+            }
+
+            $joinString[] = $cJoinString . "(". implode(") AND (", $cJoinConditions) . ")";
         }
+        if ($this->joins){
+            $mCondition->fields = "t.*";
+        }
+        $mCondition->setParams($joinParams);
+        $mCondition->join = implode(" ", $joinString);
         foreach ($this->conditions as $ck => $condition) {
             switch ($condition[0]) {
                 case "=":
                 case "!=":
                     $parentColumn = $condition[1]; // for now it only supports single column for this type of relations;
                     $relationColumn = $condition[2]; // same for relation column
-                    if (is_array($relationColumn)) {
-                        $relationColumnListForIn = [];
-                        foreach ($relationColumn as $c) {
-                            $relationColumnListForIn[] = $this->_column($c, true);
+                    if (false !== strpos($parentColumn, '.')){
+                        if (false === strpos($relationColumn, '.')){
+                            $relationColumn = '`t`.`' . $relationColumn.'`';
                         }
-                        $relationColumnListForIn = implode(', ', $relationColumnListForIn);
+                        $mCondition->addCondition("$parentColumn = $relationColumn");
                     } else {
-                        $relationColumnListForIn = $relationColumn;
-                    }
-                    $conditionParts = [];
-                    $paramKey = ':' . $ck . '_';
-                    if (is_array($parentColumn) && is_array($relationColumn)) {
-                        $columnList = [];
-                        foreach ($parentColumn as $col) {
-                            $mCondition->setParam($paramKey . $col, $model->$col);
-                            $conditionParts[] = $paramKey . $col . ('!=' == $condition[0] ? 'NOT' : '') . ' IN ( ' . $relationColumnListForIn . ' )';
-                            $columnList[] = $paramKey . $col . ('!=' == $condition[0] ? 'NOT' : '') . ' IN ( ' . $relationColumnListForIn . ' )';
-                        }
-                    } elseif (is_array($parentColumn)) {
-                        $paramList = [];
-                        foreach ($parentColumn as $col) {
-                            $mCondition->setParam($paramKey . $col, $model->$col);
-                            $paramList[] = $paramKey . $col;
-                        }
-                        $conditionParts[] = $this->_column($relationColumn, true) . ('!=' == $condition[0] ? 'NOT' : '') . ' IN (' . implode(', ', $paramList) . ')';
-                    } elseif (is_array($relationColumn)) {
-                        $mCondition->setParam($paramKey . $parentColumn, $model->$parentColumn);
-                        $conditionParts[] = $paramKey . $parentColumn . ('!=' == $condition[0] ? 'NOT' : '') . " IN ($relationColumnListForIn)";
-                    } else {
-                        if (false !== strpos($parentColumn, '.')){
-                            $mCondition->compareColumns($paramKey.$relationColumn, $parentColumn);
+                        if (is_array($relationColumn)) {
+                            $relationColumnListForIn = [];
+                            foreach ($relationColumn as $c) {
+                                $relationColumnListForIn[] = $this->_column($c, true);
+                            }
+                            $relationColumnListForIn = implode(', ', $relationColumnListForIn);
                         } else {
-                            $mCondition->setParam($paramKey . $relationColumn, $model->$parentColumn);
-                            $conditionParts[] = $paramKey . $relationColumn;
+                            $relationColumnListForIn = $relationColumn;
                         }
-                    }
-                    if (is_string($parentColumn) && is_string($relationColumn)) {
-                        $mCondition->addCondition($this->_column($relationColumn, true) . ('!=' == $condition[0] ? 'NOT' : '') . " IN (" . implode(', ', $conditionParts) . ")");
-                    } else {
-                        $mCondition->addCondition('(' . implode(") OR (", $conditionParts) . ')');
+                        $conditionParts = [];
+                        $paramKey = ':' . $ck . '_';
+                        if (is_array($parentColumn) && is_array($relationColumn)) {
+                            $columnList = [];
+                            foreach ($parentColumn as $col) {
+                                $mCondition->setParam($paramKey . $col, $model->$col);
+                                $conditionParts[] = $paramKey . $col . ('!=' == $condition[0] ? 'NOT' : '') . ' IN ( ' . $relationColumnListForIn . ' )';
+                                $columnList[] = $paramKey . $col . ('!=' == $condition[0] ? 'NOT' : '') . ' IN ( ' . $relationColumnListForIn . ' )';
+                            }
+                        } elseif (is_array($parentColumn)) {
+                            $paramList = [];
+                            foreach ($parentColumn as $col) {
+                                $mCondition->setParam($paramKey . $col, $model->$col);
+                                $paramList[] = $paramKey . $col;
+                            }
+                            $conditionParts[] = $this->_column($relationColumn, true) . ('!=' == $condition[0] ? 'NOT' : '') . ' IN (' . implode(', ', $paramList) . ')';
+                        } elseif (is_array($relationColumn)) {
+                            $mCondition->setParam($paramKey . $parentColumn, $model->$parentColumn);
+                            $conditionParts[] = $paramKey . $parentColumn . ('!=' == $condition[0] ? 'NOT' : '') . " IN ($relationColumnListForIn)";
+                        } else {
+                            if (false !== strpos($parentColumn, '.')) {
+                                $mCondition->compareColumns($paramKey . $relationColumn, $parentColumn);
+                            } else {
+                                $mCondition->setParam($paramKey . $relationColumn, $model->$parentColumn);
+                                $conditionParts[] = $paramKey . $relationColumn;
+                            }
+                        }
+                        if (is_string($parentColumn) && is_string($relationColumn)) {
+                            $mCondition->addCondition($this->_column($relationColumn, true) . ('!=' == $condition[0] ? 'NOT' : '') . " IN (" . implode(', ', $conditionParts) . ")");
+                        } else {
+                            $mCondition->addCondition('(' . implode(") OR (", $conditionParts) . ')');
+                        }
                     }
                     break;
                 case "==":
