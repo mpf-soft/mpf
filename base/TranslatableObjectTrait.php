@@ -80,7 +80,7 @@ trait TranslatableObjectTrait {
     public function translate($text) {
         $translator = $this->getTranslator();
         if (!$translator){
-            return ;
+            return $text;
         }
         return $translator->t($text, get_class($this));
     }
