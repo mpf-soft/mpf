@@ -817,8 +817,8 @@ abstract class DbModel extends BaseModel {
                 $searchedRelations[$k] = $k;
             }
         }
-        $models = static::getDb()->queryClass($condition, get_called_class(), $condition->getParams(), array(
-            array(
+        $models = static::getDb()->queryClass($condition, get_called_class(), $condition->getParams(), [
+            [
                 '_columns' => static::getDb()->getTableColumns(static::getTableName()),
                 '_pk' => static::getDb()->getTablePk(static::getTableName()),
                 '_isNewRecord' => false,
@@ -826,8 +826,8 @@ abstract class DbModel extends BaseModel {
                 '_tableName' => static::getTableName(),
                 '_db' => static::getDb(),
                 '_searchedRelations' => $searchedRelations
-            )
-        ));
+            ]
+        ]);
         if (!$models) {
             return [];
         }

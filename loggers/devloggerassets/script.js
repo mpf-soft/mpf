@@ -218,7 +218,7 @@ MPF_DevLogger_Error.prototype = {
         if (context.Params) {
             response += "<b>Params:</b><br />";
             $.each(context.Params, function (index, value) {
-                response += "&nbsp;&nbsp;&nbsp;&nbsp;<i>" + index + "</i>&nbsp;&nbsp;&nbsp;<span>" + value + "</span> <br />"
+                response += "&nbsp;&nbsp;&nbsp;&nbsp;<i>" + index + "</i>&nbsp;&nbsp;&nbsp;<span>'" + value + "'</span> <br />"
             });
         }
         response += "<b>Trace:</b><br /><span><pre>" + context.Trace + "</pre></span><br />";
