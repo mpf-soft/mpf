@@ -138,12 +138,12 @@ class WebApp extends base\App {
     }
 
     /**
-     * Instantiate controller and check if class is correct;
+     * Instantiate controller and check if class is correct;It will also check for current alias config and it will sent it to constructor
      * @param string $class
      * @return \mpf\web\Controller
      */
     private function loadController($class) {
-        $controller = new $class();
+        $controller = new $class($this->currentControllerAliasConfig);
         if (!is_a($controller, '\\mpf\\web\\Controller')) {
             $this->critical('Controller `' . $class . '` must extend \\mpf\\web\\Controller!', array(
                 'requestedController' => $this->request()->getController(),
@@ -161,6 +161,12 @@ class WebApp extends base\App {
     public function getController() {
         return $this->_controller;
     }
+
+    /**
+     * If ::getControllerClassFromNameAndModule() matches an alias then this will record the config for it;
+     * @var array
+     */
+    protected $currentControllerAliasConfig = [];
 
     /**
      * Returns full namespace and classname for selected controller.
@@ -191,8 +197,15 @@ class WebApp extends base\App {
      * @return string
      */
     public function getControllerClassFromNameAndModule($controller, $module) {
+        $this->currentControllerAliasConfig = [];
         if (isset($this->controllerAliases[$module ? $module . '/' . $controller : $controller])) { // check for controller alias first
-            return $this->controllerAliases[$module ? $module . '/' . $controller : $controller];
+            if (is_array($this->controllerAliases[$module ? $module . '/' . $controller : $controller])) {
+                $this->currentControllerAliasConfig = $this->controllerAliases[$module ? $module . '/' . $controller : $controller];
+                unset($this->currentControllerAliasConfig['class']);
+                return $this->controllerAliases[$module ? $module . '/' . $controller : $controller]['class'];
+            } else {
+                return $this->controllerAliases[$module ? $module . '/' . $controller : $controller];
+            }
         }
         return $this->request()->getModuleNamespace() . '\\' . $this->controllersNamespace . '\\' . ucfirst($controller);
     }
