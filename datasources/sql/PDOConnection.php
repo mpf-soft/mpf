@@ -359,7 +359,7 @@ class PDOConnection extends \PDO {
     public function tableExists($tableName) {
         $cache = array();
         if (App::get()->cacheExists('mpf:PDOConnection:tableList')){
-            $cache = App::get()->cacheExists('mpf:PDOConnection:tableList');
+            $cache = App::get()->cacheValue('mpf:PDOConnection:tableList');
             if (isset($cache[$tableName])){
                 return $cache[$tableName];
             }
