@@ -18,6 +18,9 @@ class DbRelation extends LogAwareObject {
     public $conditions = [];
     public $joins = [];
     public $joinType = 'LEFT JOIN';
+    public $order;
+    public $offset;
+    public $limit;
     /**
      * @var string
      */
@@ -137,6 +140,33 @@ class DbRelation extends LogAwareObject {
      */
     public function setJoinType($type) {
         $this->joinType = strtoupper($type);
+        return $this;
+    }
+
+    /**
+     * @param $order
+     * @return $this
+     */
+    public function orderBy($order){
+        $this->order = $order;
+        return $this;
+    }
+
+    /**
+     * @param $offset
+     * @return $this
+     */
+    public function offset($offset){
+        $this->offset = $offset;
+        return $this;
+    }
+
+    /**
+     * @param $limit
+     * @return $this
+     */
+    public function limit($limit){
+        $this->limit = $limit;
         return $this;
     }
 
@@ -404,6 +434,15 @@ class DbRelation extends LogAwareObject {
                     break;
 
             }
+        }
+        if ($this->order){
+            $mCondition->order = $this->order;
+        }
+        if ($this->offset){
+            $mCondition->offset = $this->offset;
+        }
+        if ($this->limit){
+            $mCondition->limit = $this->limit;
         }
         return $mCondition;
     }
