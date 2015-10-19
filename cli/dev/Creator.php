@@ -105,18 +105,19 @@ MODEL;
         echo $model;
         $prefixes = App::get()->autoload()->getPrefixesPsr4();
         $found = false;
-        foreach ($prefixes as $pref => $paths){
-            if (0 === strpos($this->namespace, $pref)){
-                $path = $paths[0] . '/' . substr($this->namespace, strlen($pref));
+        $path = '';
+        foreach ($prefixes as $pref => $paths) {
+            if (0 === strpos($this->namespace, $pref)) {
+                $path = $paths[0] . '/' . str_replace('\\', DIRECTORY_SEPARATOR, substr($this->namespace, strlen($pref)));
                 $found = true;
                 break;
             }
         }
-        if (!$found){
+        if (!$found) {
             $this->error("Path for {$this->namespace} not found!");
             return false;
         }
-        $path .= '/' . $this->class . '.php';
+        $path .= '/' . str_replace('\\', DIRECTORY_SEPARATOR, $this->class) . '.php';
         $this->debug('File name: ' . $path);
         if (file_exists($path)) {
             $this->error('File already exists!');
@@ -125,15 +126,15 @@ MODEL;
         file_put_contents($path, $model);
     }
 
-    protected function getColumnsList($array){
-        if (!$array){
+    protected function getColumnsList($array) {
+        if (!$array) {
             return implode(", ", array_keys($this->columns));
         }
         $list = array();
-        foreach ($this->columns as $name=>$type){
+        foreach ($this->columns as $name => $type) {
             $list[] = "\"$name\"";
         }
-        return implode(", " , $list);
+        return implode(", ", $list);
     }
 
     protected function getModelRelations() {
