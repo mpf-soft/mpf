@@ -9,6 +9,7 @@
 namespace mpf\datasources;
 
 
+use mpf\base\App;
 use mpf\base\Object;
 use mpf\web\Cookie;
 use mpf\web\helpers\Html;
@@ -74,12 +75,12 @@ abstract class DataProvider extends Object {
     public abstract function getColumnOptions($column, $table = null);
 
     protected function init($config) {
-        if ($this->perPageChangeKey && $this->perPageSessionKey) {
+        if ($this->perPageChangeKey || $this->perPageSessionKey) {
             if (isset($_POST[$this->perPageChangeKey]) && is_numeric($_POST[$this->perPageChangeKey])) {
                 $this->setLimitPerPage((int)$_POST[$this->perPageChangeKey]);
                 WebApp::get()->request()->goBack();
             }
-            if (Session::get()->exists($this->perPageSessionKey)) {
+            if ($this->perPageSessionKey && Session::get()->exists($this->perPageSessionKey)) {
                 $this->perPage = Session::get()->value($this->perPageSessionKey);
             } elseif ($this->perPageCookieKey && Cookie::get()->exists($this->perPageCookieKey)) {
                 Session::get()->set($this->perPageSessionKey, $this->perPage = Cookie::get()->value($this->perPageCookieKey));

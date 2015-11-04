@@ -45,7 +45,7 @@ class Cookie extends LogAwareObject implements CacheInterface {
      * Record if value should be secured or not.
      * @var bool
      */
-    public $secured = true;
+    public $secured = false;
 
     /**
      * Use hash to check if the value was altered.
@@ -117,7 +117,6 @@ class Cookie extends LogAwareObject implements CacheInterface {
                 hash('sha256', $value . $this->salt)
             ));
         }
-
         return setcookie($key, $value, time() + $minutes * 60 + $hours * 3600 + $days * 24 * 3600, '/', null, $this->secured, $this->httpOnly);
     }
 
