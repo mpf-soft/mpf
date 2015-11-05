@@ -50,7 +50,7 @@ abstract class Logger extends Object {
      */
     public static function get($config = []) {
         $class = get_called_class();
-        if (self::$instance[$class])
+        if (isset(self::$instance[$class]))
             return self::$instance[$class];
         return new $class($config);
     }
