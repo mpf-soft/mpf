@@ -123,7 +123,7 @@ class EmailLogger extends Logger {
                 /* @var $v \Exception */
                 $lines[] = "$prefix Exception: ";
                 $lines[] = "$prefix | Location: " . $v->getFile() . ' [' . $v->getLine() . ']:';
-                $lines[] = "$prefix | " . $v->getTraceAsString();
+                $lines[] = "$prefix | " . str_replace("\n", "<br />\n$prefix | ", $v->getTraceAsString());
             } else {
                 $lines[] = "$prefix $k => " . print_r($v, true);
             }
