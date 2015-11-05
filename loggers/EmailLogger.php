@@ -128,7 +128,7 @@ class EmailLogger extends Logger {
                 $lines[] = "$prefix $k => " . print_r($v, true);
             }
         }
-        return [];
+        return $lines;
     }
 
     /**
