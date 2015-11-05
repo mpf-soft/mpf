@@ -93,6 +93,7 @@ class EmailLogger extends Logger {
             $lines[] = '';
             $lines[] = "WebApp:";
             $lines[] = '<b>URL:</b> http' . (isset($_SERVER['HTTPS']) ? 's' : '') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+            $lines[] = '<b>Referer:</b> '. (isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'-');
             $lines[] = '<b>POST:</b> ' . (isset($_POST) ? $this->getArrayList($_POST) : '-');
             $lines[] = '<b>SESSION:</b> ' . (isset($_SESSION) ? $this->getArrayList($_SESSION) : '-');
             $lines[] = '================================';
