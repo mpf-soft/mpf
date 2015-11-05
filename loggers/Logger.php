@@ -19,6 +19,7 @@
  */
 
 namespace mpf\loggers;
+use mpf\base\Object;
 
 /**
  * @author Mirel Nicu Mitache <mirel.mitache@gmail.com>
@@ -30,31 +31,31 @@ namespace mpf\loggers;
  * @copyright Copyright &copy; 2011 Mirel Mitache 
  * @license  http://www.mpfframework.com/licence
  */
-abstract class Logger extends \mpf\base\Object {
+abstract class Logger extends Object {
 
     use LoggerTrait;
 
     private static $instance;
 
-    protected function init($config = array()) {
+    protected function init($config = []) {
         self::$instance = $this;
-        return parent::init($config);
+        parent::init($config);
     }
 
     /**
      * Get active Logger instance;
      * 
      * @param string[] $config
-     * @return \mpf\base\Logger
+     * @return \mpf\loggers\Logger
      */
-    public static function get($config = array()) {
+    public static function get($config = []) {
         if (self::$instance)
             return self::$instance;
         $class = get_called_class();
         return new $class($config);
     }
 
-    public $visibleLevels = array(
+    public $visibleLevels = [
         Levels::EMERGENCY,
         Levels::CRITICAL,
         Levels::ALERT,
@@ -63,21 +64,21 @@ abstract class Logger extends \mpf\base\Object {
         Levels::NOTICE,
         Levels::INFO,
         Levels::DEBUG
-    );
-    public $detaliedLevels = array(
+    ];
+    public $detaliedLevels = [
         Levels::EMERGENCY,
         Levels::CRITICAL,
         Levels::ALERT,
         Levels::ERROR,
         Levels::WARNING,
         Levels::NOTICE
-    );
+    ];
 
     /**
      * List of ignored classes. This only works for DEBUG messages.
      * @var array
      */
-    public $ignoredClasses = array();
+    public $ignoredClasses = [];
 
     abstract function getLogs();
 }
