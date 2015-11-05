@@ -122,7 +122,7 @@ class MailHelper extends Helper {
      */
     public function send($to, $subject, $message, $from = 'default', $headerExtra = array(), $html = true) {
         if (!is_null($this->method)) { // if a method is set then use that one
-            return $this->method($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, array(), $headerExtra, $html);
+            return call_user_func($this->method, $to, is_string($from) ? $this->from[$from] : $from, $subject, $message, array(), $headerExtra, $html);
         } // if not use default
         return $this->_mail($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, array(), $headerExtra, $html);
     }
@@ -140,7 +140,7 @@ class MailHelper extends Helper {
      */
     public function sendAttachments($to, $subject, $message, $attachments, $from = 'default', $headerExtra = array(), $html = true) {
         if (!is_null($this->method)) {
-            return $this->method($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, $attachments, $headerExtra, $html);
+            return call_user_func($this->method, $to, is_string($from) ? $this->from[$from] : $from, $subject, $message, $attachments, $headerExtra, $html);
         }
         return $this->_mail($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, $attachments, $headerExtra, $html);
     }
