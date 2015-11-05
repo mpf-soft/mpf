@@ -54,13 +54,14 @@ trait LogAwareObjectTrait {
         foreach ($this->loggers as $class => $config) {
             if (!is_array($config)) {
                 $class = $config;
-                $config = array();
+                $config = [];
             }
             $instance = $class::get($config);
             if (!is_a($instance, 'mpf\\loggers\\Logger'))
                 throw new \Exception("Loggers must extend mpf\\base\\Logger class!");
             $this->loggersInstances[] = $instance;
         }
+        var_dump($this->loggersInstances);
         return true;
     }
 

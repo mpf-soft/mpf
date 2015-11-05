@@ -38,7 +38,7 @@ abstract class Logger extends Object {
     private static $instance;
 
     protected function init($config = []) {
-        self::$instance = $this;
+        self::$instance[get_class($this)] = $this;
         parent::init($config);
     }
 
@@ -49,9 +49,9 @@ abstract class Logger extends Object {
      * @return \mpf\loggers\Logger
      */
     public static function get($config = []) {
-        if (self::$instance)
-            return self::$instance;
         $class = get_called_class();
+        if (self::$instance[$class])
+            return self::$instance[$class];
         return new $class($config);
     }
 

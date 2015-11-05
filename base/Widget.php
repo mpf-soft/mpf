@@ -45,7 +45,7 @@ class Widget extends LogAwareObject implements TranslatableObjectInterface {
         foreach ($config as $k => $v) {
             $forSerialize[$k] = is_object($v) ? print_r($v, true) : $v; // to fix the problem with unserializable objects)
         }
-        $key = md5(serialize($forSerialize));
+        $key = md5(get_called_class() . serialize($forSerialize));
         if (!isset(self::$_instances[$key]))
             self::$_instances[$key] = new static($config);
         return self::$_instances[$key];
