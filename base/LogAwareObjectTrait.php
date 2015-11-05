@@ -61,7 +61,6 @@ trait LogAwareObjectTrait {
                 throw new \Exception("Loggers must extend mpf\\base\\Logger class!");
             $this->loggersInstances[] = $instance;
         }
-        var_dump($this->loggersInstances);
         return true;
     }
 
