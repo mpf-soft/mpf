@@ -40,7 +40,7 @@ class EmailLogger extends Logger {
         Levels::NOTICE
     ];
 
-    public function getLevelMessageColor($lvl){
+    public function getLevelMessageColor($lvl) {
         $t = [
             Levels::EMERGENCY => 'orangered',
             Levels::CRITICAL => 'orangered',
@@ -98,11 +98,11 @@ class EmailLogger extends Logger {
     }
 
     protected function getSubject($level) {
-        return ($this->emailPrefix ?: '[' . App::get()->shortName . '] Application Log: ') . $this->getLevelTranslations($level);
+        return ($this->emailPrefix ?: '[' . App::get()->shortName . '] [' . date('Y-m-d H:i') . '] Application Log ') . '[' . $this->getLevelTranslations($level) . ']';
     }
 
     protected function getMessage($level, $message, $context) {
-        $date= date('Y-m-d H:i:s');
+        $date = date('Y-m-d H:i:s');
         $class = (isset($context['fromClass']) ? $context['fromClass'] : '-');
         $context = implode("<br />", $this->getContextLines($context));
         $message = <<<MESSAGE
@@ -116,7 +116,7 @@ MESSAGE;
             $lines[] = '';
             $lines[] = "WebApp:";
             $lines[] = '<b>URL:</b> http' . (isset($_SERVER['HTTPS']) ? 's' : '') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-            $lines[] = '<b>Referer:</b> '. (isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'-');
+            $lines[] = '<b>Referer:</b> ' . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-');
             $lines[] = '<b>POST:</b> ' . (isset($_POST) ? $this->getArrayList($_POST) : '-');
             $lines[] = '<b>SESSION:</b> ' . (isset($_SESSION) ? $this->getArrayList($_SESSION) : '-');
         } elseif (ltrim(get_class(App::get()), '\\') == 'mpf\ConsoleApp') {
@@ -132,7 +132,7 @@ MESSAGE;
         $lines = [];
         foreach ($context as $k => $v) {
             if (is_string($v) || is_numeric($v)) {
-                if ('Trace' == $k){
+                if ('Trace' == $k) {
                     $lines[] = "$prefix $k:";
                     $lines[] = "$prefix | " . str_replace("\n", "<br />{$prefix} | ", $v);
                 } else {
