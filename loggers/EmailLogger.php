@@ -97,23 +97,19 @@ class EmailLogger extends Logger {
     public function log($level, $message, array $context = []) {
         if (in_array($level, $this->visibleLevels) && $this->emailAddress) {
             $mailer = $this->mailerClass;
-            $mailer = $mailer::get();
-            /* @var $mailer \mpf\helpers\MailHelper */
-            $mailer->send($this->emailAddress, $this->getSubject($level), $this->getMessage($level, $message, $context));
+            $mailer::get()->send($this->emailAddress, $this->getSubject($level, isset($context['fromClass']) ? $context['fromClass'] : ''), $this->getMessage($level, $message, $context));
         }
     }
 
-    protected function getSubject($level) {
-        return ($this->emailPrefix ?: '[' . App::get()->shortName . '] ') . '[' . date('Y-m-d H:i') . '] [' . $this->getLevelTranslations($level) . '] ' . $this->emailTitle;
+    protected function getSubject($level, $class) {
+        $class = $class ? "[$class]" : "";
+        return ($this->emailPrefix ?: '[' . App::get()->shortName . '] ') . '[' . date('Y-m-d H:i') . '] ' . $class . ' [' . $this->getLevelTranslations($level) . '] ' . $this->emailTitle;
     }
 
     protected function getMessage($level, $message, $context) {
-        $date = date('Y-m-d H:i:s');
-        $class = (isset($context['fromClass']) ? $context['fromClass'] : '-');
         unset($context['fromClass']);
         $context = implode("<br />", $this->getContextLines($context));
         $message = <<<MESSAGE
-<b>$date [{$this->getLevelTranslations($level)} ] [ $class ]</b>
 <h3 style="color:{$this->getLevelMessageColor($level)}">$message</h3>
 <div style="border: 1px solid #888; background: #cfcfdf; color:#444; line-height: 20px; padding:5px;">$context</div>
 
