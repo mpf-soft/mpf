@@ -89,6 +89,9 @@ class EmailLogger extends Logger {
     protected function getMessage($level, $message, $context) {
         $lines = [date('Y-m-d H:i:s') . ' [' . $this->getLevelTranslations($level) . '] [' . (isset($context['fromClass']) ? $context['fromClass'] : '-') . ']'];
         $lines[] = $message;
+        unset($context['fromClass']);
+        $lines = array_merge($lines, $this->getContextLines($context));
+        $lines[] = '================================';
         if (ltrim(get_class(App::get()), '\\') == 'mpf\WebApp') {
             $lines[] = '';
             $lines[] = "WebApp:";
@@ -96,18 +99,12 @@ class EmailLogger extends Logger {
             $lines[] = '<b>Referer:</b> '. (isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:'-');
             $lines[] = '<b>POST:</b> ' . (isset($_POST) ? $this->getArrayList($_POST) : '-');
             $lines[] = '<b>SESSION:</b> ' . (isset($_SESSION) ? $this->getArrayList($_SESSION) : '-');
-            $lines[] = '================================';
-            $lines[] = '';
         } elseif (ltrim(get_class(App::get()), '\\') == 'mpf\ConsoleApp') {
             $lines[] = '';
             $lines[] = 'ConsoleApp:';
             $lines[] = '<b>Command:</b> ' . implode(' ', $_SERVER['argv']);
             $lines[] = '<b>User:</b> ' . exec('whoami');
-            $lines[] = '================================';
-            $lines[] = '';
         }
-        unset($context['fromClass']);
-        $lines = array_merge($lines, $this->getContextLines($context));
         return implode("<br />\n", $lines);
     }
 
@@ -124,7 +121,7 @@ class EmailLogger extends Logger {
                 /* @var $v \Exception */
                 $lines[] = "$prefix Exception: ";
                 $lines[] = "$prefix | Location: " . $v->getFile() . ' [' . $v->getLine() . ']:';
-                $lines[] = "$prefix | " . str_replace("\n", "<br />\n$prefix | ", $v->getTraceAsString());
+                $lines[] = "$prefix | " . str_replace("#", "<br />\n{$prefix} | ", $v->getTraceAsString());
             } else {
                 $lines[] = "$prefix $k => " . print_r($v, true);
             }
