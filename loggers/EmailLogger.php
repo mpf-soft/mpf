@@ -104,6 +104,7 @@ class EmailLogger extends Logger {
     protected function getMessage($level, $message, $context) {
         $date = date('Y-m-d H:i:s');
         $class = (isset($context['fromClass']) ? $context['fromClass'] : '-');
+        unset($context['fromClass']);
         $context = implode("<br />", $this->getContextLines($context));
         $message = <<<MESSAGE
 <b>$date [{$this->getLevelTranslations($level)} ] [ $class ]</b>
@@ -113,15 +114,11 @@ class EmailLogger extends Logger {
 MESSAGE;
         $lines = [];
         if (ltrim(get_class(App::get()), '\\') == 'mpf\WebApp') {
-            $lines[] = '';
-            $lines[] = "WebApp:";
             $lines[] = '<b>URL:</b> http' . (isset($_SERVER['HTTPS']) ? 's' : '') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
             $lines[] = '<b>Referer:</b> ' . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-');
             $lines[] = '<b>POST:</b> ' . (isset($_POST) ? $this->getArrayList($_POST) : '-');
             $lines[] = '<b>SESSION:</b> ' . (isset($_SESSION) ? $this->getArrayList($_SESSION) : '-');
         } elseif (ltrim(get_class(App::get()), '\\') == 'mpf\ConsoleApp') {
-            $lines[] = '';
-            $lines[] = 'ConsoleApp:';
             $lines[] = '<b>Command:</b> ' . implode(' ', $_SERVER['argv']);
             $lines[] = '<b>User:</b> ' . exec('whoami');
         }
@@ -134,7 +131,7 @@ MESSAGE;
             if (is_string($v) || is_numeric($v)) {
                 if ('Trace' == $k) {
                     $lines[] = "$prefix $k:";
-                    $lines[] = "$prefix | " . str_replace("\n", "<br />{$prefix} | ", $v);
+                    $lines[] = "$prefix | " . str_replace("\n", "<br />{$prefix} | ", htmlentities($v));
                 } else {
                     $lines[] = "$prefix $k => " . $v . "\n";
                 }
@@ -146,7 +143,7 @@ MESSAGE;
                 /* @var $v \Exception */
                 $lines[] = "$prefix Exception: ";
                 $lines[] = "$prefix | Location: " . $v->getFile() . ' [' . $v->getLine() . ']:';
-                $lines[] = "$prefix | " . str_replace("#", "<br />\n{$prefix} | ", $v->getTraceAsString());
+                $lines[] = "$prefix | " . str_replace("#", "<br />\n{$prefix} | ", htmlentities($v->getTraceAsString()));
             } else {
                 $lines[] = "$prefix $k => " . print_r($v, true);
             }
