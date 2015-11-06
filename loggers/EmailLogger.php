@@ -90,7 +90,7 @@ class EmailLogger extends Logger {
     protected function getMessage($level, $message, $context) {
         $date= date('Y-m-d H:i:s');
         $class = (isset($context['fromClass']) ? $context['fromClass'] : '-');
-        $context = implode("<br />", $this->getContextLines());
+        $context = implode("<br />", $this->getContextLines($context));
         $message = <<<MESSAGE
 <b>$date [{$this->getLevelTranslations($level)} ] [ $class ]</b>
 <h1>$message</h1>
