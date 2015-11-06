@@ -31,6 +31,12 @@ class EmailLogger extends Logger {
      */
     public $emailPrefix;
 
+    /**
+     * Final title that apppears after info in subject;
+     * @var string
+     */
+    public $emailTitle = 'Application Log';
+
     public $visibleLevels = [
         Levels::EMERGENCY,
         Levels::CRITICAL,
@@ -98,7 +104,7 @@ class EmailLogger extends Logger {
     }
 
     protected function getSubject($level) {
-        return ($this->emailPrefix ?: '[' . App::get()->shortName . '] [' . date('Y-m-d H:i') . '] Application Log ') . '[' . $this->getLevelTranslations($level) . ']';
+        return ($this->emailPrefix ?: '[' . App::get()->shortName . '] ') . '[' . date('Y-m-d H:i') . '] [' . $this->getLevelTranslations($level) . '] ' . $this->emailTitle;
     }
 
     protected function getMessage($level, $message, $context) {
