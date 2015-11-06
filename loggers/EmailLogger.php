@@ -135,10 +135,10 @@ MESSAGE;
                     $lines[] = "$prefix $k:";
                     $lines[] = "$prefix | " . str_replace("\n", "<br />{$prefix} | ", htmlentities($v));
                 } else {
-                    $lines[] = "$prefix $k => " . $v . "\n";
+                    $lines[] = "$prefix $k: " . $v . "\n";
                 }
             } elseif (is_bool($v)) {
-                $lines[] .= "$prefix $k => " . ($v ? 'true' : 'false') . "\n";
+                $lines[] .= "$prefix $k: " . ($v ? 'true' : 'false') . "\n";
             } elseif (is_array($v)) {
                 $lines = array_merge($lines, $this->getContextLines($v, $prefix . "   "));
             } elseif (is_a($v, '\Exception')) {
@@ -147,7 +147,7 @@ MESSAGE;
                 $lines[] = "$prefix | Location: " . $v->getFile() . ' [' . $v->getLine() . ']:';
                 $lines[] = "$prefix | " . str_replace("#", "<br />\n{$prefix} | ", htmlentities($v->getTraceAsString()));
             } else {
-                $lines[] = "$prefix $k => " . print_r($v, true);
+                $lines[] = "$prefix $k: " . print_r($v, true);
             }
         }
         return $lines;
