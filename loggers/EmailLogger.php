@@ -93,7 +93,7 @@ class EmailLogger extends Logger {
         $context = implode("<br />", $this->getContextLines($context));
         $message = <<<MESSAGE
 <b>$date [{$this->getLevelTranslations($level)} ] [ $class ]</b>
-<h1>$message</h1>
+<h3>$message</h3>
 <div style="border: 1px solid #888; background: #afafaf; color:#444;">$context</div>
 
 MESSAGE;
