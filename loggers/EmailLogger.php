@@ -9,6 +9,7 @@
 namespace mpf\loggers;
 
 
+use GuzzleHttp\Message\MessageFactory;
 use mpf\base\App;
 
 class EmailLogger extends Logger {
@@ -87,11 +88,16 @@ class EmailLogger extends Logger {
     }
 
     protected function getMessage($level, $message, $context) {
-        $lines = [date('Y-m-d H:i:s') . ' [' . $this->getLevelTranslations($level) . '] [' . (isset($context['fromClass']) ? $context['fromClass'] : '-') . ']'];
-        $lines[] = $message;
-        unset($context['fromClass']);
-        $lines = array_merge($lines, $this->getContextLines($context));
-        $lines[] = '================================';
+        $date= date('Y-m-d H:i:s');
+        $class = (isset($context['fromClass']) ? $context['fromClass'] : '-');
+        $context = implode("<br />", $this->getContextLines());
+        $message = <<<MESSAGE
+<b>$date [{$this->getLevelTranslations($level)} ] [ $class ]</b>
+<h1>$message</h1>
+<div style="border: 1px solid #888; background: #afafaf; color:#444;">$context</div>
+
+MESSAGE;
+        $lines = [];
         if (ltrim(get_class(App::get()), '\\') == 'mpf\WebApp') {
             $lines[] = '';
             $lines[] = "WebApp:";
@@ -105,14 +111,19 @@ class EmailLogger extends Logger {
             $lines[] = '<b>Command:</b> ' . implode(' ', $_SERVER['argv']);
             $lines[] = '<b>User:</b> ' . exec('whoami');
         }
-        return implode("<br />\n", $lines);
+        return $message . implode("<br />\n", $lines);
     }
 
     protected function getContextLines($context, $prefix = '') {
         $lines = [];
         foreach ($context as $k => $v) {
             if (is_string($v) || is_numeric($v)) {
-                $lines[] = "$prefix $k => " . $v . "\n";
+                if ('Trace' == $k){
+                    $lines[] = "$prefix $k:";
+                    $lines[] = "$prefix | " . str_replace("\n", "<br />{$prefix} | ", $v);
+                } else {
+                    $lines[] = "$prefix $k => " . $v . "\n";
+                }
             } elseif (is_bool($v)) {
                 $lines[] .= "$prefix $k => " . ($v ? 'true' : 'false') . "\n";
             } elseif (is_array($v)) {
