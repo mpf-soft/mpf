@@ -40,6 +40,20 @@ class EmailLogger extends Logger {
         Levels::NOTICE
     ];
 
+    public function getLevelMessageColor($lvl){
+        $t = [
+            Levels::EMERGENCY => 'orangered',
+            Levels::CRITICAL => 'orangered',
+            Levels::ALERT => 'orangered',
+            Levels::ERROR => 'orangered',
+            Levels::WARNING => 'orangered',
+            Levels::NOTICE => 'orangered',
+            Levels::INFO => 'limegreen',
+            Levels::DEBUG => 'blue'
+        ];
+        return $t[$lvl];
+    }
+
     /**
      * @param string $lvl
      * @return array|string
@@ -93,8 +107,8 @@ class EmailLogger extends Logger {
         $context = implode("<br />", $this->getContextLines($context));
         $message = <<<MESSAGE
 <b>$date [{$this->getLevelTranslations($level)} ] [ $class ]</b>
-<h3>$message</h3>
-<div style="border: 1px solid #888; background: #afafaf; color:#444;">$context</div>
+<h3 style="color:{$this->getLevelMessageColor($level)}">$message</h3>
+<div style="border: 1px solid #888; background: #cfcfdf; color:#444; line-height: 20px; padding:5px;">$context</div>
 
 MESSAGE;
         $lines = [];
