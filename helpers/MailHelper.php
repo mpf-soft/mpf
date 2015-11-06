@@ -16,7 +16,8 @@ class MailHelper extends Helper {
     /**
      * It can be replaced from config to use another mailing engine.
      * Here must be defined the function to be called in that case.
-     * @var callable
+     * It can also be "swift" and it will use SwiftMailer
+     * @var callable|string
      */
     public $method;
 
@@ -32,9 +33,64 @@ class MailHelper extends Helper {
             'reply-to' => [
                 'email' => 'me@domain.com',
                 'name' => 'MPF App'
-            ]
+            ],
+            'smtpHost' => '127.0.0.1',
+            'smtpPort' => '25',
+            'smtpUser' => '',
+            'smtpPassword' => '',
+            'smtpSecure' => false
         ]
     ];
+
+    /**
+     * @var \Swift_Mailer[]
+     */
+    protected $swiftMailers;
+
+    /**
+     * @param $from
+     * @return \Swift_Mailer
+     */
+    protected function __getSwiftMailer($from){
+        if (!isset($this->swiftMailers[$hash = md5(json_encode($from))])){
+            $transport = new \Swift_SmtpTransport(isset($from['smtpHost'])?$from['smtpHost']:'127.0.0.1', isset($from['smtpPort'])?$from['smtpPort']:25, isset($from['smtpSecure'])?$from['smtpSecure']:false);
+            if (isset($from['smtpUser'])) {
+                $transport->setUsername($from['smtpUser']);
+            }
+            if (isset($from['smtpPassword'])) {
+                $transport->setPassword($from['smtpPassword']);
+            }
+            $this->swiftMailers[$hash] =  new \Swift_Mailer($transport);
+        }
+        return $this->swiftMailers[$hash];
+    }
+
+    protected function _swiftMail($to, $from, $subject, $message, $attachments = [], $html = true) {
+        $mailer = $this->__getSwiftMailer($from);
+        if (is_array($to) && isset($to['email'])){
+            if (isset($to['name'])) {
+                $to = [$to['email'] => $to['name']];
+            } else {
+                $to = $to['email'];
+            }
+        }
+        $mail = new \Swift_Message();
+        $mail->setSubject($subject)
+            ->setFrom($from['email'], $from['name'])
+            ->setTo($to);
+        if (isset($from['reply-to'])){
+            if (is_array($from['reply-to']) && isset($from['email'])){
+                $mail->setReplyTo($from['reply-to']['email'], $from['reply-to']['name']);
+            } else {
+                $mail->setReplyTo($from['reply-to']);
+            }
+        }
+        $mail->setBody($message, $html ? 'text/html' : 'text/plain');
+        foreach ($attachments as $attachment) {
+            $mail->attach(\Swift_Attachment::fromPath($attachment));
+        }
+        return $mailer->send($mail);
+    }
 
     /**
      * Any other method used to send email must accept this parameters.
@@ -120,11 +176,15 @@ class MailHelper extends Helper {
      * @param boolean $html
      * @return bool
      */
-    public function send($to, $subject, $message, $from = 'default', $headerExtra = array(), $html = true) {
+    public function send($to, $subject, $message, $from = 'default', $headerExtra = [], $html = true) {
         if (!is_null($this->method)) { // if a method is set then use that one
-            return call_user_func($this->method, $to, is_string($from) ? $this->from[$from] : $from, $subject, $message, array(), $headerExtra, $html);
+            if (is_string($this->method) && ('swift' == $this->method)) {
+                return $this->_swiftMail($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, [], $html);
+            } else {
+                return call_user_func($this->method, $to, is_string($from) ? $this->from[$from] : $from, $subject, $message, [], $headerExtra, $html);
+            }
         } // if not use default
-        return $this->_mail($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, array(), $headerExtra, $html);
+        return $this->_mail($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, [], $headerExtra, $html);
     }
 
     /**
@@ -140,7 +200,11 @@ class MailHelper extends Helper {
      */
     public function sendAttachments($to, $subject, $message, $attachments, $from = 'default', $headerExtra = array(), $html = true) {
         if (!is_null($this->method)) {
-            return call_user_func($this->method, $to, is_string($from) ? $this->from[$from] : $from, $subject, $message, $attachments, $headerExtra, $html);
+            if (is_string($this->method) && ('swift' == $this->method)) {
+                return $this->_swiftMail($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, $attachments, $html);
+            } else {
+                return call_user_func($this->method, $to, is_string($from) ? $this->from[$from] : $from, $subject, $message, $attachments, $headerExtra, $html);
+            }
         }
         return $this->_mail($to, is_string($from) ? $this->from[$from] : $from, $subject, $message, $attachments, $headerExtra, $html);
     }
