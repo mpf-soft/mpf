@@ -27,6 +27,7 @@
  */
 
 namespace mpf\base;
+
 use mpf\interfaces\TranslatableObjectInterface;
 
 class Widget extends LogAwareObject implements TranslatableObjectInterface {
@@ -35,17 +36,27 @@ class Widget extends LogAwareObject implements TranslatableObjectInterface {
 
     private static $_instances = array();
 
+    protected static function prepareForSerialize($array) {
+        $res = [];
+        foreach ($array as $k=>$v){
+            if (is_array($v)){
+                $res[$k] = self::prepareForSerialize($v);
+            } elseif (is_callable($v)) {
+                $res[$k] = print_r($v, true);
+            } else {
+                $res[$k] = is_object($v) ? print_r($v, true) : $v; // to fix the problem with unserializable objects)
+            }
+        }
+        return $res;
+    }
+
     /**
      * Return instance of called class for specific config
      * @param string [string] $config
      * @return static
      */
     public static function get($config) {
-        $forSerialize = array();
-        foreach ($config as $k => $v) {
-            $forSerialize[$k] = is_object($v) ? print_r($v, true) : $v; // to fix the problem with unserializable objects)
-        }
-        $key = md5(get_called_class() . serialize($forSerialize));
+        $key = md5(get_called_class() . serialize(self::prepareForSerialize($config)));
         if (!isset(self::$_instances[$key]))
             self::$_instances[$key] = new static($config);
         return self::$_instances[$key];
