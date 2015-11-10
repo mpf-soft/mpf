@@ -118,6 +118,8 @@ MESSAGE;
         if (ltrim(get_class(App::get()), '\\') == 'mpf\WebApp') {
             $lines[] = '<b>URL:</b> http' . (isset($_SERVER['HTTPS']) ? 's' : '') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
             $lines[] = '<b>Referer:</b> ' . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-');
+            $lines[] = '<b>User Agent:</b> ' . (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '-');
+            $lines[] = '<b>IP:</b> ' . (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '-');
             $lines[] = '<b>POST:</b> ' . (isset($_POST) ? $this->getArrayList($_POST) : '-');
             $lines[] = '<b>SESSION:</b> ' . (isset($_SESSION) ? $this->getArrayList($_SESSION) : '-');
         } elseif (ltrim(get_class(App::get()), '\\') == 'mpf\ConsoleApp') {
