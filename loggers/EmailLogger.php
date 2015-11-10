@@ -108,25 +108,24 @@ class EmailLogger extends Logger {
 
     protected function getMessage($level, $message, $context) {
         unset($context['fromClass']);
+        if (ltrim(get_class(App::get()), '\\') == 'mpf\WebApp') {
+            $context['WebApp_URL'] = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+            $context['WebApp_Referer'] = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-';
+            $context['WebApp_User Agent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '-';
+            $context['WebApp_IP'] = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '-';
+            $context['WebApp_POST'] = isset($_POST) ? $this->getArrayList($_POST) : '-';
+            $context['WebApp_SESSION'] = isset($_POST) ? $this->getArrayList($_SESSION) : '-';
+            $context['WebApp_COOKIE'] = isset($_POST) ? $this->getArrayList($_COOKIE) : '-';
+        } elseif (ltrim(get_class(App::get()), '\\') == 'mpf\ConsoleApp'){
+            $context['ConsoleApp_Command'] = implode(' ', $_SERVER['argv']);
+            $context['ConsoleApp_User'] = exec('whoami');
+        }
         $context = implode("<br />", $this->getContextLines($context));
-        $message = <<<MESSAGE
+        return <<<MESSAGE
 <h3 style="color:{$this->getLevelMessageColor($level)}">$message</h3>
 <div style="border: 1px solid #888; background: #cfcfdf; color:#444; line-height: 20px; padding:5px;">$context</div>
 
 MESSAGE;
-        $lines = [];
-        if (ltrim(get_class(App::get()), '\\') == 'mpf\WebApp') {
-            $lines[] = '<b>URL:</b> http' . (isset($_SERVER['HTTPS']) ? 's' : '') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-            $lines[] = '<b>Referer:</b> ' . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-');
-            $lines[] = '<b>User Agent:</b> ' . (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '-');
-            $lines[] = '<b>IP:</b> ' . (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '-');
-            $lines[] = '<b>POST:</b> ' . (isset($_POST) ? $this->getArrayList($_POST) : '-');
-            $lines[] = '<b>SESSION:</b> ' . (isset($_SESSION) ? $this->getArrayList($_SESSION) : '-');
-        } elseif (ltrim(get_class(App::get()), '\\') == 'mpf\ConsoleApp') {
-            $lines[] = '<b>Command:</b> ' . implode(' ', $_SERVER['argv']);
-            $lines[] = '<b>User:</b> ' . exec('whoami');
-        }
-        return $message . implode("<br />\n", $lines);
     }
 
     protected function getContextLines($context, $prefix = '') {
@@ -134,13 +133,13 @@ MESSAGE;
         foreach ($context as $k => $v) {
             if (is_string($v) || is_numeric($v)) {
                 if ('Trace' == $k) {
-                    $lines[] = "$prefix $k:";
+                    $lines[] = "$prefix <b>$k</b>:";
                     $lines[] = "$prefix | " . str_replace("\n", "<br />{$prefix} | ", htmlentities($v));
                 } else {
-                    $lines[] = "$prefix $k: " . $v . "\n";
+                    $lines[] = "$prefix <b>$k</b>: " . $v . "\n";
                 }
             } elseif (is_bool($v)) {
-                $lines[] .= "$prefix $k: " . ($v ? 'true' : 'false') . "\n";
+                $lines[] .= "$prefix <b>$k</b>: " . ($v ? 'true' : 'false') . "\n";
             } elseif (is_array($v)) {
                 $lines = array_merge($lines, $this->getContextLines($v, $prefix . "   "));
             } elseif (is_a($v, '\Exception')) {
@@ -149,7 +148,7 @@ MESSAGE;
                 $lines[] = "$prefix | Location: " . $v->getFile() . ' [' . $v->getLine() . ']:';
                 $lines[] = "$prefix | " . str_replace("#", "<br />\n{$prefix} | ", htmlentities($v->getTraceAsString()));
             } else {
-                $lines[] = "$prefix $k: " . print_r($v, true);
+                $lines[] = "$prefix <b>$k</b>: " . print_r($v, true);
             }
         }
         return $lines;
