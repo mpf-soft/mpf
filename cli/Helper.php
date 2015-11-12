@@ -93,7 +93,7 @@ class Helper extends \mpf\base\Helper {
      * @return string
      */
     public function log($message, $color = self::CWHITE){
-        return $this->color($message, $color) . "\n";
+        return $this->color(date('Y-m-d H:i:s'), self::CLIGHT_GRAY) . $this->timeTextSeparator .  $this->color($message, $color) . "\n";
     }
 
     /**
