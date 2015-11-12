@@ -259,10 +259,10 @@ class Helper extends \mpf\base\Helper {
         $this->progress(null, null, null, 0);
     }
 
-    public function progress($message = null, $messageDebugLevel = 'debug', $progressValue = 1, $color = null) {
+    public function progress($message = null, $progressValue = 1, $color = null) {
         if (null !== $message) {
             $message = $message . str_pad('', $this->getScreen('columns') - 19 - strlen($this->timeTextSeparator) - $this->getTextLength($message));
-            $this->log($message, $messageDebugLevel, $color, 'from-progress');
+            echo $this->log($message, $color);
         }
 
         if (empty($this->activeProgressBar)) {
@@ -273,7 +273,7 @@ class Helper extends \mpf\base\Helper {
         $colorDone = self::CLIGHT_GREEN;
         $colorTotal = self::CWHITE;
         $colorCurrent = self::CYELLOW;
-        $columns = $this->getScreen('columns');
+        //$columns = $this->getScreen('columns');
         // end settings
         $percent = round(($this->activeProgressBar['done'] / $this->activeProgressBar['total']) * 100);
         $fill = round($percent / (100 / $this->activeProgressBar['width']));
