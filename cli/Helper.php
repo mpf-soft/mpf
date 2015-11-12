@@ -69,7 +69,7 @@ class Helper extends \mpf\base\Helper {
      */
     public $showProgressBar = true;
 
-    public $timeTextSeparator = '';
+    public $timeTextSeparator = ' ';
 
     protected $currentActionHadLogs;
 
@@ -259,7 +259,7 @@ class Helper extends \mpf\base\Helper {
         $this->progress(null, null, null, 0);
     }
 
-    public function progress($message = null, $progressValue = 1, $color = null) {
+    public function progress($message = null, $progressValue = 1, $color = self::CWHITE) {
         if (null !== $message) {
             $message = $message . str_pad('', $this->getScreen('columns') - 19 - strlen($this->timeTextSeparator) - $this->getTextLength($message));
             echo $this->log($message, $color);
