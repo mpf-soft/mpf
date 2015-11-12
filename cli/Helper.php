@@ -88,6 +88,15 @@ class Helper extends \mpf\base\Helper {
     }
 
     /**
+     * @param $message
+     * @param string $color
+     * @return string
+     */
+    public function log($message, $color = self::CWHITE){
+        return $this->color($message, $color) . "\n";
+    }
+
+    /**
      * Start a new action
      * @param string $message
      * @param string $color one of class constants
