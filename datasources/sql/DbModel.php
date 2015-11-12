@@ -116,6 +116,12 @@ abstract class DbModel extends BaseModel {
      */
     private $relationsParser;
 
+    /**
+     * Set this to true to debug relations and other info
+     * @var bool
+     */
+    public $debugMode = false;
+
 
     /**
      * !! THIS METHOD IS CALLED AUTOMATICALLY BY "Validator" object !!
@@ -329,7 +335,9 @@ abstract class DbModel extends BaseModel {
 
         $relations = static::getRelations();
         if (isset($relations[$name])) {
-            $this->debug("Searching relation $name for " . get_class($this));
+            if ($this->debugMode) {
+                $this->debug("Searching relation $name for " . get_class($this));
+            }
             $this->_searchedRelations[$name] = true;
             return $this->_relations[$name] = $this->getRelationFromDb($name);
         }

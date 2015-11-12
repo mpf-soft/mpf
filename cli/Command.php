@@ -79,6 +79,7 @@ class Command extends LogAwareObject {
     protected function beforeAction($actionName) {
         if (!$this->debug) {
             InlineCliLogger::get()->ignoredClasses = array('mpf\datasources\sql\PDOConnection');
+            Helper::get()->showProgressBar = false;
         }
         return true;
     }
