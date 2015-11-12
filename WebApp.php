@@ -101,8 +101,6 @@ class WebApp extends base\App {
         if ($path != $this->request()->getModulePath()){
             $this->request()->setModulePath($path);
         }
-        $this->debug(dirname(dirname($path)));
-
 
         $controller->setActiveAction($this->request()->getAction())
             ->setRequest($this->request())
