@@ -28,10 +28,10 @@
 
 namespace mpf\datasources\sql;
 
-use app\components\htmltools\Page;
 use mpf\base\App;
+use mpf\interfaces\LogAwareObjectInterface;
 
-class PDOConnection extends \PDO {
+class PDOConnection extends \PDO implements LogAwareObjectInterface{
 
     use \mpf\base\LogAwareObjectTrait;
 
@@ -187,8 +187,8 @@ class PDOConnection extends \PDO {
                 'Query' => $statement .'',
                 'Params' => $params,
                 'Trace' => $e->getTraceAsString()
-            ));die();
-            return null;
+            ));
+            die();
         }
         $this->debug($statement, array(
             'params' => $params,
