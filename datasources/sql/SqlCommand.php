@@ -154,31 +154,54 @@ class SqlCommand extends \mpf\base\LogAwareObject {
     protected $currentPos = 0;
 
     /**
+     * @param array $columns2values
+     * @return $this
+     */
+    public function compare($columns2values = []) {
+        foreach ($columns2values as $column => $value) {
+            $c = "`" . str_replace('.', '`.`', $column) . "`";
+            if (is_array($value)) {
+                foreach ($value as $k => $val) {
+                    $keys[':_compare_' . $k . '_' . str_replace('.', '_', $column)] = $val;
+                    $this->andWhere("$c IN (" . implode(', ', array_keys($keys)) . ")", $keys);
+                }
+            } else {
+                $key = ':_compare_' . str_replace('.', '_', $column);
+                $this->andWhere("$c = $key", [$key => $value]);
+            }
+        }
+        return $this;
+    }
+
+    /**
      *
      * @param string $condition
+     * @param string[] $params
      * @return \mpf\datasources\sql\SqlCommand
      */
-    public function where($condition) {
+    public function where($condition, $params = []) {
         $this->condition = $condition;
-        return $this;
+        return $this->setParams($params);
     }
 
     /**
      * @param $condition
+     * @param string[] $params
      * @return $this
      */
-    public function andWhere($condition) {
+    public function andWhere($condition, $params = []) {
         $this->condition = $this->condition ? "({$this->condition}) AND ($condition)" : $condition;
-        return $this;
+        return $this->setParams($params);
     }
 
     /**
      * @param $condition
+     * @param string[] $params
      * @return $this
      */
-    public function orWhere($condition) {
+    public function orWhere($condition, $params = []) {
         $this->condition = $this->condition ? "({$this->condition}) OR ($condition)" : $condition;
-        return $this;
+        return $this->setParams($params);
     }
 
     /**
@@ -390,12 +413,12 @@ class SqlCommand extends \mpf\base\LogAwareObject {
 
     /**
      * Inserts a new row and returns the id or false if failed.
-     * @param string[string] $columns
-     * @param string[string]|string $duplicateKey Can have the value "ignore" or list of columns to update
+     * @param string [string] $columns
+     * @param string [string]|string $duplicateKey Can have the value "ignore" or list of columns to update
      * @return int|boolean
      */
     public function insert($columns, $duplicateKey = null) {
-        if (is_string($duplicateKey) && 'ignore' == strtolower($duplicateKey)){
+        if (is_string($duplicateKey) && 'ignore' == strtolower($duplicateKey)) {
             $q = "INSERT IGNORE INTO {$this->table} ";
         } else {
             $q = "INSERT INTO {$this->table} ";
@@ -403,17 +426,17 @@ class SqlCommand extends \mpf\base\LogAwareObject {
         $cols = array();
         $vals = array();
         foreach ($columns as $name => $value) {
-            $cols[] = '`'.$name.'`';
+            $cols[] = '`' . $name . '`';
             $vals[] = ":$name";
             $this->params[":$name"] = $value;
         }
         $q .= "(" . implode(", ", $cols) . ") VALUES (" . implode(", ", $vals) . ")";
-        if (is_array($duplicateKey) && count($duplicateKey)){
-            $q.= " ON DUPLICATE KEY UPDATE ";
+        if (is_array($duplicateKey) && count($duplicateKey)) {
+            $q .= " ON DUPLICATE KEY UPDATE ";
             $updates = [];
-            foreach($duplicateKey as $column=>$value){
+            foreach ($duplicateKey as $column => $value) {
                 $updates[] = "`$column` = :dp_{$column}";
-                $this->params[':dp_'.$column] = $value;
+                $this->params[':dp_' . $column] = $value;
             }
             $q .= implode(", ", $updates);
         }

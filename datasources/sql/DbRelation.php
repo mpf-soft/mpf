@@ -147,7 +147,7 @@ class DbRelation extends LogAwareObject {
      * @param $order
      * @return $this
      */
-    public function orderBy($order){
+    public function orderBy($order) {
         $this->order = $order;
         return $this;
     }
@@ -156,7 +156,7 @@ class DbRelation extends LogAwareObject {
      * @param $offset
      * @return $this
      */
-    public function offset($offset){
+    public function offset($offset) {
         $this->offset = $offset;
         return $this;
     }
@@ -165,7 +165,7 @@ class DbRelation extends LogAwareObject {
      * @param $limit
      * @return $this
      */
-    public function limit($limit){
+    public function limit($limit) {
         $this->limit = $limit;
         return $this;
     }
@@ -323,30 +323,30 @@ class DbRelation extends LogAwareObject {
         $mCondition = new ModelCondition(['model' => $this->model]);
         $joinString = [];
         $joinParams = [];
-        foreach ($this->joins as $join){
+        foreach ($this->joins as $join) {
             if (is_array($join[0])) {
                 $cJoinString = $join[3] . " `" . key($join[0]) . "` as `" . current($join[0]) . '`';
-                $tName = "`".current($join[0])."`";
+                $tName = "`" . current($join[0]) . "`";
             } else {
                 $cJoinString = $join[3] . " `" . $join[0] . "`";
                 $tName = $join[0];
             }
             $cJoinString .= " ON ";
             $cJoinConditions = [];
-            foreach ($join[1] as $column1=>$column2){ // c1 -> from parent; c2 -> from table;
-                if (false === strpos($column1, '.')){ // is parent here
-                    $joinParams[":t_".$column1] = $model->$column1;
-                    $column1 = ":t_".$column1;
+            foreach ($join[1] as $column1 => $column2) { // c1 -> from parent; c2 -> from table;
+                if (false === strpos($column1, '.')) { // is parent here
+                    $joinParams[":t_" . $column1] = $model->$column1;
+                    $column1 = ":t_" . $column1;
                 }
-                if (false === strpos($column2, '.')){
-                    $column2 =  $tName . '.' . $column2;
+                if (false === strpos($column2, '.')) {
+                    $column2 = $tName . '.' . $column2;
                 }
                 $cJoinConditions[] = $column1 . ' = ' . $column2;
             }
 
-            foreach ($join[2] as $column=>$value) {
+            foreach ($join[2] as $column => $value) {
                 $pName = ':';
-                if (false === strpos($column, '.')){
+                if (false === strpos($column, '.')) {
                     $pName .= str_replace('.', '_', "$tName.$column");
                     $cJoinConditions[] = "`$tName`.`$column` = :$pName";
                 } else {
@@ -356,9 +356,9 @@ class DbRelation extends LogAwareObject {
                 $joinParams[$pName] = $value;
             }
 
-            $joinString[] = $cJoinString . "(". implode(") AND (", $cJoinConditions) . ")";
+            $joinString[] = $cJoinString . "(" . implode(") AND (", $cJoinConditions) . ")";
         }
-        if ($this->joins){
+        if ($this->joins) {
             $mCondition->fields = "t.*";
         }
         $mCondition->setParams($joinParams);
@@ -369,9 +369,9 @@ class DbRelation extends LogAwareObject {
                 case "!=":
                     $parentColumn = $condition[1]; // for now it only supports single column for this type of relations;
                     $relationColumn = $condition[2]; // same for relation column
-                    if (false !== strpos($parentColumn, '.')){
-                        if (false === strpos($relationColumn, '.')){
-                            $relationColumn = '`t`.`' . $relationColumn.'`';
+                    if (false !== strpos($parentColumn, '.')) {
+                        if (false === strpos($relationColumn, '.')) {
+                            $relationColumn = '`t`.`' . $relationColumn . '`';
                         }
                         $mCondition->addCondition("$parentColumn = $relationColumn");
                     } else {
@@ -435,13 +435,13 @@ class DbRelation extends LogAwareObject {
 
             }
         }
-        if ($this->order){
+        if ($this->order) {
             $mCondition->order = $this->order;
         }
-        if ($this->offset){
+        if ($this->offset) {
             $mCondition->offset = $this->offset;
         }
-        if ($this->limit){
+        if ($this->limit) {
             $mCondition->limit = $this->limit;
         }
         return $mCondition;
@@ -456,12 +456,71 @@ class DbRelation extends LogAwareObject {
         $key = '__parentRelationKey';
         $column = "(CASE ";
         $mCondition = new ModelCondition(['model' => $this->model]);
+        if ($this->joins) {
+            foreach ($this->joins as $join) {
+                if (is_array($join[0])) {
+                    $t = '`' . key($join[0]) . '` as `' . current($join[0]) . '`';
+                } else {
+                    $t = '`' . $join[0] . '`';
+                }
+                $c = [];
+                // columns;
+                foreach ($join[1] as $col1 => $col2) {
+                    if (is_array($col2)) {
+
+                    } else {
+                        if ('!=' == substr($col2, 0, 2)) {
+
+                        } elseif ('>=' == substr($col2, 0, 2)){
+
+                        } elseif ('<=' == substr($col2, 0, 2)){
+
+                        } elseif ('>' == $col2[0]){
+
+                        } elseif ('<' == $col2[0]){
+
+                        } else {
+
+                        }
+                    }
+                }
+                // values;
+                foreach ($join[2] as $col => $value) {
+                    if (is_array($value)) {
+
+                    } else {
+                        if ('!=' == substr($value, 0, 2)) {
+
+                        } elseif ('>=' == substr($value, 0, 2)){
+
+                        } elseif ('<=' == substr($value, 0, 2)){
+
+                        } elseif ('>' == $value[0]){
+
+                        } elseif ('<' == $value[0]){
+
+                        } else {
+
+                        }
+                    }
+                }
+                // type;
+
+                $mCondition->join .= $join[3] . $t . " ON (" . implode(') AND (', $c) . ")";
+            }
+        }
+
         foreach ($this->conditions as $ck => $condition) {
             switch ($condition[0]) {
                 case "=":
                 case "!=":
                     $parentColumn = $condition[1]; // for now it only supports single column for this type of relations;
                     $relationColumn = $condition[2]; // same for relation column
+                    if (is_string($parentColumn) && (false !== strpos($parentColumn, '.') && false !== strpos($parentColumn, '_'))) {
+                        $r = $relationColumn;
+                        $relationColumn = $parentColumn;
+                        $parentColumn = $r;
+                    }
                     if (is_array($relationColumn)) {
                         $relationColumnListForIn = [];
                         foreach ($relationColumn as $c) {
@@ -501,9 +560,10 @@ class DbRelation extends LogAwareObject {
                         } else {
                             if ("(CASE " == $column)
                                 $column .= $this->_column($relationColumn, true);
-                            $mCondition->setParam($paramKey . $relationColumn, $model->$parentColumn);
-                            $conditionParts[] = $paramKey . $relationColumn;
-                            $column .= " WHEN " . $paramKey . $relationColumn . " THEN $mk ";
+                            $p = str_replace('.', '__', $paramKey . $relationColumn);
+                            $mCondition->setParam($p, $model->$parentColumn);
+                            $conditionParts[] = $p;
+                            $column .= " WHEN " . $p . " THEN $mk ";
                         }
                     }
                     if (is_string($parentColumn) && is_string($relationColumn)) {
