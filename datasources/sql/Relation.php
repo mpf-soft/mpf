@@ -62,9 +62,9 @@ class Relation extends LogAwareObject {
     protected $limit, $order, $offset, $group;
 
     /**
-     * @var string, string[], string[]
+     * @var string[]
      */
-    protected $condition, $params, $joins = [];
+    protected $compares = [], $values = [], $params = [], $joins = [];
 
 
     /**
@@ -77,7 +77,7 @@ class Relation extends LogAwareObject {
     public static function belongsTo($modelClass, $columnName, $options = []) {
         $options['type'] = self::BELONGS_TO;
         $options['modelClass'] = $modelClass;
-        $options['connection'] = $columnName;
+        $options['compares'] = [[(false === strpos($columnName, '.')) ? "t.$columnName" : $columnName, "r." . $modelClass::getDb()->getTablePk($modelClass::getTableName()), "="]];
         return new self($options);
     }
 
@@ -91,7 +91,7 @@ class Relation extends LogAwareObject {
     public static function hasOne($modelClass, $columnName, $options = []) {
         $options['type'] = self::HAS_ONE;
         $options['modelClass'] = $modelClass;
-        $options['connection'] = $columnName;
+        $options['compares'] = [["t.__PK__", (false === strpos($columnName, '.')) ? "r.$columnName" : $columnName, "="]];
         return new self($options);
     }
 
@@ -105,7 +105,7 @@ class Relation extends LogAwareObject {
     public static function hasMany($modelClass, $columnName, $options = []) {
         $options['type'] = self::HAS_MANY;
         $options['modelClass'] = $modelClass;
-        $options['connection'] = $columnName;
+        $options['compares'] = [["t.__PK__", (false === strpos($columnName, '.')) ? "r.$columnName" : $columnName, "="]];
         return new self($options);
     }
 
@@ -119,8 +119,15 @@ class Relation extends LogAwareObject {
     public static function manyToMany($modelClass, $connection, $options = []) {
         $options['type'] = self::MANY_TO_MANY;
         $options['modelClass'] = $modelClass;
-        $options['connection'] = $connection;
-        return new self($options);
+        $connection = explode('(', $connection);
+        $table = $connection[0];
+        list($c1, $c2) = explode(',', $connection[1]);
+        $r =  new self($options);
+        $c1 = trim($c1);
+        $c2 = trim($c2);
+        $r->join(trim($table), "t.__PK__ = j.$c1")
+            ->compare(["j.$c2 = r." . $modelClass::getDb()->getTablePk($modelClass::getTableName())]);
+        return $r;
     }
 
     /**
@@ -130,21 +137,22 @@ class Relation extends LogAwareObject {
      * @param array $params
      * @return $this
      */
-    public function join($table, $condition, $type, $params = []) {
+    public function join($table, $condition, $type = 'LEFT JOIN', $params = []) {
         $this->joins[] = [$table, $condition, $type, $params];
         return $this;
     }
 
     public function compare($columns2columns, $operator = '=', $separator = ' AND ') {
-
+        return $this;
     }
 
-    public function values($columns2values, $operator = '=', $separator = ' AND ') {
 
+    public function values($columns2values, $operator = '=', $separator = ' AND ') {
+        return $this;
     }
 
     public function addCondition($condition, $params = [], $separator = ' AND ') {
-
+        return $this;
     }
 
     /**
@@ -160,9 +168,9 @@ class Relation extends LogAwareObject {
      */
     public function getCondition($name, $models = null) {
         $this->_afterConditionParams = $this->_afterConditionJoins = [];
-        if (is_null($models)){
+        if (is_null($models)) {
             return $this->_calcJoin();
-        } elseif (!is_array($models)){
+        } elseif (!is_array($models)) {
             $models = [$models]; // if it's not a list already;
         }
         return $this->_calcModels($models);
@@ -171,7 +179,7 @@ class Relation extends LogAwareObject {
     /**
      * @return string
      */
-    protected function _calcJoin(){
+    protected function _calcJoin() {
         return "";
     }
 
@@ -179,14 +187,14 @@ class Relation extends LogAwareObject {
      * @param DbModel[] $models
      * @return string
      */
-    protected function _calcModels($models){
+    protected function _calcModels($models) {
         return "";
     }
 
     /**
      * @return string
      */
-    public function getJoin(){
+    public function getJoin() {
         return implode(" ", $this->_afterConditionJoins);
     }
 
@@ -197,7 +205,6 @@ class Relation extends LogAwareObject {
     public function getParams() {
         return $this->_afterConditionParams;
     }
-
 
 
 }
