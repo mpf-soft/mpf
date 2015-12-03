@@ -1,9 +1,9 @@
 #devlogger-main {
     display: block;
     width: 100%;
-    height: 250px;
+    height: 404px;
     position: fixed;
-    bottom: -228px;
+    bottom: -378px;
     left: 0;
     line-height: 12px;
     font-family: monospace;
@@ -31,7 +31,7 @@
 
 #devlogger-logs {
     display: block;
-    height: 232px;
+    max-height: 382px;
 }
 
 #devlogger-title-bar b {
