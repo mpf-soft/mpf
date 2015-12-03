@@ -191,6 +191,9 @@ class Form extends \mpf\base\Helper {
                     $selected = '';
                 } else {
                     $selected = (is_array($value) ? in_array($val, $value) : $value == $val) ? 'selected="selected"' : '';
+                    if (!is_array($value) && $value && is_numeric($val) && (!is_numeric($value))){
+                        $selected = "";
+                    }
                     if (!$value && ($value !== $val) && is_int($val) && ('' === $value)) {
                         $selected = '';
                     }
