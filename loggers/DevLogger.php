@@ -40,7 +40,7 @@ class DevLogger extends Logger {
         }
         if (isset($context['exception'])) {
             $context['exception'] = $this->prepareException($context['exception']);
-        } elseif (isset($context['Trace'])){
+        } elseif (isset($context['Trace'])) {
             $context['Trace'] = Html::get()->encode($context['Trace']);
         }
         $context['logTime'] = date('H:i:s') . '.' . substr(microtime(), 2, 5);
@@ -61,16 +61,40 @@ class DevLogger extends Logger {
     }
 
     public function onShutDown() {
-        if (WebApp::get()->request()->isAjaxRequest()|| self::$ignoreOutput) {
+        if (WebApp::get()->request()->isAjaxRequest() || self::$ignoreOutput) {
             return;
         }
         $url = AssetsPublisher::get()->publishFolder(__DIR__ . DIRECTORY_SEPARATOR . 'devloggerassets/');
+        $numbers = ['all' => count($this->logs), 'error' => '0', 'debug' => '0', 'info' => '0', 'query' => '0'];
+        foreach ($this->logs as $log) {
+            switch ($log['level']) {
+                case Levels::ERROR:
+                case Levels::ALERT:
+                case Levels::CRITICAL:
+                case Levels::EMERGENCY:
+                case Levels::NOTICE:
+                case Levels::WARNING:
+                    $numbers['error']++;
+                    break;
+                case Levels::INFO:
+                    $numbers['info']++;
+                    break;
+                case Levels::DEBUG:
+                    if (isset($log['context']['fromClass']) && ('mpf\\datasources\\sql\\PDOConnection' == $log['context']['fromClass'])) {
+                        $numbers['query']++;
+                    } else {
+                        $numbers['debug']++;
+                    }
+                    break;
+            }
+        }
         $json = json_encode($this->logs);
         $time = number_format(microtime(true) - WebApp::get()->startTime, 4);
         echo Html::get()->cssFile($url . 'style.css') .
             Html::get()->mpfScriptFile('jquery.js') .
             Html::get()->scriptFile($url . 'script.js') .
             Html::get()->script("var DevLogger_RunTime = $time; \n" .
+                "var DevLogger_Numbers = { all : {$numbers['all']}, error : {$numbers['error']}, debug : {$numbers['debug']}, info : {$numbers['info']}, query : {$numbers['query']} }; \n" .
                 "var DevLogger_Logs = " . $json);
     }
 

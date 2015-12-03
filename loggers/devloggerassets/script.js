@@ -3,8 +3,31 @@ $(document).ready(function () {
     var DevLogger_Debug = new MPF_DevLogger_Debug();
     var DevLogger_Error = new MPF_DevLogger_Error();
     $('<div>').attr('id', 'devlogger-main').appendTo($('body')); //.addClass('alwaysvisible');
+    var _all = '', _error = '', _debug = '', _info = '', _query = '';
+    if (DevLogger_Numbers.all) {
+        _all = '(' + DevLogger_Numbers.all + ')';
+    }
+    if (DevLogger_Numbers.error) {
+        _error = '(' + DevLogger_Numbers.error + ')';
+    }
+    if (DevLogger_Numbers.debug) {
+        _debug = '(' + DevLogger_Numbers.debug + ')';
+    }
+    if (DevLogger_Numbers.info) {
+        _info = '(' + DevLogger_Numbers.info + ')';
+    }
+    if (DevLogger_Numbers.query) {
+        _query = '(' + DevLogger_Numbers.query + ')';
+    }
     $('<div>').attr('id', 'devlogger-title-bar').appendTo($('#devlogger-main'))
-        .html('<b>Developer Info (' + DevLogger_RunTime + 's)</b><b id="devlogger-title-errors"></b><span><a onclick="return MPF_DevLogger_Filter(this, \'all\');" class="selected" href="#">All</a><a onclick="return MPF_DevLogger_Filter(this, \'error;alert;critical;warning;notice;emergency\');" href="#">Error</a><a onclick="return MPF_DevLogger_Filter(this, \'debug\');" href="#">Debug</a><a onclick="return MPF_DevLogger_Filter(this, \'info\');" href="#">Info</a><a onclick="return MPF_DevLogger_Filter(this, \'debug-query\');" href="#">Query</a></span>');
+        .html('<b>Developer Info (' + DevLogger_RunTime + 's)</b><b id="devlogger-title-errors"></b>' +
+            '<span>' +
+            '<a onclick="return MPF_DevLogger_Filter(this, \'all\');" class="selected" href="#">All ' + _all + '</a>' +
+            '<a onclick="return MPF_DevLogger_Filter(this, \'error;alert;critical;warning;notice;emergency\');" href="#">Error ' + _error + '</a>' +
+            '<a onclick="return MPF_DevLogger_Filter(this, \'debug\');" href="#">Debug ' + _debug + '</a>' +
+            '<a onclick="return MPF_DevLogger_Filter(this, \'info\');" href="#">Info ' + _info + '</a>' +
+            '<a onclick="return MPF_DevLogger_Filter(this, \'debug-query\');" href="#">Query ' + _query + '</a>' +
+            '</span>');
     $('<div>').attr('id', 'devlogger-logs').appendTo($('#devlogger-main'));
     $('<ul>').attr('id', 'devlogger-list').appendTo($('#devlogger-logs'));
     var errorsNumber = 0;

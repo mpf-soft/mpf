@@ -122,23 +122,24 @@ class Relation extends LogAwareObject {
         $connection = explode('(', $connection);
         $table = $connection[0];
         list($c1, $c2) = explode(',', $connection[1]);
-        $r =  new self($options);
+        $r = new self($options);
         $c1 = trim($c1);
         $c2 = trim($c2);
-        $r->join(trim($table), "t.__PK__ = j.$c1")
-            ->compare(["j.$c2 = r." . $modelClass::getDb()->getTablePk($modelClass::getTableName())]);
+        $r->join(trim($table), [["t.__PK__", "j.$c1", "="]])
+            ->compare(["j.$c2" => "r." . $modelClass::getDb()->getTablePk($modelClass::getTableName())]);
         return $r;
     }
 
     /**
      * @param $table
+     * @param $compare
      * @param $condition
      * @param $type
      * @param array $params
      * @return $this
      */
-    public function join($table, $condition, $type = 'LEFT JOIN', $params = []) {
-        $this->joins[] = [$table, $condition, $type, $params];
+    public function join($table, $compare = [], $condition, $type = 'LEFT JOIN', $params = []) {
+        $this->joins[] = [$table, $compare, $condition, $type, $params];
         return $this;
     }
 
