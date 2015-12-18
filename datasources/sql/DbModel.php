@@ -317,6 +317,9 @@ abstract class DbModel extends BaseModel {
      * @return mixed
      */
     public function __get($name) {
+        if (is_null($this->_attributes)){
+            $this->reload();
+        }
         if (array_key_exists($name, $this->_attributes)) {
             return $this->_attributes[$name];
         }
