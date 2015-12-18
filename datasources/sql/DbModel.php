@@ -443,8 +443,13 @@ abstract class DbModel extends BaseModel {
             $r = $this->_db->table($this->_tableName)->insert($this->_updatedAttributes);
             if (is_string($this->_pk)) {
                 $this->{$this->_pk} = $r;
+                $this->_originalPk = $this->{$this->_pk};
+            } else {
+                foreach ($this->_pk as $k){
+                    $this->_originalPk[$k] = $this->$k;
+                }
             }
-            $this->_originalPk = $this->{$this->_pk};
+
             $this->_isNewRecord = false; // so that the next save won't do another insert
             $this->reload();  // to get extra default values.
             if (is_string($this->_pk) && !$this->{$this->_pk}) {
