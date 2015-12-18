@@ -228,13 +228,20 @@ class PDOConnection extends \PDO implements LogAwareObjectInterface{
     /**
      * Get column used as primary key.
      * @param string $tableName
-     * @return string|null
+     * @return string|string[]|null
      */
     public function getTablePk($tableName) {
         $details = $this->getTableColumns($tableName);
+        $pk = [];
         foreach ($details as $column) {
-            if ($column['Key'] == 'PRI')
-                return $column['Field'];
+            if ($column['Key'] == 'PRI') {
+                $pk[] =  $column['Field'];
+            }
+        }
+        if (1 == count($pk)){
+            return $pk[0];
+        } elseif (count($pk)) {
+            return $pk;
         }
         return null;
     }

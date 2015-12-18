@@ -150,11 +150,25 @@ abstract class DbModel extends BaseModel {
                 return true;
             }
         } else { // then search in all except current
-            if (!$this->_db->table($table)->where("`$column` = :value AND `{$this->_pk}` != :pk")
-                ->setParam(':value', $validator->getValue($field))
-                ->setParam(':pk', (false != ($pk = $validator->getValue($this->_pk))) ? $pk : $this->_originalPk)->get()
-            ) {
-                return true;
+            if (is_string($this->_pk)) {
+                if (!$this->_db->table($table)->where("`$column` = :value AND `{$this->_pk}` != :pk")
+                    ->setParam(':value', $validator->getValue($field))
+                    ->setParam(':pk', (false != ($pk = $validator->getValue($this->_pk))) ? $pk : $this->_originalPk)->get()
+                ) {
+                    return true;
+                }
+            } elseif (is_array($this->_pk)) {
+                $c = $p = [];
+                foreach ($this->_originalPk as $k => $v) {
+                    $c[] = "`$k` = :pk_$k";
+                    $p[":pk_$k"] = $v;
+                }
+                if (!$this->_db->table($table)
+                    ->where("`$column` = :value AND " . implode(" AND ", $c), $p)
+                    ->setParam(':value', $validator->getValue($field))->get()
+                ) {
+                    return true;
+                }
             }
         }
 
@@ -247,7 +261,14 @@ abstract class DbModel extends BaseModel {
             $this->_columns = static::getDb()->getTableColumns($this->_tableName);
             $this->_pk = static::getDb()->getTablePk($this->_tableName);
         } else {
-            $this->_originalPk = $this->_attributes[$this->_pk];
+            if (is_array($this->_pk)) {
+                $this->_originalPk = [];
+                foreach ($this->_pk as $k) {
+                    $this->_originalPk[$k] = $this->_attributes[$k];
+                }
+            } else {
+                $this->_originalPk = $this->_attributes[$this->_pk];
+            }
             $this->afterLoad();
         }
         $this->applyRelationsAttributes();
@@ -317,7 +338,7 @@ abstract class DbModel extends BaseModel {
      * @return mixed
      */
     public function __get($name) {
-        if (is_null($this->_attributes)){
+        if (is_null($this->_attributes)) {
             $this->reload();
         }
         if (array_key_exists($name, $this->_attributes)) {
@@ -419,12 +440,17 @@ abstract class DbModel extends BaseModel {
         }
 
         if ($this->_isNewRecord) {
-            $this->{$this->_pk} = $this->_db->table($this->_tableName)->insert($this->_updatedAttributes);
+            $r = $this->_db->table($this->_tableName)->insert($this->_updatedAttributes);
+            if (is_string($this->_pk)) {
+                $this->{$this->_pk} = $r;
+            }
             $this->_originalPk = $this->{$this->_pk};
             $this->_isNewRecord = false; // so that the next save won't do another insert
             $this->reload();  // to get extra default values.
-            if (!$this->{$this->_pk}) {
+            if (is_string($this->_pk) && !$this->{$this->_pk}) {
                 return false; // there was an error when saving
+            } elseif (!is_string($this->_pk) && !$r) {
+                return false;
             }
         }
 
@@ -432,12 +458,29 @@ abstract class DbModel extends BaseModel {
             return true; // nothing to save.
         }
 
-        $r = (bool)$this->_db->table($this->_tableName)
-            ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
-            ->update($this->_updatedAttributes);
-        $this->_originalPk = $this->{$this->_pk};
+        if (is_array($this->_pk)) {
+            $c = $p = [];
+            foreach ($this->_originalPk as $k => $v) {
+                $c[] = "`$k` = :pk_$k";
+                $p[":pk_$k"] = $v;
+            }
+            $r = (bool)$this->_db->table($this->_tableName)
+                ->where(implode(" AND ", $c), $p)
+                ->update($this->_updatedAttributes);
+        } else {
+            $r = (bool)$this->_db->table($this->_tableName)
+                ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
+                ->update($this->_updatedAttributes);
+        }
         if ($r) { // in case it saved the data then make it look like new.
-            $this->_updatedAttributes = array();
+            $this->_updatedAttributes = [];
+            if (is_array($this->_pk)) {
+                foreach ($this->_pk as $k) {
+                    $this->_originalPk[$k] = $this->$k;
+                }
+            } else {
+                $this->_originalPk = $this->{$this->_pk};
+            }
         }
         return $r;
     }
@@ -463,6 +506,10 @@ abstract class DbModel extends BaseModel {
         if ($validate && (!$this->validate())) {
             return false;
         }
+        if (!is_string($this->_pk)) {
+            $this->error("Can't duplicate rows in tables with multiple primary keys!");
+            return false;
+        }
         $originalBackup = $this->_originalPk;
         unset($this->_attributes[$this->_pk]);
         $this->_originalPk = $this->_db->table($this->_tableName)->insert($this->_attributes);
@@ -480,10 +527,22 @@ abstract class DbModel extends BaseModel {
      */
     public function delete() {
         if ($this->beforeDelete()) {
-            if ((bool)$this->_db->table($this->_tableName)
-                ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
-                ->delete()
-            ) {
+            if (is_array($this->_pk)) {
+                $c = $p = [];
+                foreach ($this->_originalPk as $k => $v) {
+                    $c[] = "`$k` = :pk_$k";
+                    $p[":pk_$k"] = $v;
+                }
+                $r = (bool)$this->_db->table($this->_tableName)
+                    ->where(implode(" AND ", $c), $p)
+                    ->delete();
+            } else {
+                $r = (bool)$this->_db->table($this->_tableName)
+                    ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
+                    ->delete();
+            }
+
+            if ($r) {
                 return $this->afterDelete();
             }
         }
@@ -494,10 +553,21 @@ abstract class DbModel extends BaseModel {
      */
     public function reload() {
         $this->_relations = array();
-        $this->_attributes = $this->_db->table($this->_tableName)
-            ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
-            ->first();
-        $this->_updatedAttributes = array();
+        if (is_array($this->_pk)) {
+            $c = $p = [];
+            foreach ($this->_originalPk as $k => $v) {
+                $c[] = "`$k` = :pk_$k";
+                $p[":pk_$k"] = $v;
+            }
+            $this->_attributes = $this->_db->table($this->_tableName)
+                ->where(implode(" AND ", $c), $p)
+                ->first();
+        } else {
+            $this->_attributes = $this->_db->table($this->_tableName)
+                ->where("`{$this->_pk}` = :__pk")->setParam(':__pk', $this->_originalPk)
+                ->first();
+        }
+        $this->_updatedAttributes = [];
         $this->afterLoad();
     }
 
@@ -823,8 +893,8 @@ abstract class DbModel extends BaseModel {
         }
         $condition->setParams($params);
         $searchedRelations = [];
-        if (is_array($condition->with)){
-            foreach ($condition->with as $k){
+        if (is_array($condition->with)) {
+            foreach ($condition->with as $k) {
                 $searchedRelations[$k] = $k;
             }
         }
