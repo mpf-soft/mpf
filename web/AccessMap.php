@@ -79,6 +79,7 @@ class AccessMap extends \mpf\base\LogAwareObject implements \mpf\interfaces\Acce
      * @return boolean
      */
     public function canAccess($controller, $action, $module = null) {
+        $module = is_array($module)?null:$module;
         $rights = $this->getRightsFromMap($controller, $action, $module);
         if ('*' == $rights[0]) {
             return true;
