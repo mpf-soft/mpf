@@ -197,11 +197,11 @@ class Validator extends TranslatableObject {
      */
     protected function __checkRule($rule) {
         $fields = explode(',', $rule[0]);
-        if (is_string($rule[1])){
+        if (is_string($rule[1])) {
             $conditions = explode(',', $rule[1]);
-            foreach ($conditions as $k=>$item){
+            foreach ($conditions as $k => $item) {
                 $item = trim($item);
-                $conditions[$k] = isset($this->aliases[$item])?$this->aliases[$item]:$item;
+                $conditions[$k] = isset($this->aliases[$item]) ? $this->aliases[$item] : $item;
             }
         } else {
             $conditions = array($rule[1]);
@@ -212,7 +212,7 @@ class Validator extends TranslatableObject {
                 $field = trim($field);
                 $label = isset($this->labels[$field]) ? $this->labels[$field] : ucwords(str_replace('_', ' ', $field));
                 $errorMessage = isset($rule['message']) ? $this->translate(str_replace(array('__VALUE__', '__LABEL__'), array((!is_null($this->getValue($field))) ? $this->getValue($field) : ' - no value -', $label), $rule['message'])) : null;
-                if ('required' == $condition && ((is_null($this->getValue($field))) || ('' == trim($this->getValue($field))))) {
+                if ('required' == $condition && ((is_null($this->getValue($field))) || (is_array($this->getValue($field)) && count($this->getValue($field))) || (is_string($this->getValue($field)) && '' == trim($this->getValue($field))))) {
                     if (!isset($this->errors[$field])) {
                         $this->errors[$field] = array();
                     }
