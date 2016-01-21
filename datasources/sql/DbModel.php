@@ -73,7 +73,7 @@ abstract class DbModel extends BaseModel {
      * List of table columns from db and info about each one.
      * @var string[]
      */
-    protected $_columns;
+    protected $_columns = [];
 
     /**
      * Name of db table.
@@ -343,6 +343,9 @@ abstract class DbModel extends BaseModel {
         }
         if (array_key_exists($name, $this->_attributes)) {
             return $this->_attributes[$name];
+        }
+        if (!$this->_columns){
+            $this->_columns = static::getDb()->getTableColumns($this->_tableName);
         }
         foreach ($this->_columns as $column) { // check for columns that were not read yet [ useful for search and not only ]
             if ($column['Field'] == $name) {
