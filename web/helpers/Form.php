@@ -302,7 +302,7 @@ class Form extends \mpf\base\Helper {
      * @param string $template
      * @param string $separator
      */
-    public function radioGroup($name, $options, $selected = null, $htmlOptions, $template = '<input><label>', $separator = '<br />') {
+    public function radioGroup($name, $options, $selected = null, $htmlOptions = [], $template = '<input><label>', $separator = '<br />') {
         if (is_null($selected)) {
             $selected = $this->getArrayValue($_POST, $name);
             if (is_null($selected)) {
