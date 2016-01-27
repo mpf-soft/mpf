@@ -431,7 +431,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
         if (!$this->relationsParser) {
             $this->relationsParser = RelationsParser::parse($this->model, $this, $this->conditionColumns);
         }
-        return $this->join . ' ' . ($forCount?$this->relationsParser->getForCount():$this->relationsParser->getForMainSelect());
+        return ($forCount?$this->relationsParser->getForCount():$this->relationsParser->getForMainSelect()) . ' ' . $this->join;
     }
 
     public function getJoinParams(){
