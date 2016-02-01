@@ -413,11 +413,12 @@ class SqlCommand extends \mpf\base\LogAwareObject {
 
     /**
      * Inserts a new row and returns the id or false if failed.
-     * @param string [string] $columns
-     * @param string [string]|string $duplicateKey Can have the value "ignore" or list of columns to update
+     * @param string[string] $columns
+     * @param string[string]|string $duplicateKey Can have the value "ignore" or list of columns to update
+     * @param string[] $params Optional params in case that string is sent to duplicate key
      * @return int|boolean
      */
-    public function insert($columns, $duplicateKey = null) {
+    public function insert($columns, $duplicateKey = null, $params = []) {
         if (is_string($duplicateKey) && 'ignore' == strtolower($duplicateKey)) {
             $q = "INSERT IGNORE INTO {$this->table} ";
         } else {
@@ -425,6 +426,7 @@ class SqlCommand extends \mpf\base\LogAwareObject {
         }
         $cols = array();
         $vals = array();
+        $this->params = $params;
         foreach ($columns as $name => $value) {
             $cols[] = '`' . $name . '`';
             $vals[] = ":$name";
@@ -439,6 +441,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
                 $this->params[':dp_' . $column] = $value;
             }
             $q .= implode(", ", $updates);
+        } elseif ($duplicateKey && is_string($duplicateKey)){
+            $q .= " ON DUPLICATE KEY UPDATE " . $duplicateKey;
         }
         if ($this->connection->execQuery($q, $this->params)) {
             return $this->connection->lastInsertId();
