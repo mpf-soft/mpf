@@ -280,7 +280,7 @@ class Form extends \mpf\base\Helper {
      * @param string $separator
      * @return string
      */
-    public function checkboxGroup($name, $options, $selected = null, $htmlOptions, $template = '<input><label>', $separator = '<br />') {
+    public function checkboxGroup($name, $options, $selected = null, $htmlOptions = [], $template = '<input><label>', $separator = '<br />') {
         if (is_null($selected)) {
             $selected = $this->getArrayValue($_POST, $name);
             if (is_null($selected)) {
