@@ -40,6 +40,8 @@ class Form extends \mpf\base\Helper {
      */
     public $tinyMCESkin = 'lightgray';
 
+    public $markdownHint = 'This input uses Markdown syntax. <a href=\'https://daringfireball.net/projects/markdown/syntax\' target=\'_blank\'>Click For Details</a>';
+
     public $tinyMCEOptionTemplates = [
         'basic' => [
             'plugins' => [
@@ -116,7 +118,7 @@ class Form extends \mpf\base\Helper {
         foreach ($htmlOptions as $k => $v)
             $r .= "$k = '$v' ";
 
-        return $r . '>' . ((isset($htmlOptions['method']) && 'post' == strtolower($htmlOptions['method']))?$this->hiddenInput(WebApp::get()->request()->getCsrfKey(), WebApp::get()->request()->getCsrfValue()):'');
+        return $r . '>' . ((isset($htmlOptions['method']) && 'post' == strtolower($htmlOptions['method'])) ? $this->hiddenInput(WebApp::get()->request()->getCsrfKey(), WebApp::get()->request()->getCsrfValue()) : '');
     }
 
     /**
@@ -154,7 +156,7 @@ class Form extends \mpf\base\Helper {
 
     public function select($name, $options, $value = null, $htmlOptions = array(), $emptyValue = false) {
         $htmlOptions['name'] = $name;
-        if (isset($htmlOptions['multiple'])){
+        if (isset($htmlOptions['multiple'])) {
             $htmlOptions['name'] .= '[]';
         }
         if (is_null($value)) {
@@ -172,9 +174,9 @@ class Form extends \mpf\base\Helper {
             $opts[] = "<option value='' $selected>$emptyValue</option>";
         }
         foreach ($options as $val => $label) {
-            if (is_array($label)){
+            if (is_array($label)) {
                 $opts[] = "<optgroup label='$val'>";
-                foreach ($label as $k=>$v){
+                foreach ($label as $k => $v) {
                     if (!isset($value)) {
                         $selected = '';
                     } else {
@@ -191,7 +193,7 @@ class Form extends \mpf\base\Helper {
                     $selected = '';
                 } else {
                     $selected = (is_array($value) ? in_array($val, $value) : $value == $val) ? 'selected="selected"' : '';
-                    if (!is_array($value) && $value && is_numeric($val) && (!is_numeric($value))){
+                    if (!is_array($value) && $value && is_numeric($val) && (!is_numeric($value))) {
                         $selected = "";
                     }
                     if (!$value && ($value !== $val) && is_int($val) && ('' === $value)) {
@@ -204,7 +206,6 @@ class Form extends \mpf\base\Helper {
         $options = implode("\n", $opts);
         return Html::get()->tag('select', $options, $htmlOptions);
     }
-
 
     /**
      * Get value from array. It will parse the name and search for [ or ] to read the real value.
@@ -295,12 +296,13 @@ class Form extends \mpf\base\Helper {
     }
 
     /**
-     * @param string $name
-     * @param array $options
+     * @param $name
+     * @param $options
      * @param null $selected
      * @param array $htmlOptions
      * @param string $template
      * @param string $separator
+     * @return string
      */
     public function radioGroup($name, $options, $selected = null, $htmlOptions = [], $template = '<input><label>', $separator = '<br />') {
         if (is_null($selected)) {
@@ -314,6 +316,54 @@ class Form extends \mpf\base\Helper {
             $r[] = $this->radio($name, $label, $value, $selected == $value, $htmlOptions, $template);
         }
         return implode($separator, $r);
+    }
+
+    public function markdown($name, $value = null, $htmlOptions = [], $showHint = true, $showPreview = true, $previewURL = null) {
+        if (is_null($value)) {
+            $value = $this->getArrayValue($_POST, $name);
+            if (is_null($value)) {
+                $value = $this->getArrayValue($_GET, $name);
+            }
+        }
+        $htmlOptions['class'] = (isset($htmlOptions['class']) ? $htmlOptions['class'] . ' ' : '') . 'input markdown-input' . ($showPreview ? ' markdown-input-preview' : '');
+        $htmlOptions['ajax-url'] = $previewURL ?: WebApp::get()->request()->getCurrentURL();
+        $htmlOptions['csrf-key'] = WebApp::get()->request()->getCsrfKey();
+        $htmlOptions['csrf-value'] = WebApp::get()->request()->getCsrfValue();
+        $s = <<<SCR
+function MPF_markdownPreview(element){
+        var _parent = element.parentNode;
+        var csrfKey = $(element).attr('csrf-key');
+        var csrfValue = $(element).attr('csrf-value');
+        var post = {
+            MarkdownPreview : 1,
+            text : $(element).val()
+        };
+        post[csrfKey] = csrfValue;
+        $.post(
+            $(this).attr('ajax-url'), post,
+            function (data) {
+                $(".markdown-preview", _parent).html(data);
+            }
+        );
+}
+
+$(".markdown-input-preview").each(function () {
+        var interval;
+        $(this).focus(function(){
+            var _element = this;
+            interval = setInterval(function(){
+                MPF_markdownPreview(_element);
+            }, 5000);
+        }).blur(function(){
+            clearInterval(interval);
+            MPF_markdownPreview(this);
+        });
+    });
+SCR;
+
+        return Html::get()->script($s) . $this->textarea($name, $value, $htmlOptions)
+        . ($showHint ? Html::get()->tag("span", $this->markdownHint, ["class" => "markdown-hint"]) : '')
+        . ($showPreview ? Html::get()->tag("div", "", ["class" => "markdown-preview"]) : '');
     }
 
     /**
@@ -340,7 +390,7 @@ class Form extends \mpf\base\Helper {
      * @param array $htmlOptions Optional extra button html options
      * @return string
      */
-    public function submitButton($value, $name='', $htmlOptions = []){
+    public function submitButton($value, $name = '', $htmlOptions = []) {
         return $this->input($name, 'submit', $value, $htmlOptions);
     }
 
@@ -353,7 +403,7 @@ class Form extends \mpf\base\Helper {
      * @param array $htmlOptions Extra HTML options. Values for scr, alt, type, name, value will be replaced with first parameters of this method
      * @return string
      */
-    public function imageButton($src, $alt ='Submit', $name='', $value ='', $htmlOptions = []){
+    public function imageButton($src, $alt = 'Submit', $name = '', $value = '', $htmlOptions = []) {
         $htmlOptions['src'] = $src;
         $htmlOptions['alt'] = $alt;
         return $this->input($name, 'image', $value, $htmlOptions);
