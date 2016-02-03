@@ -318,6 +318,15 @@ class Form extends \mpf\base\Helper {
         return implode($separator, $r);
     }
 
+    /**
+     * @param $name
+     * @param null $value
+     * @param array $htmlOptions
+     * @param bool|true $showHint
+     * @param bool|true $showPreview
+     * @param null $previewURL
+     * @return string
+     */
     public function markdown($name, $value = null, $htmlOptions = [], $showHint = true, $showPreview = true, $previewURL = null) {
         if (is_null($value)) {
             $value = $this->getArrayValue($_POST, $name);
