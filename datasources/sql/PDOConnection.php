@@ -64,16 +64,20 @@ class PDOConnection extends \PDO implements LogAwareObjectInterface{
 
     /**
      *
-     * @param type $options
+     * @param string $options
      */
     public function __construct($options = array()) {
         foreach (\mpf\base\Config::get()->forClass(get_called_class()) as $k => $n) {
             $this->$k = $n;
         }
         foreach ($options as $k => $n) {
+            if ('noInstance' == $k)
+                continue;
             $this->$k = $n;
         }
-        self::$_instances[md5(serialize($options))] = $this;
+        if (!isset($options['noInstance'])) {
+            self::$_instances[md5(serialize($options))] = $this;
+        }
         $this->init($options);
         $this->driver_options[\PDO::ATTR_ERRMODE] = isset($this->driver_options[\PDO::ATTR_ERRMODE]) ? $this->driver_options[\PDO::ATTR_ERRMODE] : \PDO::ERRMODE_EXCEPTION;
         return parent::__construct($this->dns, $this->username, $this->password, $this->driver_options);
