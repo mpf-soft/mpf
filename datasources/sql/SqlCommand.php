@@ -441,7 +441,7 @@ class SqlCommand extends \mpf\base\LogAwareObject {
                 $this->params[':dp_' . $column] = $value;
             }
             $q .= implode(", ", $updates);
-        } elseif ($duplicateKey && is_string($duplicateKey)){
+        } elseif ($duplicateKey && is_string($duplicateKey) && ('ignore' != strtolower($duplicateKey))){
             $q .= " ON DUPLICATE KEY UPDATE " . $duplicateKey;
         }
         if ($this->connection->execQuery($q, $this->params)) {
