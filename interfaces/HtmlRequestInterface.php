@@ -93,7 +93,7 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * Redirect to generated internal URL;
      * @return null
      */
-    public function goToPage($controller, $action = null, $params = array());
+    public function goToPage($controller, $action = null, $params = array(), $module = null);
     
     /**
      * Reload current page

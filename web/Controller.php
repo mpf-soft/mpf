@@ -218,10 +218,11 @@ class Controller extends LogAwareObject {
      * @param string $controller Controller name where it must be redirected
      * @param string $action Action name where it must be redirected. Index is the default selected action
      * @param array $params Optional a list of params can be added also
+     * @param string $module Optional a different module
      * @return bool
      */
-    public function goToPage($controller, $action = 'index', $params = []) {
-        return $this->request->goToPage($controller, $action, $params);
+    public function goToPage($controller, $action = 'index', $params = [], $module = null) {
+        return $this->request->goToPage($controller, $action, $params, $module);
     }
 
     /**
