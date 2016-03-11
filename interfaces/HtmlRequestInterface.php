@@ -73,9 +73,10 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * @param string $action Name of the action where the URL must link
      * @param array $params List of associative parameters 
      * @param string $module Name of the module where the URL must link. If none it's set it will use current module;
+     * @param string $language
      * @return string
      */
-    public function createURL($controller, $action = null, $params = array(), $module = null);
+    public function createURL($controller, $action = null, $params = array(), $module = null, $language = null);
     
     /**
      * Get full current URL;
@@ -243,4 +244,10 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * @return mixed
      */
     public function setModulePath($path);
+
+    /**
+     * Get User Selected Language
+     * @return mixed
+     */
+    public function getLanguage();
 }

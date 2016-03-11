@@ -174,6 +174,18 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     public $paramsSeparator = '/';
 
     /**
+     * Default Site Language;
+     * @var string
+     */
+    public $defaultLanguage;
+
+    /**
+     * List of available languages;
+     * @var array
+     */
+    public $availableLanguages = ['ro', 'en'];
+
+    /**
      * Active module
      * @var string
      */
@@ -196,6 +208,12 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @var string
      */
     private $params;
+
+    /**
+     * User selected language
+     * @var string
+     */
+    private $language;
 
     /**
      * List of instantiated classes
@@ -271,12 +289,19 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     protected function updateURLData() {
         $uri = substr($this->currentURL, strlen($this->baseURL));
         if (!trim($uri) || '/' == $uri) {
+            $this->language = $this->defaultLanguage;
             $this->module = $this->defaultModule;
             $this->controller = $this->defaultController;
             $this->action = null;
             $this->calculateModulePath();
             return;
         }
+        $language = explode('/', $uri, 2); // search for language
+        if (in_array($language[0], $this->availableLanguages)) {
+            $this->language = $language[0];
+            $uri = $language[1];
+        }
+
         $module = explode('/', $uri, 2); // search for module
         foreach ($this->modules as $mod => $details) {
             if (is_array($details) && $module[0] == $mod) {
@@ -434,6 +459,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             unset($_POST[$key]);
         }
         if (!$this->SEO) {
+            $this->language = isset($_GET['language']) ? $_GET['language'] : $this->defaultLanguage;
             $this->module = isset($_GET['module']) ? $_GET['module'] : $this->defaultModule;
             $this->controller = isset($_GET['controller']) ? $_GET['controller'] : $this->defaultController;
             $this->action = isset($_GET['action']) ? $_GET['action'] : null;
@@ -446,6 +472,19 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                 WebApp::get()->autoload()->addPsr4('\\app\\modules\\' . $name, $details['path'], true);
             }
         }
+    }
+
+
+    /**
+     * Get current language
+     * @return bool|string
+     */
+    public function getLanguage() {
+        if ($this->language)
+            return $this->language;
+        if ($this->defaultLanguage)
+            return $this->defaultLanguage;
+        return $this->getPreferredLanguage();
     }
 
     /**
@@ -476,9 +515,10 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param string $action Name of the action where the URL must link
      * @param array $params List of associative parameters
      * @param string $module Name of the module where the URL must link. If you want to removed current module and go to default use false. If none it's set it will use current module;
+     * @param string $language Language to use. Must exists in the list of available languages;
      * @return string
      */
-    public function createURL($controller, $action = null, $params = array(), $module = null) {
+    public function createURL($controller, $action = null, $params = array(), $module = null, $language = null) {
         if (null == $controller)
             $controller = $this->getController();
         if (!$this->SEO) {
@@ -493,6 +533,10 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         }
 
         $url = $this->getLinkRoot();
+        $language = $language ?: $this->language;
+        if ($language != $this->defaultLanguage) {
+            $url .= $language . '/';
+        }
         if ((!is_null($module)) && $module != $this->module) {
             if ($this->module != $this->defaultModule) {
                 if ($module == $this->defaultModule) {
@@ -556,7 +600,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                         unset($preparedParams[$def]);
                         if ('module' == $def) {
                             if (substr($cBase, -1 * strlen($value . '/')) == $value . '/') { // remove module from base url if it's there
-                                $cBase = substr($cBase, 0, strlen($cBase) - strlen($value.'/'));
+                                $cBase = substr($cBase, 0, strlen($cBase) - strlen($value . '/'));
                             }
                         }
                     }
@@ -666,11 +710,11 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get current module namespace.
      * @return string
      */
-    public function getModuleNamespace(){
-        if (!$this->module || '\\' == $this->module || '/' == $this->module){
+    public function getModuleNamespace() {
+        if (!$this->module || '\\' == $this->module || '/' == $this->module) {
             return '\app';
         }
-        if (isset($this->modules[$this->module]['namespace'])){
+        if (isset($this->modules[$this->module]['namespace'])) {
             return $this->modules[$this->module]['namespace'];
         }
         return '\app\modules\\' . $this->module;
@@ -780,7 +824,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
                     $languages[$matches[1][$i]] = empty($matches[3][$i]) ? 1.0 : floatval($matches[3][$i]);
                 arsort($languages);
                 foreach ($languages as $language => $pref)
-                    return $this->_preferredLanguage = CLocale::getCanonicalID($language);
+                    return $this->_preferredLanguage = strtolower(str_replace('-', '_', $language));
             }
             return $this->_preferredLanguage = false;
         }
@@ -790,8 +834,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     public function sendFile($fileName, $content, $mimeType = null, $terminate = true) {
         DevLogger::$ignoreOutput = true;
         if ($mimeType === null) {
-            if (($mimeType = CFileHelper::getMimeTypeByExtension($fileName)) === null)
-                $mimeType = 'text/plain';
+            $mimeType = 'text/plain';
         }
         header('Pragma: public');
         header('Expires: 0');
