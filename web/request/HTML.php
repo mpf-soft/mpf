@@ -183,7 +183,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * List of available languages;
      * @var array
      */
-    public $availableLanguages = ['ro', 'en'];
+    public $availableLanguages = ['ro', 'en', 'en_us'];
 
     /**
      * Active module
@@ -484,7 +484,10 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
             return $this->language;
         if ($this->defaultLanguage)
             return $this->defaultLanguage;
-        return $this->getPreferredLanguage();
+        $prefered = $this->getPreferredLanguage();
+        if (in_array($prefered, $this->availableLanguages))
+            return $prefered;
+        return $this->availableLanguages[0]; // if nothing works return first language from the list
     }
 
     /**
@@ -534,7 +537,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
 
         $url = $this->getLinkRoot();
         $language = $language ?: $this->language;
-        if ($language != $this->defaultLanguage) {
+        if ($language != $this->defaultLanguage && (trim($language))) {
             $url .= $language . '/';
         }
         if ((!is_null($module)) && $module != $this->module) {
