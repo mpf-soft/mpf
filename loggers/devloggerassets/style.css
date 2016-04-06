@@ -9,6 +9,7 @@
     font-family: monospace;
     font-size: 10px;
     font-weight: 100;
+    z-index: 30;
     background: #dfdfdf;
     opacity: 0.8;
     filter: alpha(opacity=80);
