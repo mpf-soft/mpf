@@ -46,7 +46,7 @@ class Connection extends LogAwareObject{
     }
 
 
-    public function init($config){
+    public function init($config = []){
         $this->predis = new Client($this->parameters, $this->options);
         return parent::info($config);
     }
