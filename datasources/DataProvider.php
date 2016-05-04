@@ -74,7 +74,7 @@ abstract class DataProvider extends Object {
 
     public abstract function getColumnOptions($column, $table = null);
 
-    protected function init($config) {
+    protected function init($config = array()) {
         if ($this->perPageChangeKey || $this->perPageSessionKey) {
             if (isset($_POST[$this->perPageChangeKey]) && is_numeric($_POST[$this->perPageChangeKey])) {
                 $this->setLimitPerPage((int)$_POST[$this->perPageChangeKey]);
