@@ -92,7 +92,7 @@ class RelationsParser extends LogAwareObject {
             }
             $this->relations[$name]->name = $name;
         }
-        parent::init();
+        return parent::init($config);
     }
 
     /**
