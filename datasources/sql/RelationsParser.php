@@ -61,7 +61,7 @@ class RelationsParser extends LogAwareObject {
         return new static(['relations' => $modelClass::getRelations(), 'modelClass' => $modelClass, 'condition' => $condition, 'conditionColumns' => $conditionColumns]);
     }
 
-    public function init($config = []) {
+    public function init($config) {
         $modelClass = $this->modelClass;
         foreach ($this->relations as $name => $details) {
             if (is_array($details)) {

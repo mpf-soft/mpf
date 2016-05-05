@@ -19,7 +19,7 @@ class DataProvider extends \mpf\datasources\DataProvider {
      */
     public $modelCondition;
 
-    protected function init($config = array()) {
+    protected function init($config) {
         $this->updateLabels();
         $this->updateKeys();
         $this->checkPage();

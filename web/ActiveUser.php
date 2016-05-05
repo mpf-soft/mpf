@@ -78,7 +78,7 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      */
     protected $connected = false;
 
-    public function init($config = array()) {
+    public function init($config) {
         parent::init($config);
 
         $this->refresh();

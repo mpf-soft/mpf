@@ -8,7 +8,7 @@ class Object {
      * This config options will override the options from main config
      * @param string[] $config
      */
-    public function __construct($config = array()) {
+    public function __construct($config = []) {
         if (!is_a($this, 'mpf\\interfaces\\AutoLoaderInterface')) {
             $this->applyConfig(Config::get()->forClass(get_called_class()));
         }
@@ -16,7 +16,7 @@ class Object {
         $this->init($config);
     }
 
-    public function applyConfig($config = array()) {
+    public function applyConfig($config) {
         foreach ($config as $key => $value) {
             $this->$key = $value;
         }
@@ -27,7 +27,7 @@ class Object {
      * By default, Object class doesn't include any code in this method.
      * @param string[] $config Config values that were sent when object was initiated;
      */
-    protected function init($config = array()) {
+    protected function init($config) {
         
     }
 

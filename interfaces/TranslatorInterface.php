@@ -34,13 +34,13 @@ interface TranslatorInterface {
      * Basic __construct method from Object to make sure it's extended and it will load
      * config;
      */
-    public function __construct($config = array());
+    public function __construct($config = []);
 
     /**
      * Basic applyConfig method from Object to make sure it's extended and it will load
      * config;
      */
-    public function applyConfig($config = array());
+    public function applyConfig($config);
 
     /**
      * Translate a text; A class can be specified if different translations are needed

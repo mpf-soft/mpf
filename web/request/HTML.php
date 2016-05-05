@@ -437,7 +437,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         return $original;
     }
 
-    protected function init($options = array()) {
+    protected function init($options) {
         parent::init($options);
         self::$_instances[md5(serialize($options))] = $this;
         $this->normalizeRequest();

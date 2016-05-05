@@ -33,7 +33,7 @@ class AccessMap extends \mpf\base\LogAwareObject implements \mpf\interfaces\Acce
     public $finalMap = array();
     public $map = array();
 
-    public function init($config = array()) {
+    public function init($config) {
         $this->parseMap();
         return parent::init($config);
     }

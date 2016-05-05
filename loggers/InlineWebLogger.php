@@ -30,7 +30,7 @@ namespace mpf\loggers;
 
 class InlineWebLogger extends Logger {
 
-    protected function init($config = array()) {
+    protected function init($config) {
         echo <<<STYLE
 <style>
     .log-message{

@@ -37,7 +37,7 @@ class Connection extends LogAwareObject{
      * @param array $config
      * @return \Predis\Client
      */
-    public static function get($config = array()){
+    public static function get($config = []){
         $key = md5(serialize($config));
         if (!isset(self::$instances[$key])){
             self::$instances[$key] = new static($config);
@@ -46,7 +46,7 @@ class Connection extends LogAwareObject{
     }
 
 
-    public function init($config = []){
+    public function init($config){
         $this->predis = new Client($this->parameters, $this->options);
         return parent::info($config);
     }

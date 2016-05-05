@@ -50,7 +50,7 @@ trait LogAwareObjectTrait {
      * @return null
      * @throws \Exception
      */
-    protected function init($config = array()) {
+    protected function init($config) {
         foreach ($this->loggers as $class => $config) {
             if (!is_array($config)) {
                 $class = $config;

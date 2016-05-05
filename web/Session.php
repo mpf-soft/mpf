@@ -43,7 +43,7 @@ class Session extends LogAwareObject implements CacheInterface {
         return $newId?session_id($newId):session_id();
     }
 
-    protected function init($config = array()) {
+    protected function init($config) {
         if (!self::$sessionStarted) {
             session_start();
             self::$sessionStarted = true;

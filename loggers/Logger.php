@@ -37,7 +37,7 @@ abstract class Logger extends Object {
 
     private static $instance;
 
-    protected function init($config = []) {
+    protected function init($config) {
         self::$instance[get_class($this)] = $this;
         parent::init($config);
     }

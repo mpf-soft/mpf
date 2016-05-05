@@ -276,7 +276,7 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * Multiple values will be set for that, one for each config variant that is initiated.
      * @param string[] $config Config values that were used when the object was instantiated.
      */
-    protected function init($config = []) {
+    protected function init($config) {
         $this->addNamespace(self::APP_DEVELOPER_VENDORKEY, APP_ROOT);
         self::$_self[md5(serialize($config))] = $this;
         return parent::init();

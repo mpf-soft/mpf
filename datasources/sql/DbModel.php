@@ -253,7 +253,7 @@ abstract class DbModel extends BaseModel {
      * @param array $config
      * @return null
      */
-    public function init($config = array()) {
+    public function init($config) {
         $this->_initiated = true;
         if ($this->isNewRecord()) {
             $this->_tableName = static::getTableName();
