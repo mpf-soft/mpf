@@ -117,8 +117,8 @@ class Cookie extends LogAwareObject implements CacheInterface {
                 hash('sha256', $value . $this->salt)
             ));
         }
-        $domain = ltrim($_SERVER['SERVER_NAME'], "www.");
-        return setcookie($key, $value, time() + $minutes * 60 + $hours * 3600 + $days * 24 * 3600, '/', $domain, $this->secured, $this->httpOnly);
+        //$domain = ltrim($_SERVER['SERVER_NAME'], "www.");
+        return setcookie($key, $value, time() + $minutes * 60 + $hours * 3600 + $days * 24 * 3600, '/', "", $this->secured, $this->httpOnly);
     }
 
     /**
