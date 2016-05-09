@@ -136,6 +136,7 @@ class Cookie extends LogAwareObject implements CacheInterface {
      * @return bool
      */
     public function exists($key){
+        var_dump($_COOKIE);
         return isset($_COOKIE[$key]);
     }
 } 
