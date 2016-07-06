@@ -35,7 +35,8 @@ use mpf\loggers\DevLogger;
 use mpf\web\Session;
 use mpf\WebApp;
 
-class HTML extends LogAwareObject implements HtmlRequestInterface {
+class HTML extends LogAwareObject implements HtmlRequestInterface
+{
 
     protected $_deleteParams;
 
@@ -225,7 +226,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Calculates current URL and returns it.
      * @return string
      */
-    protected function calculateCurrentURL() {
+    protected function calculateCurrentURL()
+    {
         $url = "http";
         if ($this->isSecureConnection()) {
 
@@ -249,7 +251,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param string [string] $config
      * @return $this
      */
-    protected function applyModuleConfig($config) {
+    protected function applyModuleConfig($config)
+    {
         if (isset($config['mpf\\web\\request\\HTML'])) {
             foreach ($config['mpf\\web\\request\\HTML'] as $k => $v) {
                 $this->$k = $v;
@@ -271,7 +274,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     /**
      * Calculates module path to be later used for viewers.
      */
-    protected function calculateModulePath() {
+    protected function calculateModulePath()
+    {
         if (!$this->module || '/' == $this->module) {
             $this->modulePath = APP_ROOT;
         } else {
@@ -286,7 +290,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     /**
      * Calculates controller, action, model and all extra info.
      */
-    protected function updateURLData() {
+    protected function updateURLData()
+    {
         $uri = substr($this->currentURL, strlen($this->baseURL));
         if (!trim($uri) || '/' == $uri) {
             $this->language = $this->defaultLanguage;
@@ -355,7 +360,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         $_GET = $this->params;
     }
 
-    protected function _updateURLDataUsingMatches($matches, $defined) {
+    protected function _updateURLDataUsingMatches($matches, $defined)
+    {
         if ($defined) {
             foreach ($defined as $k => $v) {
                 $matches[$k] = $v;
@@ -410,7 +416,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         }
     }
 
-    protected function _addToParamsFromString($paramString) {
+    protected function _addToParamsFromString($paramString)
+    {
         $paramPairs = explode($this->paramsSeparator, $paramString);
         $exp = str_replace(array('{name}', '{value}'), array('(?<name>[a-zA-Z0-9_\-\[\]]+)', '(?<value>.*)'), $this->paramsPairStructure);
         foreach ($paramPairs as $pair) {
@@ -421,7 +428,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         }
     }
 
-    protected function addValue($original, $name, $value) {
+    protected function addValue($original, $name, $value)
+    {
         $name = explode('[', $name, 2);
         if ($name[0][strlen($name[0]) - 1] == ']') {
             $name[0] = substr($name[0], 0, strlen($name[0]) - 1);
@@ -437,7 +445,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         return $original;
     }
 
-    protected function init($options) {
+    protected function init($options)
+    {
         parent::init($options);
         self::$_instances[md5(serialize($options))] = $this;
         $this->normalizeRequest();
@@ -479,7 +488,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get current language
      * @return bool|string
      */
-    public function getLanguage() {
+    public function getLanguage()
+    {
         if ($this->language)
             return $this->language;
         if ($this->defaultLanguage)
@@ -495,7 +505,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param string $path
      * @return void
      */
-    public function setModulePath($path) {
+    public function setModulePath($path)
+    {
         $this->modulePath = $path;
     }
 
@@ -504,7 +515,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param string[] $options
      * @return \mpf\web\request\HTML
      */
-    public static function get($options = array()) {
+    public static function get($options = array())
+    {
         if (!isset(self::$_instances[md5(serialize($options))])) {
             return new HTML($options);
         }
@@ -521,7 +533,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param string $language Language to use. Must exists in the list of available languages;
      * @return string
      */
-    public function createURL($controller, $action = null, $params = array(), $module = null, $language = null) {
+    public function createURL($controller, $action = null, $params = array(), $module = null, $language = null)
+    {
         if (null == $controller)
             $controller = $this->getController();
         if (!$this->SEO) {
@@ -559,7 +572,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         return $this->_createURL($url, $controller, $action, $this->_prepareParams($params));
     }
 
-    protected function _prepareParams($params) {
+    protected function _prepareParams($params)
+    {
         $result = array();
         foreach ($params as $name => $value) {
             if (is_array($value)) {
@@ -585,7 +599,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param boolean $searchDefined
      * @return string
      */
-    protected function _createURL($base, $controller, $action, $params, $searchDefined = true) {
+    protected function _createURL($base, $controller, $action, $params, $searchDefined = true)
+    {
         $params['controller'] = $controller;
         $params['action'] = $action;
         foreach ($this->urlRoutes as $route => $defined) { // first check those with strict params.
@@ -644,7 +659,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param $params
      * @return string
      */
-    protected function _params2string($params) {
+    protected function _params2string($params)
+    {
         if (!count($params)) {
             return '';
         }
@@ -665,7 +681,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get current action name
      * @return string
      */
-    public function getAction() {
+    public function getAction()
+    {
         return $this->action;
     }
 
@@ -673,7 +690,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Change current action
      * @param string $name
      */
-    public function setAction($name) {
+    public function setAction($name)
+    {
         $this->action = $name;
     }
 
@@ -681,7 +699,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get current controller name
      * @return string
      */
-    public function getController() {
+    public function getController()
+    {
         return $this->controller ? $this->controller : $this->defaultController;
     }
 
@@ -689,7 +708,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Change current controller
      * @param string $name
      */
-    public function setController($name) {
+    public function setController($name)
+    {
         $this->controller = $name;
     }
 
@@ -697,7 +717,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get full current URL;
      * @return string
      */
-    public function getCurrentURL() {
+    public function getCurrentURL()
+    {
         return $this->currentURL;
     }
 
@@ -705,7 +726,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get active module name;
      * @return string
      */
-    public function getModule() {
+    public function getModule()
+    {
         return $this->module;
     }
 
@@ -713,7 +735,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get current module namespace.
      * @return string
      */
-    public function getModuleNamespace() {
+    public function getModuleNamespace()
+    {
         if (!$this->module || '\\' == $this->module || '/' == $this->module) {
             return '\app';
         }
@@ -727,7 +750,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get an associative list of parameters and values;
      * @return array
      */
-    public function getParams() {
+    public function getParams()
+    {
         return $this->params;
     }
 
@@ -735,7 +759,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Go back to the last page
      * @return null
      */
-    public function goBack() {
+    public function goBack()
+    {
         $this->goToURL($this->getReferrer());
     }
 
@@ -746,7 +771,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param string $module
      * @return void
      */
-    public function goToPage($controller, $action = null, $params = [], $module = null) {
+    public function goToPage($controller, $action = null, $params = [], $module = null)
+    {
         $this->goToURL($this->createURL($controller, $action, $params, $module));
     }
 
@@ -754,7 +780,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Redirect to selected string URL;
      * @return null
      */
-    public function goToURL($url) {
+    public function goToURL($url)
+    {
         header('Location: ' . $url);
         die();
     }
@@ -763,7 +790,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Reload current page
      * @return null
      */
-    public function reloadPage() {
+    public function reloadPage()
+    {
         $this->goToURL($this->getCurrentURL());
     }
 
@@ -772,7 +800,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * unit test.
      * @return null
      */
-    public function simulateURI($uri) {
+    public function simulateURI($uri)
+    {
         $this->currentURL = $this->baseURL . ('/' == $uri[0] ? substr($uri, 1) : $uri);
     }
 
@@ -782,7 +811,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param string[] $data input data to be processed
      * @return string[] processed data
      */
-    public function stripSlashes(&$data) {
+    public function stripSlashes(&$data)
+    {
         if (is_array($data)) {
             if (count($data) == 0)
                 return $data;
@@ -797,7 +827,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Normalizes the request data.
      * This method strips off slashes in request data if get_magic_quotes_gpc() returns true.
      */
-    protected function normalizeRequest() {
+    protected function normalizeRequest()
+    {
         // normalize request
         if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
             if (isset($_GET))
@@ -811,15 +842,27 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         }
     }
 
-    public function getLinkRoot() {
+    public function getLinkRoot()
+    {
         return $this->baseURL . ($this->module != $this->defaultModule ? $this->module . '/' : '');
     }
 
-    public function getWebRoot() {
+    public function getWebRoot()
+    {
         return $this->baseURL;
     }
 
-    public function getPreferredLanguage() {
+    /**
+     * @param $lang
+     * @return string
+     */
+    public function getLanguageChangeURL($lang)
+    {
+        return $this->createURL($this->controller, $this->action, $this->params, $this->module, $lang);
+    }
+
+    public function getPreferredLanguage()
+    {
         if ($this->_preferredLanguage === null) {
             if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && ($n = preg_match_all('/([\w\-_]+)\s*(;\s*q\s*=\s*(\d*\.\d*))?/', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches)) > 0) {
                 $languages = array();
@@ -834,7 +877,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         return $this->_preferredLanguage;
     }
 
-    public function sendFile($fileName, $content, $mimeType = null, $terminate = true) {
+    public function sendFile($fileName, $content, $mimeType = null, $terminate = true)
+    {
         DevLogger::$ignoreOutput = true;
         if ($mimeType === null) {
             $mimeType = 'text/plain';
@@ -912,7 +956,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @param array $options
      * @return null
      */
-    public function xSendFile($filePath, $options = array()) {
+    public function xSendFile($filePath, $options = array())
+    {
         DevLogger::$ignoreOutput = true;
         if (!isset($options['forceDownload']) || $options['forceDownload'])
             $disposition = 'attachment';
@@ -947,35 +992,40 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
     /**
      * @return bool
      */
-    public function isAjaxRequest() {
+    public function isAjaxRequest()
+    {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
     /**
      * @return bool
      */
-    public function isDeleteRequest() {
+    public function isDeleteRequest()
+    {
         return isset($_SERVER['REQUEST_METHOD']) && !strcasecmp($_SERVER['REQUEST_METHOD'], 'DELETE');
     }
 
     /**
      * @return bool
      */
-    public function isPutRequest() {
+    public function isPutRequest()
+    {
         return isset($_SERVER['REQUEST_METHOD']) && !strcasecmp($_SERVER['REQUEST_METHOD'], 'PUT');
     }
 
     /**
      * @return bool
      */
-    public function isPostRequest() {
+    public function isPostRequest()
+    {
         return isset($_SERVER['REQUEST_METHOD']) && !strcasecmp($_SERVER['REQUEST_METHOD'], 'POST');
     }
 
     /**
      * @return bool
      */
-    public function isSecureConnection() {
+    public function isSecureConnection()
+    {
         return isset($_SERVER['HTTPS']) && !strcasecmp($_SERVER['HTTPS'], 'on');
     }
 
@@ -984,15 +1034,18 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * @return string
      */
 
-    public function getReferrer() {
+    public function getReferrer()
+    {
         return isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null;
     }
 
-    public function getUserAgent() {
+    public function getUserAgent()
+    {
         return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
     }
 
-    protected function getRestParams() {
+    protected function getRestParams()
+    {
         $result = array();
         if (function_exists('mb_parse_str'))
             mb_parse_str(file_get_contents('php://input'), $result);
@@ -1001,13 +1054,15 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
         return $result;
     }
 
-    public function getDelete($name, $defaultValue = null) {
+    public function getDelete($name, $defaultValue = null)
+    {
         if ($this->_deleteParams === null)
             $this->_deleteParams = $this->isDeleteRequest() ? $this->getRestParams() : [];
         return isset($this->_deleteParams[$name]) ? $this->_deleteParams[$name] : $defaultValue;
     }
 
-    public function getPut($name, $defaultValue = null) {
+    public function getPut($name, $defaultValue = null)
+    {
         if ($this->_putParams === null)
             $this->_putParams = $this->isPutRequest() ? $this->getRestParams() : [];
         return isset($this->_putParams[$name]) ? $this->_putParams[$name] : $defaultValue;
@@ -1017,7 +1072,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get csrf token key
      * @return string
      */
-    public function getCsrfKey() {
+    public function getCsrfKey()
+    {
         return $this->csrfKey;
     }
 
@@ -1025,7 +1081,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get csrf token value
      * @return string
      */
-    public function getCsrfValue() {
+    public function getCsrfValue()
+    {
         return md5($this->getUserAgent() . Session::get()->id() . $this->csrfSalt);
     }
 
@@ -1033,7 +1090,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface {
      * Get full path for current module
      * @return string
      */
-    public function getModulePath() {
+    public function getModulePath()
+    {
         return $this->modulePath;
     }
 }
