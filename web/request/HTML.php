@@ -152,12 +152,8 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
      * @var array
      */
     public $urlRoutes = array(
-        '(?<language>[a-z]{2})\/(?<controller>[a-zA-Z0-9]+)\/(?<action>[a-zA-Z0-9_\-]+)\/(?<id>[0-9]+)', // language & controller & action  & id
         '(?<controller>[a-zA-Z0-9]+)\/(?<action>[a-zA-Z0-9_\-]+)\/(?<id>[0-9]+)', // controller & action & id
-        '(?<language>[a-z]{2})\/(?<controller>[a-zA-Z0-9]+)\/(?<action>[a-zA-Z0-9_\-]+)', // language & controller & action
-        '(?<language>[a-z]{2})\/(?<controller>[a-zA-Z0-9]+)\/(?<id>[0-9]+)' => array('action' => 'view'), // language & controller & view id
         '(?<controller>[a-zA-Z0-9]+)\/(?<id>[0-9]+)' => array('action' => 'view'), // controller & view id
-        '(?<language>[a-z]{2})\/(?<controller>[a-zA-Z0-9]+)', // language & controller
         '(?<controller>[a-zA-Z0-9]+)\/(?<action>[a-zA-Z0-9_\-]+)', // controller & action
         '(?<controller>[a-zA-Z0-9]+)' // controller
     );
@@ -858,7 +854,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
      */
     public function getLanguageChangeURL($lang)
     {
-        return $this->createURL($this->controller, $this->action, $this->params, $this->module, $lang);
+        return $this->createURL($this->controller, $this->action, $this->params ?: [], $this->module, $lang);
     }
 
     public function getPreferredLanguage()
