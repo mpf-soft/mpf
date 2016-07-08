@@ -455,6 +455,7 @@ abstract class DbModel extends BaseModel {
 
             $this->_isNewRecord = false; // so that the next save won't do another insert
             $this->reload();  // to get extra default values.
+            $this->afterSave();
             if (is_string($this->_pk) && !$this->{$this->_pk}) {
                 return false; // there was an error when saving
             } elseif (!is_string($this->_pk) && !$r) {
@@ -463,6 +464,7 @@ abstract class DbModel extends BaseModel {
         }
 
         if (!$this->_updatedAttributes) {
+            $this->afterSave();
             return true; // nothing to save.
         }
 
