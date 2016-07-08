@@ -490,6 +490,9 @@ abstract class DbModel extends BaseModel {
                 $this->_originalPk = $this->{$this->_pk};
             }
         }
+
+        $this->afterSave();
+
         return $r;
     }
 
@@ -650,6 +653,10 @@ abstract class DbModel extends BaseModel {
     }
 
     public function beforeSave() {
+        return true;
+    }
+
+    public function afterSave(){
         return true;
     }
 
