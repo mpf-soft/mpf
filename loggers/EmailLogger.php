@@ -36,6 +36,12 @@ class EmailLogger extends Logger {
      * @var string
      */
     public $emailTitle = 'Application Log';
+    
+    public $maxEmailsPerRun = 1;
+    
+    public $dieWhenMaxEmailsIsReached = true;
+    
+    protected $_emailsSent = 0;
 
     public $visibleLevels = [
         Levels::EMERGENCY,
@@ -95,9 +101,17 @@ class EmailLogger extends Logger {
      * @return null
      */
     public function log($level, $message, array $context = []) {
+        if ($this->_emailsSent > $this->maxEmailsPerRun){
+            return; // skip all checks if max number was already reached
+        }
         if (in_array($level, $this->visibleLevels) && $this->emailAddress) {
             $mailer = $this->mailerClass;
             $mailer::get()->send($this->emailAddress, $this->getSubject($level, isset($context['fromClass']) ? $context['fromClass'] : ''), $this->getMessage($level, $message, $context));
+            if ($this->_emailsSent++ > $this->maxEmailsPerRun){
+                if ($this->dieWhenMaxEmailsIsReached) {
+                    die(); // too many errors; 
+                }
+            }
         }
     }
 
