@@ -66,6 +66,12 @@ class WebApp extends base\App {
      * @var \mpf\web\AccessMap
      */
     public $accessMap;
+    
+    /**
+     * Create a log entry when someone accesses an unknown page.
+     * @var bool
+     */
+    public $logMissingPages = false;    
 
     /**
      * Link to active controller
@@ -80,15 +86,19 @@ class WebApp extends base\App {
         $controllerClass = $this->calculateControllerClassFromRights();
         $controller = $this->loadController($controllerClass); // try to instantiate the controller
         if (!$controller) {
-            $this->alert('Invalid controller ' . $controllerClass . '!');
+            if ($this->logMissingPages) {
+                $this->alert('Invalid controller ' . $controllerClass . '!');
+            }
             return; // stop execution if it's  an invalid controller
         }
         $controller->setActiveAction($this->request()->getAction());
         if (!method_exists($controller, 'action' . ucfirst($controller->getActiveAction()))) { //check if action exists;
-            $this->alert('Action ' . $this->request()->getAction() . ' not found!', array(
-                'requestedController' => $this->request()->getController(),
-                'requestedModule' => $this->request()->getModule()
-            ));
+            if ($this->logMissingPages) {
+                $this->alert('Action ' . $this->request()->getAction() . ' not found!', array(
+                    'requestedController' => $this->request()->getController(),
+                    'requestedModule' => $this->request()->getModule()
+                ));
+            }
             $controller = $this->loadController($this->getPageNotFound());
             if (!$controller) {
                 $this->alert('Invalid controller ' . $controllerClass . '!');
@@ -120,10 +130,12 @@ class WebApp extends base\App {
 
         }
         if (!class_exists($controllerClass)) {
-            $this->alert('Controller ' . $controllerClass . ' not found!', array(
-                'requestedController' => $this->request()->getController(),
-                'requestedModule' => $this->request()->getModule()
-            ));
+            if ($this->logMissingPages) {
+                $this->alert('Controller ' . $controllerClass . ' not found!', array(
+                    'requestedController' => $this->request()->getController(),
+                    'requestedModule' => $this->request()->getModule()
+                ));
+            }
             $controllerClass = $this->getPageNotFound();
         } elseif ($this->accessMap && (!$this->accessMap->canAccess($this->request()->getController(), $this->request()->getAction(), $this->request()->getModule()))) {
             if ($this->user()->isGuest()) { // it's not loggedin , redirect to login page
