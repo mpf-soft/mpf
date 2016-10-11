@@ -64,7 +64,7 @@ class Calendar extends LogAwareObject
         $pMonthDays = $this->getPrevMonthDays();
         $d = date('Y-m-', $this->firstDayTime - 10000);
         for ($i = 1; $i < $firstWeekStartsWith; $i++) {
-            $dn = $pMonthDays - ($firstWeekStartsWith - $i);
+            $dn = $pMonthDays - ($firstWeekStartsWith - $i) + 1;
             $cd = ($d . (10 > $dn ? '0' : '') . $dn);
             $weeks[0][$i] = new $dayClass(['date' => $cd, 'time' => strtotime($cd), 'callBacks' => $this->dayAttributesCallbacks, 'inCurrentMonth' => false, 'dayNumber' => $dn]);
         }
