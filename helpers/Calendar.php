@@ -23,6 +23,15 @@ class Calendar extends LogAwareObject
         return $c;
     }
 
+    /**
+     * Get name of the current month
+     * @return string
+     */
+    public function getMonthName()
+    {
+        return date('F', $this->firstDayTime);
+    }
+
     protected function init($config)
     {
         if (!$this->dayClass) {
