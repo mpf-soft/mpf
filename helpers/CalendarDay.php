@@ -29,4 +29,8 @@ class CalendarDay extends LogAwareObject
     {
         return date('Y-m-d') == $this->date;
     }
+
+    public function getWeekDay(){
+        return date('l', $this->time);
+    }
 }
