@@ -13,8 +13,8 @@ use mpf\base\Helper;
 
 class DateTimeHelper extends Helper
 {
-    public $days = array('', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
-    public $months = array('', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+
+    public $timeFormat = ' H:i';
 
     public function niceDate($date = null, $noInterval = false, $showDayOfWeek = true, $noValueText = '-')
     {
@@ -24,13 +24,14 @@ class DateTimeHelper extends Helper
             $date = time();
         if (is_string($date))
             $date = strtotime($date);
-        $day = $this->translate($this->days[(int)date('N', $date)]);
-        $month = $this->translate($this->months[(int)date('m', $date)]);
+        $day = $this->translate(date('l', $date));
+        $month = $this->translate(date('F', $date));
         if ($showDayOfWeek) {
             $niceDate = $day . ', ' . date('d', $date) . ' ' . $month . ' ' . date('Y', $date);
         } else {
             $niceDate = date('d', $date) . ' ' . $month . ' ' . date('Y', $date);
         }
+        $niceDate .= date($this->timeFormat, $date);
         if ((date('Y-m-d') == date('Y-m-d', $date)) && (!$noInterval)) {
             if ((date('H') != date('H', $date)) && ((date('H') != (date('H', $date) + 1)) || (date('i') > date('i', $date)))) {
                 $niceDate = date('H') - date('H', $date);
@@ -39,7 +40,7 @@ class DateTimeHelper extends Helper
                 } elseif (-1 === $niceDate) {
                     $niceDate = $this->translate('One hour from now');
                 } elseif ($niceDate < 0) {
-                    $niceDate = str_replace('{x}', $niceDate*-1, $this->translate('{x} hours from now'));
+                    $niceDate = str_replace('{x}', $niceDate * -1, $this->translate('{x} hours from now'));
                 } else {
                     $niceDate = str_replace('{x}', $niceDate, $this->translate('{x} hours ago'));
                 }
@@ -60,7 +61,7 @@ class DateTimeHelper extends Helper
                 } elseif (-1 === $niceDate) {
                     $niceDate = $this->translate('One minute from now');
                 } elseif ($niceDate < 0) {
-                    $niceDate = str_replace('{x}', $niceDate*-1, $this->translate('{x} minute from now'));
+                    $niceDate = str_replace('{x}', $niceDate * -1, $this->translate('{x} minute from now'));
                 } else {
                     $niceDate = str_replace('{x}', $niceDate, $this->translate('{x} minutes ago'));
                 }
