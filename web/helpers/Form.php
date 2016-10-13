@@ -93,6 +93,7 @@ class Form extends \mpf\base\Helper
                 $value = $this->getArrayValue($_GET, $name);
             }
         }
+        $value = str_replace("'", "\\'", $value); // escape value
         $r = "<input type='$type' name='$name' value='$value' ";
         foreach ($htmlOptions as $k => $v)
             $r .= "$k = '$v' ";
