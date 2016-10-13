@@ -93,8 +93,8 @@ class Form extends \mpf\base\Helper
                 $value = $this->getArrayValue($_GET, $name);
             }
         }
-        $value = str_replace("'", "\\'", $value); // escape value
-        $r = "<input type='$type' name='$name' value='$value' ";
+        $value = htmlspecialchars($value);
+        $r = "<input type='$type' name='$name' value=\"$value\" ";
         foreach ($htmlOptions as $k => $v)
             $r .= "$k = '$v' ";
         return $r . ' />';
@@ -159,7 +159,7 @@ class Form extends \mpf\base\Helper
     public function textarea($name, $value = null, $htmlOptions = array())
     {
         $htmlOptions['name'] = $name;
-        return Html::get()->tag('textarea', $value, $htmlOptions);
+        return Html::get()->tag('textarea', htmlspecialchars($value), $htmlOptions);
     }
 
     public function select($name, $options, $value = null, $htmlOptions = array(), $emptyValue = false)
