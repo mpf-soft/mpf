@@ -31,7 +31,8 @@ namespace mpf\web\helpers;
 
 use mpf\WebApp;
 
-class Form extends \mpf\base\Helper {
+class Form extends \mpf\base\Helper
+{
 
     /**
      * MarkItUp http://markitup.jaysalvat.com/ is used to generate HtmlTextareas by method ::htmlTextarea.
@@ -83,7 +84,8 @@ class Form extends \mpf\base\Helper {
      * @param array $htmlOptions
      * @return string
      */
-    public function input($name, $type = 'text', $value = null, $htmlOptions = array()) {
+    public function input($name, $type = 'text', $value = null, $htmlOptions = array())
+    {
         // if value is null then it will check $_POST then $_GET for last filled value (in case of failed form submission)
         if (is_null($value)) {
             $value = $this->getArrayValue($_POST, $name);
@@ -104,7 +106,8 @@ class Form extends \mpf\base\Helper {
      * @param array $htmlOptions
      * @return string
      */
-    public function hiddenInput($name, $value = null, $htmlOptions = array()) {
+    public function hiddenInput($name, $value = null, $htmlOptions = array())
+    {
         return $this->input($name, 'hidden', $value, $htmlOptions);
     }
 
@@ -113,7 +116,8 @@ class Form extends \mpf\base\Helper {
      * @param string [string] $htmlOptions
      * @return string
      */
-    public function openForm($htmlOptions) {
+    public function openForm($htmlOptions)
+    {
         $r = '<form ';
         foreach ($htmlOptions as $k => $v)
             $r .= "$k = '$v' ";
@@ -125,7 +129,8 @@ class Form extends \mpf\base\Helper {
      * Returns a close form tag;
      * @return string
      */
-    public function closeForm() {
+    public function closeForm()
+    {
         return '</form>';
     }
 
@@ -137,7 +142,8 @@ class Form extends \mpf\base\Helper {
      * @param string $tinyMCETemplate
      * @return string
      */
-    public function htmlTextarea($name, $value = null, $htmlOptions = array(), $tinyMCETemplate = 'basic') {
+    public function htmlTextarea($name, $value = null, $htmlOptions = array(), $tinyMCETemplate = 'basic')
+    {
         $r = Html::get()->mpfScriptFile('jquery.js') . Html::get()->mpfScriptFile('tinymce/tinymce.min.js') . Html::get()->mpfScriptFile('tinymce/jquery.tinymce.min.js');
         if (!isset($htmlOptions['id'])) {
             $htmlOptions['id'] = 'tinymce_' . uniqid();
@@ -149,12 +155,14 @@ class Form extends \mpf\base\Helper {
         return $r;
     }
 
-    public function textarea($name, $value = null, $htmlOptions = array()) {
+    public function textarea($name, $value = null, $htmlOptions = array())
+    {
         $htmlOptions['name'] = $name;
         return Html::get()->tag('textarea', $value, $htmlOptions);
     }
 
-    public function select($name, $options, $value = null, $htmlOptions = array(), $emptyValue = false) {
+    public function select($name, $options, $value = null, $htmlOptions = array(), $emptyValue = false)
+    {
         $htmlOptions['name'] = $name;
         if (isset($htmlOptions['multiple'])) {
             $htmlOptions['name'] .= '[]';
@@ -213,7 +221,8 @@ class Form extends \mpf\base\Helper {
      * @param string $name
      * @return null|string
      */
-    protected function getArrayValue($source, $name) {
+    protected function getArrayValue($source, $name)
+    {
         if (false === strpos($name, '[')) {
             return isset($source[$name]) ? $source[$name] : null;
         }
@@ -230,7 +239,8 @@ class Form extends \mpf\base\Helper {
      * @param string $template
      * @return mixed
      */
-    public function checkbox($name, $label, $value = 1, $checked = null, $htmlOptions = array(), $template = '<input><label>') {
+    public function checkbox($name, $label, $value = 1, $checked = null, $htmlOptions = array(), $template = '<input><label>')
+    {
         if (null === $checked) {
             $checked = $this->getArrayValue($_POST, $name);
             if (is_null($value)) {
@@ -255,7 +265,8 @@ class Form extends \mpf\base\Helper {
      * @param string $template
      * @return mixed
      */
-    public function radio($name, $label, $value = 1, $checked = null, $htmlOptions = array(), $template = '<input><label>') {
+    public function radio($name, $label, $value = 1, $checked = null, $htmlOptions = array(), $template = '<input><label>')
+    {
         if (null === $checked) {
             $checked = $this->getArrayValue($_POST, $name);
             if (is_null($value)) {
@@ -281,7 +292,8 @@ class Form extends \mpf\base\Helper {
      * @param string $separator
      * @return string
      */
-    public function checkboxGroup($name, $options, $selected = null, $htmlOptions = [], $template = '<input><label>', $separator = '<br />') {
+    public function checkboxGroup($name, $options, $selected = null, $htmlOptions = [], $template = '<input><label>', $separator = '<br />')
+    {
         if (is_null($selected)) {
             $selected = $this->getArrayValue($_POST, $name);
             if (is_null($selected)) {
@@ -304,7 +316,8 @@ class Form extends \mpf\base\Helper {
      * @param string $separator
      * @return string
      */
-    public function radioGroup($name, $options, $selected = null, $htmlOptions = [], $template = '<input><label>', $separator = '<br />') {
+    public function radioGroup($name, $options, $selected = null, $htmlOptions = [], $template = '<input><label>', $separator = '<br />')
+    {
         if (is_null($selected)) {
             $selected = $this->getArrayValue($_POST, $name);
             if (is_null($selected)) {
@@ -327,7 +340,8 @@ class Form extends \mpf\base\Helper {
      * @param null $previewURL
      * @return string
      */
-    public function markdown($name, $value = null, $htmlOptions = [], $showHint = true, $showPreview = true, $previewURL = null) {
+    public function markdown($name, $value = null, $htmlOptions = [], $showHint = true, $showPreview = true, $previewURL = null)
+    {
         if (is_null($value)) {
             $value = $this->getArrayValue($_POST, $name);
             if (is_null($value)) {
@@ -375,6 +389,8 @@ SCR;
         . ($showPreview ? Html::get()->tag("div", "", ["class" => "markdown-preview"]) : '');
     }
 
+    private $_date_input_count = 0;
+
     /**
      * Get HTML input with jQuery UI date.
      * @param string $name
@@ -383,10 +399,12 @@ SCR;
      * @param array $htmlOptions
      * @return string
      */
-    public function date($name, $value = null, $format = 'yy-mm-dd', $htmlOptions = array()) {
+    public function date($name, $value = null, $format = 'yy-mm-dd', $htmlOptions = array())
+    {
         $return = Html::get()->mpfScriptFile('jquery.js') . Html::get()->mpfScriptFile('jquery-ui/jquery-ui.js');
         if (!isset($htmlOptions['id'])) {
-            $htmlOptions['id'] = 'mdate-time' . str_replace(array('[', ']'), array('_', '__'), $name);
+            $htmlOptions['id'] = 'mdate-time' . str_replace(array('[', ']'), array('_', '__'), $name) . $this->_date_input_count;
+            $this->_date_input_count++;
         }
         $s = Html::get()->script("$(function(){\$(\"#{$htmlOptions['id']}\").datepicker({dateFormat: '$format'});});");
         return $return . $this->input($name, 'text', $value, $htmlOptions) . $s;
@@ -399,7 +417,8 @@ SCR;
      * @param array $htmlOptions Optional extra button html options
      * @return string
      */
-    public function submitButton($value, $name = '', $htmlOptions = []) {
+    public function submitButton($value, $name = '', $htmlOptions = [])
+    {
         return $this->input($name, 'submit', $value, $htmlOptions);
     }
 
@@ -412,7 +431,8 @@ SCR;
      * @param array $htmlOptions Extra HTML options. Values for scr, alt, type, name, value will be replaced with first parameters of this method
      * @return string
      */
-    public function imageButton($src, $alt = 'Submit', $name = '', $value = '', $htmlOptions = []) {
+    public function imageButton($src, $alt = 'Submit', $name = '', $value = '', $htmlOptions = [])
+    {
         $htmlOptions['src'] = $src;
         $htmlOptions['alt'] = $alt;
         return $this->input($name, 'image', $value, $htmlOptions);
