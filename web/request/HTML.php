@@ -213,6 +213,12 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
     private $language;
 
     /**
+     * Current host
+     * @var string
+     */
+    private $host;
+
+    /**
      * List of instantiated classes
      * @var HTML[]
      */
@@ -226,11 +232,11 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
     {
         $url = "http";
         if ($this->isSecureConnection()) {
-
             $url .= 's://' . $_SERVER['SERVER_NAME'] . ('443' != $_SERVER['SERVER_PORT'] ? ':' . $_SERVER['SERVER_PORT'] : '');
         } else {
             $url .= '://' . $_SERVER['SERVER_NAME'] . ('80' != $_SERVER['SERVER_PORT'] ? ':' . $_SERVER['SERVER_PORT'] : '');
         }
+        $this->host = $_SERVER['SERVER_NAME'];
         $this->currentDomain = $url . '/';
         $this->currentURL = $url . $_SERVER['REQUEST_URI'];
         if ($_SERVER['DOCUMENT_ROOT'][strlen($_SERVER['DOCUMENT_ROOT']) - 1] == '/') {
@@ -477,6 +483,15 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
                 WebApp::get()->autoload()->addPsr4('\\app\\modules\\' . $name, $details['path'], true);
             }
         }
+    }
+
+    /**
+     * Get current host
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->host;
     }
 
 

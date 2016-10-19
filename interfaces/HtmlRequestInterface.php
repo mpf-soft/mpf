@@ -247,7 +247,13 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
 
     /**
      * Get User Selected Language
-     * @return mixed
+     * @return string
      */
     public function getLanguage();
+
+    /**
+     * Get current host
+     * @return string
+     */
+    public function getHost();
 }
