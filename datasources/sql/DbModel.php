@@ -37,7 +37,8 @@ use mpf\tools\Validator;
  *
  * @author mirel
  */
-abstract class DbModel extends BaseModel {
+abstract class DbModel extends BaseModel
+{
 
     private $_initiated = false;
 
@@ -137,7 +138,8 @@ abstract class DbModel extends BaseModel {
      * @return bool
      * @throws \Exception
      */
-    public function validateUnique(Validator $validator, $field, $rule, $label, $message) {
+    public function validateUnique(Validator $validator, $field, $rule, $label, $message)
+    {
         $model = $validator->getValues();
         if (!is_a($model, __CLASS__)) {
             return true; // can only check models not arrays or any other object.
@@ -187,7 +189,8 @@ abstract class DbModel extends BaseModel {
      * @return bool
      * @throws \Exception
      */
-    public function validateEnum(Validator $validator, $field, $rule, $label, $message) {
+    public function validateEnum(Validator $validator, $field, $rule, $label, $message)
+    {
         $table = isset($rule['table']) ? $rule['table'] : $this->_tableName;
         $column = isset($rule['column']) ? $rule['column'] : $field;
 
@@ -210,7 +213,8 @@ abstract class DbModel extends BaseModel {
      * @return bool
      * @throws \Exception
      */
-    public function validateExternalKey(Validator $validator, $field, $rule, $label, $message) {
+    public function validateExternalKey(Validator $validator, $field, $rule, $label, $message)
+    {
         foreach (array('table', 'column') as $option) {
             if (!isset($rule[$option])) {
                 throw new \Exception("'externalKey' rule needs '$option' option in order to work! Example: array('types', 'externalKey', 'table'=> 'x', 'column' => 'y')");
@@ -223,7 +227,8 @@ abstract class DbModel extends BaseModel {
     /**
      * @return \mpf\tools\Validator
      */
-    public function getValidator() {
+    public function getValidator()
+    {
         if (!$this->_validator) {
             $rules = static::getRules();
             $model = $this;
@@ -253,7 +258,8 @@ abstract class DbModel extends BaseModel {
      * @param array $config
      * @return null
      */
-    public function init($config) {
+    public function init($config)
+    {
         $this->_initiated = true;
         if ($this->isNewRecord()) {
             $this->_tableName = static::getTableName();
@@ -280,7 +286,8 @@ abstract class DbModel extends BaseModel {
      * @param $name
      * @return DbModel[]|DbModel
      */
-    private function getRelationFromDb($name) {
+    private function getRelationFromDb($name)
+    {
         if (!$this->relationsParser) {
             $this->relationsParser = RelationsParser::parse(get_class($this), new ModelCondition(['model' => get_class($this)]), '*');
         }
@@ -292,7 +299,8 @@ abstract class DbModel extends BaseModel {
      * @param string $path
      * @return array
      */
-    private function getSearchRelationsForPath($path) {
+    private function getSearchRelationsForPath($path)
+    {
         $matched = [];
         foreach ($this->_searchedRelations as $relation) {
             if (0 === strpos($relation, $path . '.')) {
@@ -303,7 +311,8 @@ abstract class DbModel extends BaseModel {
         return $matched;
     }
 
-    private function applyRelationsAttributes() {
+    private function applyRelationsAttributes()
+    {
         foreach ($this->_attributesForRelations as $relation => $attributes) {
             $relation = explode('.', $relation);
             $model = $this;
@@ -328,7 +337,8 @@ abstract class DbModel extends BaseModel {
         }
     }
 
-    public function relationIsSet($relationName) {
+    public function relationIsSet($relationName)
+    {
         return isset($this->_relations[$relationName]);
     }
 
@@ -337,14 +347,15 @@ abstract class DbModel extends BaseModel {
      * @param string $name
      * @return mixed
      */
-    public function __get($name) {
+    public function __get($name)
+    {
         if (is_null($this->_attributes)) {
             $this->reload();
         }
         if (array_key_exists($name, $this->_attributes)) {
             return $this->_attributes[$name];
         }
-        if (!$this->_columns){
+        if (!$this->_columns) {
             $this->_columns = static::getDb()->getTableColumns($this->_tableName);
         }
         foreach ($this->_columns as $column) { // check for columns that were not read yet [ useful for search and not only ]
@@ -377,7 +388,8 @@ abstract class DbModel extends BaseModel {
      * @param $value
      * @throws \Exception
      */
-    public function __set($name, $value) {
+    public function __set($name, $value)
+    {
         $originalName = $name;
         if (!count($this->_columns)) { // had to be added here because of the order PDO assigns attributes when it creates a new object
             $this->_columns = static::getDb()->getTableColumns(static::getTableName());
@@ -432,7 +444,8 @@ abstract class DbModel extends BaseModel {
      * @param bool $validate
      * @return bool
      */
-    public function save($validate = true) {
+    public function save($validate = true)
+    {
         if ($validate) {
             if (!$this->validate()) {
                 return false;
@@ -448,7 +461,7 @@ abstract class DbModel extends BaseModel {
                 $this->{$this->_pk} = $r;
                 $this->_originalPk = $this->{$this->_pk};
             } else {
-                foreach ($this->_pk as $k){
+                foreach ($this->_pk as $k) {
                     $this->_originalPk[$k] = $this->$k;
                 }
             }
@@ -495,14 +508,15 @@ abstract class DbModel extends BaseModel {
 
         $this->afterSave();
 
-        return $r;
+        return $r ?: true;
     }
 
     /**
      * Validate current data
      * @return bool
      */
-    public function validate() {
+    public function validate()
+    {
         if (!$this->getValidator()->validate($this, $this->_action)) {
             $this->_errors = $this->getValidator()->getErrors();
             return false;
@@ -515,7 +529,8 @@ abstract class DbModel extends BaseModel {
      * @param bool $validate
      * @return bool|int
      */
-    public function saveAsNew($validate = true) {
+    public function saveAsNew($validate = true)
+    {
         if ($validate && (!$this->validate())) {
             return false;
         }
@@ -538,7 +553,8 @@ abstract class DbModel extends BaseModel {
      * Delete current row from table.
      * @return bool
      */
-    public function delete() {
+    public function delete()
+    {
         if ($this->beforeDelete()) {
             if (is_array($this->_pk)) {
                 $c = $p = [];
@@ -564,7 +580,8 @@ abstract class DbModel extends BaseModel {
     /**
      * Reload info from DB for current object. Will also call afterLoad method in case updates are needed.
      */
-    public function reload() {
+    public function reload()
+    {
         $this->_relations = array();
         if (is_array($this->_pk)) {
             $c = $p = [];
@@ -590,7 +607,8 @@ abstract class DbModel extends BaseModel {
      * @param string $errorMessage
      * @return $this
      */
-    public function setError($attribute, $errorMessage) {
+    public function setError($attribute, $errorMessage)
+    {
         if (!isset($this->_errors[$attribute])) {
             $this->_errors[$attribute] = array();
         }
@@ -603,7 +621,8 @@ abstract class DbModel extends BaseModel {
      * @param null|string $attribute
      * @return boolean
      */
-    public function hasErrors($attribute = null) {
+    public function hasErrors($attribute = null)
+    {
         if (!count($this->_errors)) {
             return false;
         }
@@ -620,7 +639,8 @@ abstract class DbModel extends BaseModel {
      * @param null|string $attribute
      * @return string
      */
-    public function getErrors($attribute = null) {
+    public function getErrors($attribute = null)
+    {
         return $attribute ? $this->_errors[$attribute] : $this->_errors;
     }
 
@@ -629,7 +649,8 @@ abstract class DbModel extends BaseModel {
      * @param string $action
      * @return $this
      */
-    public function setAction($action) {
+    public function setAction($action)
+    {
         $this->_action = $action;
         return $this;
     }
@@ -638,7 +659,8 @@ abstract class DbModel extends BaseModel {
      * Get current action.
      * @return string
      */
-    public function getAction() {
+    public function getAction()
+    {
         return $this->_action;
     }
 
@@ -646,27 +668,33 @@ abstract class DbModel extends BaseModel {
      * Checks if current object is a new record or it's saved in DB
      * @return boolean
      */
-    public function isNewRecord() {
+    public function isNewRecord()
+    {
         return $this->_isNewRecord;
     }
 
-    public function afterLoad() {
+    public function afterLoad()
+    {
         return true;
     }
 
-    public function beforeSave() {
+    public function beforeSave()
+    {
         return true;
     }
 
-    public function afterSave(){
+    public function afterSave()
+    {
         return true;
     }
 
-    public function beforeDelete() {
+    public function beforeDelete()
+    {
         return true;
     }
 
-    public function afterDelete() {
+    public function afterDelete()
+    {
         return true;
     }
 
@@ -676,7 +704,8 @@ abstract class DbModel extends BaseModel {
      * @param string [string] $attributes
      * @return $this
      */
-    public function setAttributes($attributes) {
+    public function setAttributes($attributes)
+    {
         if (count($safe = static::getSafeAttributes($this->_action))) {
             foreach ($safe as $attribute) {
                 if (isset($attributes[$attribute])) {
@@ -695,7 +724,8 @@ abstract class DbModel extends BaseModel {
      * Used internally when getting relations for model.
      * @return mixed
      */
-    public function __parentRelationKey() {
+    public function __parentRelationKey()
+    {
         return $this->__parentRelationKey;
     }
 
@@ -704,7 +734,8 @@ abstract class DbModel extends BaseModel {
      * @param $pk
      * @return static
      */
-    public function __invoke($pk) {
+    public function __invoke($pk)
+    {
         return self::findByPk($pk);
     }
 
@@ -713,7 +744,8 @@ abstract class DbModel extends BaseModel {
      * @param string $action
      * @return static
      */
-    public static function model($action = 'search') {
+    public static function model($action = 'search')
+    {
         return new static(array(
             '_action' => $action
         ));
@@ -725,7 +757,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return int
      */
-    public static function count($condition, $params = array()) {
+    public static function count($condition, $params = array())
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition')) {
             $condition = ModelCondition::getFrom($condition, get_called_class());
         }
@@ -743,7 +776,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return int
      */
-    public static function countByAttributes($attributes, $condition = null, $params = array()) {
+    public static function countByAttributes($attributes, $condition = null, $params = array())
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition')) {
             $condition = ModelCondition::getFrom($condition, get_called_class());
         }
@@ -760,7 +794,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return int
      */
-    public static function deleteAll($condition, $params = array()) {
+    public static function deleteAll($condition, $params = array())
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition')) {
             $condition = ModelCondition::getFrom($condition, get_called_class());
         }
@@ -776,7 +811,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return int
      */
-    public static function deleteAllByAttributes($attributes, $condition = null, $params = array()) {
+    public static function deleteAllByAttributes($attributes, $condition = null, $params = array())
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition')) {
             $condition = ModelCondition::getFrom($condition, get_called_class());
         }
@@ -794,7 +830,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return int
      */
-    public static function deleteByPk($pk, $condition = null, $params = array()) {
+    public static function deleteByPk($pk, $condition = null, $params = array())
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition')) {
             $condition = ModelCondition::getFrom($condition, get_called_class());
         }
@@ -807,7 +844,8 @@ abstract class DbModel extends BaseModel {
      * Return connection to SQL Database
      * @return \mpf\datasources\sql\PDOConnection
      */
-    public static function getDb() {
+    public static function getDb()
+    {
         return App::get()->sql();
     }
 
@@ -818,7 +856,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return static[]
      */
-    public static function findAllByAttributes($attributes, $condition = null, $params = []) {
+    public static function findAllByAttributes($attributes, $condition = null, $params = [])
+    {
         $class = get_called_class();
         $condition = ModelCondition::getFrom($condition, $class);
         foreach ($attributes as $name => $value) {
@@ -834,7 +873,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return static[]
      */
-    public static function findAllByPk($pk, $condition = null, $params = []) {
+    public static function findAllByPk($pk, $condition = null, $params = [])
+    {
         $class = get_called_class();
         $condition = ModelCondition::getFrom($condition, $class);
         $condition->compareColumn($class::getDb()->getTablePk($class::getTableName()), $pk);
@@ -848,7 +888,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return null|static
      */
-    public static function findByAttributes($attributes, $condition = null, $params = []) {
+    public static function findByAttributes($attributes, $condition = null, $params = [])
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition'))
             $condition = ModelCondition::getFrom($condition, get_called_class());
         /* @var $condition \mpf\datasources\sql\ModelCondition */
@@ -865,7 +906,8 @@ abstract class DbModel extends BaseModel {
      * @param mixed $condition
      * @return static
      */
-    public static function findByPk($pk, $condition = null) {
+    public static function findByPk($pk, $condition = null)
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition'))
             $condition = ModelCondition::getFrom($condition, get_called_class());
 
@@ -883,7 +925,8 @@ abstract class DbModel extends BaseModel {
      * @param string[] $params
      * @return static
      */
-    public static function find($condition, $params = array()) {
+    public static function find($condition, $params = array())
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition'))
             $condition = ModelCondition::getFrom($condition, get_called_class());
 
@@ -901,7 +944,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return static[]
      */
-    public static function findAll($condition = '1=1', $params = array()) {
+    public static function findAll($condition = '1=1', $params = array())
+    {
         /* @var $condition \mpf\datasources\sql\ModelCondition */
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition')) {
             $condition = ModelCondition::getFrom($condition, get_called_class());
@@ -941,7 +985,8 @@ abstract class DbModel extends BaseModel {
      * )
      * @return array
      */
-    public static function getRules() {
+    public static function getRules()
+    {
         return [];
     }
 
@@ -954,14 +999,16 @@ abstract class DbModel extends BaseModel {
      * More details on "DbRelations" class description.
      * @return array
      */
-    public static function getRelations() {
+    public static function getRelations()
+    {
         return [];
     }
 
     /**
      * @return array
      */
-    public static function getLabels() {
+    public static function getLabels()
+    {
         return [];
     }
 
@@ -971,7 +1018,8 @@ abstract class DbModel extends BaseModel {
      * @param string $action
      * @return string[]
      */
-    public static function getSafeAttributes($action = 'insert') {
+    public static function getSafeAttributes($action = 'insert')
+    {
         return self::getAttributesByRule($action, 'safe');
     }
 
@@ -980,11 +1028,13 @@ abstract class DbModel extends BaseModel {
      * @param string $action
      * @return array
      */
-    public static function getRequiredAttributes($action = 'insert') {
+    public static function getRequiredAttributes($action = 'insert')
+    {
         return self::getAttributesByRule($action, 'require');
     }
 
-    protected static function getAttributesByRule($action, $rule) {
+    protected static function getAttributesByRule($action, $rule)
+    {
         if (!count(static::getRules())) {
             return [];
         }
@@ -1024,7 +1074,8 @@ abstract class DbModel extends BaseModel {
      * @param $fields
      * @return int
      */
-    public static function update($pk, $fields) {
+    public static function update($pk, $fields)
+    {
         return static::getDb()->table(static::getTableName())
             ->where(static::getDb()->getTablePk(static::getTableName()) . ' = :pk')
             ->setParam(':pk', $pk)
@@ -1037,7 +1088,8 @@ abstract class DbModel extends BaseModel {
      * @param array $params
      * @return int
      */
-    public static function updateAll($fields, $condition, $params = array()) {
+    public static function updateAll($fields, $condition, $params = array())
+    {
         if (!is_a($condition, '\\mpf\\datasources\\sql\\ModelCondition'))
             $condition = ModelCondition::getFrom($condition, get_called_class());
         /* @var $condition \mpf\datasources\sql\ModelCondition */
@@ -1053,7 +1105,8 @@ abstract class DbModel extends BaseModel {
      * @param array $options
      * @return int
      */
-    public static function insert($fields, $options = array()) {
+    public static function insert($fields, $options = array())
+    {
         return static::getDb()->table(static::getTableName())
             ->insert($fields);
     }
