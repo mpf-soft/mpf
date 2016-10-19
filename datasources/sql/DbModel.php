@@ -409,7 +409,7 @@ abstract class DbModel extends BaseModel {
             }
         }
         if ($isColumn) {
-            if (!array_key_exists($name, $this->_attributes) || $this->_attributes[$name] != $value) { // if no change was done there is no need for this.
+            if (!array_key_exists($name, $this->_attributes) || $this->_attributes[$name] !== $value) { // if no change was done there is no need for this.
                 $this->_attributes[$name] = $value;
                 if ($this->_initiated) { // to make sure that it wont' have all attributes on the updates. This way those that are set by
                     // PDO before __construct() is called will not be saved in this list

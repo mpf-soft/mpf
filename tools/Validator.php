@@ -220,6 +220,9 @@ class Validator extends TranslatableObject {
                     $valid = false; // if it's required but not defined then the rule it's not valid.
                     continue;
                 } elseif (is_null($fieldValue = $this->getValue($field)) || (is_array($fieldValue) ? !count($fieldValue) : !trim($fieldValue))) { // if it's not required and not defined then there is nothing to check
+                    if (isset($rule['default_value'])){
+                        $this->setValue($field, $rule['default_value']);
+                    }
                     continue;
                 }
                 if ('required' == $condition || 'safe' == $condition) { // skip required as it was checked above also skip safe as it is a model condition and not implemented here
@@ -274,6 +277,7 @@ class Validator extends TranslatableObject {
         if (isset($details['max']) && $this->getValue($field) > $details['max']) {
             throw new \Exception($message ? $message : $this->translate("$label must be smaller or equal than $details[min]!"));
         }
+        $this->setValue($field, (int)$this->getValue($field));
         return true;
     }
 
