@@ -4,7 +4,9 @@ namespace mpf\test;
 
 define('LIBS_FOLDER', dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR);
 define('APP_ROOT', __DIR__ . DIRECTORY_SEPARATOR);
-require_once LIBS_FOLDER . 'mpf' . DIRECTORY_SEPARATOR . 'base' . DIRECTORY_SEPARATOR . 'AutoLoader.php';
+if (class_exists('\mpf\base\AutoLoader', false)) {
+    require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'base' . DIRECTORY_SEPARATOR . 'AutoLoader.php';
+}
 
 /**
  * Provides a base test class for ensuring compliance with the LoggerInterface
