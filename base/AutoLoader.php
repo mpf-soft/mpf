@@ -29,7 +29,7 @@
 namespace mpf\base;
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Object.php';
-require_once LIBS_FOLDER . 'mpf' . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_SEPARATOR . 'AutoLoaderInterface.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_SEPARATOR . 'AutoLoaderInterface.php';
 
 /**
  * Class AutoLoader
@@ -81,7 +81,8 @@ require_once LIBS_FOLDER . 'mpf' . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTOR
  * used to maintain packages that it will also take care of the autoload for all classes.
  * @package mpf\base
  */
-class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
+class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
+{
 
     /**
      * Keeps a link to last instantiated AutoLoader class.
@@ -124,7 +125,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * than last.
      * @return void
      */
-    public function addNamespace($prefix, $base_dir, $prepend = false) {
+    public function addNamespace($prefix, $base_dir, $prepend = false)
+    {
         // normalize namespace prefix
         $prefix = trim($prefix, '\\') . '\\';
 
@@ -149,7 +151,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * @param string $name Name of class + namespace;
      * @return string
      */
-    public function load($name) {
+    public function load($name)
+    {
         if (null === ($path = $this->path($name)))
             return;
         if ($this->fileExists && (!file_exists($path))) {
@@ -165,7 +168,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * @param bool $folder If is set as folder .php extension is not added
      * @return string
      */
-    public function path($name, $folder = false) {
+    public function path($name, $folder = false)
+    {
 
         // the current namespace prefix
         $prefix = $name;
@@ -204,7 +208,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * @return mixed Boolean false if no mapped file can be loaded, or the
      * name of the mapped file that was loaded.
      */
-    protected function loadMappedFile($prefix, $relative_class, $folder) {
+    protected function loadMappedFile($prefix, $relative_class, $folder)
+    {
         // are there any base directories for this namespace prefix?
         if (isset($this->prefixes[$prefix]) === false) {
             return false;
@@ -237,7 +242,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * @param string $file The file to require.
      * @return bool True if the file exists, false if not.
      */
-    protected function requireFile($file) {
+    protected function requireFile($file)
+    {
         if (!$this->fileExists || file_exists($file)) {
             require $file;
             return true;
@@ -257,7 +263,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * @param string[] $config Extra config options that can be specified for each class
      * @return \mpf\base\AutoLoader
      */
-    public static function get($config = []) {
+    public static function get($config = [])
+    {
         if (isset(self::$_self[$hash = md5(serialize($config))]))
             return self::$_self[$hash];
         return new \mpf\base\AutoLoader($config);
@@ -267,7 +274,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * Get last registered autoloader. In most of the cases only one will be registered.
      * @return \mpf\base\AutoLoader
      */
-    public static function getLastRegistered() {
+    public static function getLastRegistered()
+    {
         return self::$lastRegistered;
     }
 
@@ -276,7 +284,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * Multiple values will be set for that, one for each config variant that is initiated.
      * @param string[] $config Config values that were used when the object was instantiated.
      */
-    protected function init($config) {
+    protected function init($config)
+    {
         $this->addNamespace(self::APP_DEVELOPER_VENDORKEY, APP_ROOT);
         self::$_self[md5(serialize($config))] = $this;
         return parent::init();
@@ -287,7 +296,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface {
      * Multiple autoload classes can be registered and somepackages will register their own autoload class. Is better to
      * not remove this class except if you're using composer to handle the autoload process.
      */
-    public function register() {
+    public function register()
+    {
         self::$lastRegistered = $this;
         return spl_autoload_register(array($this, 'load'));
     }
