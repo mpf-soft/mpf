@@ -31,7 +31,8 @@ namespace mpf\base;
 use mpf\datasources\redis\Connection;
 use mpf\datasources\sql\PDOConnection;
 
-abstract class App extends LogAwareObject {
+abstract class App extends LogAwareObject
+{
 
     /**
      * Set from index to measure total time
@@ -62,7 +63,7 @@ abstract class App extends LogAwareObject {
      * Link to composer autoload class
      * @var \Composer\Autoload\ClassLoader
      */
-    protected  $autoload;
+    protected $autoload;
 
 
     /**
@@ -77,7 +78,8 @@ abstract class App extends LogAwareObject {
      * @param string[] $config
      * @return static
      */
-    public static function run($config = []) {
+    public static function run($config = [])
+    {
         try {
             $class = get_called_class();
             self::$_instance = new $class($config);
@@ -117,7 +119,8 @@ abstract class App extends LogAwareObject {
      * Fast access to active Application;
      * @return static
      */
-    public static function get() {
+    public static function get()
+    {
         if (!self::$_instance)
             return self::run();
         return self::$_instance;
@@ -135,7 +138,8 @@ abstract class App extends LogAwareObject {
      * @param string[] $options
      * @return \mpf\datasources\sql\PDOConnection
      */
-    public function sql($options = []) {
+    public function sql($options = [])
+    {
         return PDOConnection::get($options);
     }
 
@@ -144,47 +148,51 @@ abstract class App extends LogAwareObject {
      * @param string[] $options
      * @return \Predis\Client
      */
-    public function redis($options = array()) {
+    public function redis($options = array())
+    {
         return Connection::get($options);
     }
 
-    /**
+
+    /*
      * Shortcut to Mongodb database connection
      * @param string[] $options
      * @return \mpf\datasources\mongodb\Connection
-     */
-    public function mongodb($options = array()) {
+     *//*
+    public function mongodb($options = array())
+    {
         trigger_error("MONGODB CONNECTION NOT IMPLEMENTED YET!");
         return \mpf\datasources\mongodb\Connection::get($options);
-    }
+    }*/
 
-    /**
+    /*
      * Shortcut to Redis database connection
      * @param string[] $options
      * @return \mpf\datasources\couchbase\Connection
-     */
+     *//*
     public function couchbase($options = array()) {
         trigger_error("COUCHBASE CONNECTION NOT IMPLEMENTED YET!");
         return \mpf\datasources\couchbase\Connection::get($options);
-    }
+    }*/
 
-    /**
+    /*
      * Shortcut to Mongodb database connection
      * @param string[] $options
      * @return \mpf\datasources\elasticsearch\Connection
-     */
+     *//*
     public function elasticsearch($options = array()) {
         trigger_error("ELASTICSEARCH CONNECTION NOT IMPLEMENTED YET!");
         return \mpf\datasources\elasticsearch\Connection::get($options);
     }
-
+*/
     /**
      * Get value for selected cache key. If cache engine is not set it will return null.
      * @param $key
      * @return mixed
      */
-    public function cacheValue($key) {
-        return $this->cache()?$this->cache()->value($key):null;
+    public function cacheValue($key)
+    {
+        return $this->cache() ? $this->cache()->value($key) : null;
     }
 
     /**
@@ -192,8 +200,9 @@ abstract class App extends LogAwareObject {
      * @param string $key
      * @return mixed|bool
      */
-    public function cacheExists($key) {
-        return $this->cache()?$this->cache()->exists($key):false;
+    public function cacheExists($key)
+    {
+        return $this->cache() ? $this->cache()->exists($key) : false;
     }
 
     /**
@@ -202,16 +211,18 @@ abstract class App extends LogAwareObject {
      * @param $value
      * @return null|bool
      */
-    public function cacheSet($key, $value) {
-        return $this->cache()?$this->cache()->set($key, $value):null;
+    public function cacheSet($key, $value)
+    {
+        return $this->cache() ? $this->cache()->set($key, $value) : null;
     }
 
     /**
      * Get an instance of selected Cache object or null if none is set;
      * @return \mpf\interfaces\CacheInterface|null
      */
-    public function cache(){
-        if (!$this->cacheEngineClass){
+    public function cache()
+    {
+        if (!$this->cacheEngineClass) {
             return null;
         }
         $class = $this->cacheEngineClass;
@@ -222,7 +233,8 @@ abstract class App extends LogAwareObject {
      * Link to composer autoload class
      * @return \Composer\Autoload\ClassLoader
      */
-    public function autoload(){
+    public function autoload()
+    {
         return $this->autoload;
     }
 

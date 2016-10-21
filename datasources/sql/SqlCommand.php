@@ -33,7 +33,8 @@ namespace mpf\datasources\sql;
  *
  * @author mirel
  */
-class SqlCommand extends \mpf\base\LogAwareObject {
+class SqlCommand extends \mpf\base\LogAwareObject
+{
 
     /**
      * Name of the table used for query
@@ -157,7 +158,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param array $columns2values
      * @return $this
      */
-    public function compare($columns2values = []) {
+    public function compare($columns2values = [])
+    {
         foreach ($columns2values as $column => $value) {
             $c = "`" . str_replace('.', '`.`', $column) . "`";
             if (is_array($value)) {
@@ -174,12 +176,31 @@ class SqlCommand extends \mpf\base\LogAwareObject {
     }
 
     /**
+     * Truncate selected table from database.
+     * @return int
+     */
+    public function truncate()
+    {
+        return $this->connection->execQuery("TRUNCATE TABLE `{$this->table}`");
+    }
+
+    /**
+     * Drop selected table from database.
+     * @return int
+     */
+    public function drop()
+    {
+        return $this->connection->execQuery("DROP TABLE `{$this->table}` IF EXISTS");
+    }
+
+    /**
      *
      * @param string $condition
      * @param string[] $params
      * @return \mpf\datasources\sql\SqlCommand
      */
-    public function where($condition, $params = []) {
+    public function where($condition, $params = [])
+    {
         $this->condition = $condition;
         return $this->setParams($params);
     }
@@ -189,7 +210,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string[] $params
      * @return $this
      */
-    public function andWhere($condition, $params = []) {
+    public function andWhere($condition, $params = [])
+    {
         $this->condition = $this->condition ? "({$this->condition}) AND ($condition)" : $condition;
         return $this->setParams($params);
     }
@@ -199,7 +221,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string[] $params
      * @return $this
      */
-    public function orWhere($condition, $params = []) {
+    public function orWhere($condition, $params = [])
+    {
         $this->condition = $this->condition ? "({$this->condition}) OR ($condition)" : $condition;
         return $this->setParams($params);
     }
@@ -209,7 +232,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param $value
      * @return $this
      */
-    public function setParam($name, $value) {
+    public function setParam($name, $value)
+    {
         $this->params[$name] = $value;
         return $this;
     }
@@ -219,7 +243,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param array $params
      * @return $this
      */
-    public function setParams($params) {
+    public function setParams($params)
+    {
         foreach ($params as $name => $value) {
             $this->setParam($name, $value);
         }
@@ -231,7 +256,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string $fields
      * @return \mpf\datasources\sql\SqlCommand
      */
-    public function fields($fields) {
+    public function fields($fields)
+    {
         $this->fields = $fields;
         return $this;
     }
@@ -240,7 +266,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string $order
      * @return $this
      */
-    public function orderBy($order) {
+    public function orderBy($order)
+    {
         $this->order = $order;
         return $this;
     }
@@ -249,7 +276,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string $group
      * @return $this
      */
-    public function groupBy($group) {
+    public function groupBy($group)
+    {
         $this->group = $group;
         return $this;
     }
@@ -258,7 +286,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string $having
      * @return $this
      */
-    public function having($having) {
+    public function having($having)
+    {
         $this->having = $having;
         return $this;
     }
@@ -267,7 +296,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param int $index
      * @return $this
      */
-    public function offset($index) {
+    public function offset($index)
+    {
         $this->offset = $index;
         return $this;
     }
@@ -276,7 +306,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param int $number
      * @return $this
      */
-    public function limit($number) {
+    public function limit($number)
+    {
         $this->limit = $number;
         return $this;
     }
@@ -285,16 +316,19 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string $joinString
      * @return $this
      */
-    public function join($joinString) {
+    public function join($joinString)
+    {
         $this->join = $joinString;
         return $this;
     }
 
     /**
+     * Cache result for the selected interval
      * @param $seconds
      * @return $this
      */
-    public function cache($seconds) {
+    public function cache($seconds)
+    {
         return $this;
     }
 
@@ -303,7 +337,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string $into
      * @return $this
      */
-    public function into($into) {
+    public function into($into)
+    {
         $this->into = $into;
         return $this;
     }
@@ -312,7 +347,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * Returns a single row as assoc array
      * @return string[string]
      */
-    public function first() {
+    public function first()
+    {
         $oldLimit = $this->limit;
         $this->limit = 1;
         $rows = $this->get();
@@ -325,7 +361,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * Also it will start from the selected offset if one is set.
      * @return null|string[string]
      */
-    public function next() {
+    public function next()
+    {
         if ($this->limit && $this->currentPos >= $this->limit) { // it won't go further than the selected limit
             return null;
         }
@@ -344,7 +381,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * Creates select query, executes it and returns the result as assoc array.
      * @return string
      */
-    public function get() {
+    public function get()
+    {
         $q = "SELECT " . $this->fields . " FROM `" . $this->table . "` " . $this->join;
         if ($this->condition) {
             $q .= " WHERE {$this->condition}";
@@ -383,7 +421,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * Return number of rows for current options.
      * @return int
      */
-    public function count() {
+    public function count()
+    {
         $oldFields = $this->fields;
         $this->fields = 'COUNT(*) as number';
         $number = $this->get();
@@ -398,7 +437,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param int $value
      * @return int
      */
-    public function increment($column, $value) {
+    public function increment($column, $value)
+    {
         $this->params[':column'] = $value;
         $query = "UPDATE `{$this->table}` {$this->join} SET `$column` = `$column` + :$column";
         if ($this->condition) {
@@ -418,7 +458,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param string[] $params Optional params in case that string is sent to duplicate key
      * @return int|boolean
      */
-    public function insert($columns, $duplicateKey = null, $params = []) {
+    public function insert($columns, $duplicateKey = null, $params = [])
+    {
         if (is_string($duplicateKey) && 'ignore' == strtolower($duplicateKey)) {
             $q = "INSERT IGNORE INTO {$this->table} ";
         } else {
@@ -457,7 +498,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * @param $columns
      * @return int
      */
-    public function update($columns) {
+    public function update($columns)
+    {
         $update = array();
         foreach ($columns as $k => $v) {
             $update[] = "`$k` = :$k";
@@ -475,7 +517,8 @@ class SqlCommand extends \mpf\base\LogAwareObject {
      * Deletes rows that match condition. It will return number of affected rows.
      * @return int
      */
-    public function delete() {
+    public function delete()
+    {
         $query = "DELETE FROM `{$this->table}` {$this->join}";
         if ($this->condition) {
             $query .= " WHERE {$this->condition}";
