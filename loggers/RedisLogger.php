@@ -2,7 +2,7 @@
 
 namespace mpf\loggers;
 
-class WebLogger extends Logger {
+class RedisLogger extends Logger {
     public function getLogs() {
         
     }
