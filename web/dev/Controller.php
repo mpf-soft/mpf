@@ -1,5 +1,7 @@
 <?php
 
+namespace mpf\web\dev;
+
 /**
  * Created by PhpStorm.
  * User: mirel
