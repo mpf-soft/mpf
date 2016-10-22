@@ -27,15 +27,15 @@
  */
 
 namespace mpf\datasources\sql;
-use mpf\base\App;
+use mpf\base\LogAwareObject;
 
 
 /**
- * Description of DbCondition
+ * Description of ModelCondition
  *
  * @author mirel
  */
-class ModelCondition extends \mpf\base\LogAwareObject {
+class ModelCondition extends LogAwareObject {
 
     /**
      * Model class for current table;
@@ -133,7 +133,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     public $lock_in_share_mode;
 
     /**
-     * If set to true will be used for INSER & UPDATE queries;
+     * If set to true will be used for INSERT & UPDATE queries;
      * @var boolean
      */
     public $ignore;
@@ -234,20 +234,21 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     /**
      * Compare a colum with a single value or multiple values;
      * Example:
+     *  [php]
      *  $condition->compareColumn('name', 'Mirel'); // simple comparison with exact value.
-     *      Result: "`tableName`.`name` = :name" where :name = 'Mirel'
+     *    //  Result: "`tableName`.`name` = :name" where :name = 'Mirel'
      *  $condition->compareColumn('name', array('Mirel', 'Nicu')); // compare with multiple values;
-     *      Result: "`tableName`.`name` IN (:name1, :name2)" where :name1 = 'Mirel' and :name2 = 'Nicu'
+     *    //  Result: "`tableName`.`name` IN (:name1, :name2)" where :name1 = 'Mirel' and :name2 = 'Nicu'
      *  $condition->compareColumn('age', '>=20'); // must be equal or bigger than selected value
-     *      Result: "`tableName`.`age` >= :age" // where :age = 20
+     *    //  Result: "`tableName`.`age` >= :age" // where :age = 20
      *  $condition->compareColumn('name', 'Mirel', true); // partial match
-     *      Result: "`tableName`.`name` LIKE :name" //where :name = '%Mirel%'
-     *
+     *    //  Result: "`tableName`.`name` LIKE :name" //where :name = '%Mirel%'
+     *  [/php]
      * @param string $name column name to be compare. if it's from a relation then it's relationName.columnName
      * @param string|int|string[]|int[] $value value to compare with; Can start with: >, <, >=, <=, !=. Can also be an array, in that case "IN" will be used as condition
      * @param boolean $partial if it's set to true then "LIKE" will be used with "%" added before and after the value;
      * @param string $link Connection between this condition and current one. Can be AND | OR
-     * @return \mpf\datasources\sql\DbCondition
+     * @return \mpf\datasources\sql\ModelCondition
      */
     public function compareColumn($name, $value, $partial = false, $link = 'AND') {
         $this->conditionColumns[] = $name;
@@ -276,20 +277,24 @@ class ModelCondition extends \mpf\base\LogAwareObject {
 
     /**
      * Same as compareColumn but instead of value another column is used.
+     *
      * Example:
+     *
+     * [php]
      *  $condition->compareColumn('name', 'firstname'); // simple comparison with exact value of the columns.
-     *      Result: "`tableName`.`name` = `tableName`.`firstName`"
+     *  //   Result: "`tableName`.`name` = `tableName`.`firstName`"
      *  $condition->compareColumn('name', array('fname', 'lname')); // compare with multiple columns;
-     *      Result: "`tableName`.`name` IN (`tableName`.`fname`, `tableName`.`lname`)"
+     *  //   Result: "`tableName`.`name` IN (`tableName`.`fname`, `tableName`.`lname`)"
      *  $condition->compareColumn('age', '>=fname'); // must be equal or bigger than selected column
-     *      Result: "`tableName`.`age` >= `tableName`.`fname`"
+     *  //    Result: "`tableName`.`age` >= `tableName`.`fname`"
      *  $condition->compareColumn('name', 'fname', true); // partial match
-     *      Result: "`tableName`.`name` LIKE CONCAT('%', `tableName`.`fname`, '%')"
+     *  //    Result: "`tableName`.`name` LIKE CONCAT('%', `tableName`.`fname`, '%')"
+     * [/php]
      * @param string $column1
      * @param string $column2
      * @param boolean $partial
      * @param string $link
-     * @return \mpf\datasources\sql\DbCondition
+     * @return \mpf\datasources\sql\ModelCondition
      */
     public function compareColumns($column1, $column2, $partial = false, $link = 'AND') {
         $this->conditionColumns[] = $column2;
@@ -320,7 +325,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @param string $column Column name to be compared
      * @param string[] $values List of possible values
      * @param string $link Connection to other conditions can be "AND" or "OR"
-     * @return \mpf\datasources\sql\DbCondition
+     * @return \mpf\datasources\sql\ModelCondition
      */
     public function addInCondition($column, $values, $link = 'AND') {
         $this->conditionColumns[] = $column;
@@ -328,11 +333,11 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     }
 
     /**
-     * Similiar to addInCondition() but it will use "NOT IN" condition.
+     * Same as `addInCondition()` but it will use `"NOT IN"` condition.
      * @param string $column Column name to be compared
      * @param string[] $values List of values
      * @param string $link Connection to existent condition
-     * @return \mpf\datasources\sql\DbCondition
+     * @return \mpf\datasources\sql\ModelCondition
      */
     public function addNotInCondition($column, $values, $link = 'AND') {
         $this->conditionColumns[] = $column;
@@ -349,7 +354,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @param int $start Minimum value
      * @param int $end Maximum value
      * @param string $link Connection to existent condition
-     * @return \mpf\datasources\sql\DbCondition
+     * @return \mpf\datasources\sql\ModelCondition
      */
     public function addBetweenCondition($column, $start, $end, $link = 'AND') {
         $this->conditionColumns[] = $column;
@@ -363,7 +368,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
      * @param string $query
      * @param array $params
      * @param string $link
-     * @return \mpf\datasources\sql\DbCondition
+     * @return \mpf\datasources\sql\ModelCondition
      */
     public function addInSelectCondition($column, $query, $params = array(), $link = 'AND') {
         $this->conditionColumns[] = $column;
@@ -538,7 +543,7 @@ class ModelCondition extends \mpf\base\LogAwareObject {
     }
 
     /**
-     * Get DbCondition or subclass from a condition that can be string or array
+     * Get ModelCondition or subclass from a condition that can be string or array
      * or another condition object, in wich case it will return that object;
      * @param mixed $condition The original condition
      * @return static
