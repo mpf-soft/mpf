@@ -31,6 +31,79 @@ namespace mpf\base;
 use mpf\datasources\redis\Connection;
 use mpf\datasources\sql\PDOConnection;
 
+/**
+ * App class is extended, by default, by {@class:\mpf\WebApp} and {@class:\mpf\ConsoleApp} and those are the main classes used by the framework to run a website or a terminal application.
+ * It can also be extended by a custom class if that's needed to create a specific type of application. Any class that extends this must include `::start()` method that will be called from
+ * `run()` method.
+ *
+ * It is usually instantiated in the index file of the application like this:
+ *
+ * ## Framework App index file
+ *
+ * [php]
+ * \mpf\ConsoleApp::run([
+ *    'startTime' => microtime(true),
+ *    'autoload' => $autoload // <- an instance of composer autoload class;
+ * ]);
+ * [/php]
+ *
+ * Some classes from the framework also require that 2 constants should be defined in the index before running the main app: `LIBS_FOLDER` and `APP_ROOT`.
+ *
+ *  - `LIBS_FOLDER`  records the location of `"vendor"` folder created by composer
+ *  - `APP_ROOT` records the location of `"php"` folder of the main app, where all php files are found.
+ *
+ * Those  are used by autoloader to load all classes when needed and find other folders locations.
+ *
+ * Index file should also define an error handler. All exceptions are already handled by the app automatically by for errors the programmer must handle them.
+ *
+ * This can be done by something similar to this:
+ * [php]
+ * set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+ *     $severity = 1 * E_ERROR | // change 0 / 1 value to ignore / handle different errors;
+ *         1 * E_WARNING |
+ *         1 * E_PARSE |
+ *         1 * E_NOTICE |
+ *         0 * E_CORE_ERROR |
+ *         0 * E_CORE_WARNING |
+ *         0 * E_COMPILE_ERROR |
+ *         0 * E_COMPILE_WARNING |
+ *         1 * E_USER_ERROR |
+ *         1 * E_USER_WARNING |
+ *         1 * E_USER_NOTICE |
+ *         0 * E_STRICT |
+ *         0 * E_RECOVERABLE_ERROR |
+ *         0 * E_DEPRECATED |
+ *         0 * E_USER_DEPRECATED;
+ *     $ex = new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+ *     if (($ex->getSeverity() & $severity) != 0) {
+ *         \mpf\ConsoleApp::get()->error($errstr, array(
+ *             'File' => $errfile,
+ *             'Line' => $errline,
+ *             'Number' => $errno,
+ *             'Trace' => $ex->getTraceAsString()
+ *         ));
+ *     }
+ * });
+ * [/php]
+ *
+ * ## How to access App class
+ *
+ * App class can be accessed from anyplace by calling the exact type of app used or by calling the general app. In models and classes that are used by multiple types
+ * of apps is better to access the main app. It will return the current instance created in index. For the example written above the following code will return a
+ * {@class:\mpf\ConsoleApp} instance: `$inst = \mpf\base\App::get()`.
+ *
+ * Accessing components from the app is really ways because of this:
+ *
+ * [php]
+ *
+ *     // access Sql datasource and run a query:
+ *     \mpf\base\App::get()->sql()->Query("SELECT * FROM `something`");
+ *
+ *     // access redis datasource and read a key:
+ *     \mpf\base\App::get()->redis()->get("something");
+ * [/php]
+ *
+ */
 abstract class App extends LogAwareObject
 {
 
