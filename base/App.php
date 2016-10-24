@@ -49,8 +49,11 @@ use mpf\datasources\sql\PDOConnection;
  *
  * Some classes from the framework also require that 2 constants should be defined in the index before running the main app: `LIBS_FOLDER` and `APP_ROOT`.
  *
- *  - `LIBS_FOLDER`  records the location of `"vendor"` folder created by composer
- *  - `APP_ROOT` records the location of `"php"` folder of the main app, where all php files are found.
+ *
+ *  -`LIBS_FOLDER`  records the location of `"vendor"` folder created by composer
+ *
+ *  -`APP_ROOT` records the location of `"php"` folder of the main app, where all php files are found.
+ *
  *
  * Those  are used by autoloader to load all classes when needed and find other folders locations.
  *
@@ -95,12 +98,10 @@ use mpf\datasources\sql\PDOConnection;
  * Accessing components from the app is really ways because of this:
  *
  * [php]
- *
- *     // access Sql datasource and run a query:
- *     \mpf\base\App::get()->sql()->Query("SELECT * FROM `something`");
- *
- *     // access redis datasource and read a key:
- *     \mpf\base\App::get()->redis()->get("something");
+ * // access Sql datasource and run a query:
+ * \mpf\base\App::get()->sql()->Query("SELECT * FROM `something`");
+ * // access redis datasource and read a key:
+ * \mpf\base\App::get()->redis()->get("something");
  * [/php]
  *
  */

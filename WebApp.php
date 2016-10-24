@@ -4,39 +4,83 @@ namespace mpf;
 
 use mpf\interfaces\AccessMapInterface;
 
+/**
+ * Default class used for websites created with MPF Framework.
+ *
+ * This should be instantiated in the index.php file, for more details about that you can also read the description for {@class:\mpf\base\App}.
+ *
+ * One extra config option that can be sent as a param to {@method:\mpf\base\App::run()} is `"accessMap"`:
+ *
+ * [php]
+ * App::run(array(
+ * 'accessMap' => new AccessMap(['map' => include(APP_ROOT . 'config' . DIRECTORY_SEPARATOR . 'accessmap.php')]),
+ * 'startTime' => microtime(true),
+ * 'autoload' => $autoload
+ * ));
+ * [/php]
+ *
+ * Default used AccessMap is {@class:\mpf\web\AccessMap} class that requires a 'map' config option that has the full path to accessmap.php file.
+ * More details about the `accessmap.php` file can be found on the {@class:\mpf\web\AccessMap} class description page.
+ *
+ * When the `::run()` method is executed it will call `::start()` method from this class and that runs the entire website.
+ *
+ * You can use `::get()` method to access the instantiated object of this class.  That offers access to two new components:
+ *   - `request()` -  Access to  the implementation of {@class:\mpf\interfaces\HtmlRequestInterface}, default is : {@class:\mpf\web\request\HTML}.
+ *   - `user()` -  Access to  the implementation of {@class:\mpf\interfaces\ActiveUserInterface}, default is : `\app\components\ActiveUser`. An class that can be modified by the developer that
+ * also extends, by default, {@class:\mpf\web\ActiveUser} class.
+ *
+ * Usage examples:
+ *
+ * [php]
+ * use \mpf\WebApp;
+ * if (WebApp::get()->hasAccessTo('user', 'profile')){
+ *     echo "<a href='" . WebApp::get()->request()->createURL('user', 'profile') . "'>Welcome " . WebApp::get()->user()->name . "!</a>";
+ * }
+ * // this will display a link to user profile if it has access to it.
+ * [/php]
+ */
 class WebApp extends base\App {
 
     /**
      * List of aliases for selected controllers.
      * For example:
+     * [php]
+     * [
      *      'dev' => '\mpf\web\dev\Controller'
+     * ]
+     * [/php]
+     * When a url requires an alias then it will use the selected class instead.
      * @var array
      */
     public $controllerAliases = array();
 
     /**
-     * Name of the class used to handle HTML requests;
+     * Name of the class used to handle HTML requests.
+     *
+     * **Must implement {@class:\mpf\interfaces\HtmlRequestInterface} in order to be accepted!**
      * @var string
      */
     public $requestClass = '\\mpf\\web\\request\\HTML';
 
     /**
-     * Class name for ActiveUser object;
+     * Class name for ActiveUser object.
+     *
+     * **Must implement {@class:\mpf\interfaces\ActiveUserInterface} in order to be accepted!**
      * @var string
      */
     public $activeUserClass = '\\app\\components\\ActiveUser';
 
     /**
-     * Name of the controllers namespace. By default it's "controllers";
+     * Name of the controllers namespace. By default it's "controllers".
      * Same name must be used by the folders from both app folder and module
-     * folder;
+     * folder.
      * @var string
      */
     public $controllersNamespace = 'controllers';
 
     /**
      * Name of the modules namespace. Same name must be used by folder that
-     * contains all modules that don't have a specific namespace specified;
+     * contains all modules that don't have a specific namespace specified.
      * @var string
      */
     public $modulesNamespace = 'modules';
@@ -45,24 +89,26 @@ class WebApp extends base\App {
      * List of Controller & Action replacement page in case that the requeste page was not found.
      * @var string[]
      */
-    public $pageNotFound = array('special', 'notFound');
+    public $pageNotFound = ['special', 'notFound'];
 
     /**
      * List of Controller & Action where user is redirected if it tries to access
      * a page without the required rights;
      * @var string[]
      */
-    public $pageAccessDenied = array('special', 'accessDenied');
+    public $pageAccessDenied = ['special', 'accessDenied'];
 
     /**
      * List of Controller & Action where user is redirected when it tries to access a restricted page
      * but it's not logged in
      * @var string[]
      */
-    public $pageLogin = array('user', 'login');
+    public $pageLogin = ['user', 'login'];
 
     /**
-     * Object to be used as access map
+     * Object to be used as access map.
+     *
+     * **Must implement {@class:\mpf\interfaces\AccessMapInterface} to be accepted!**
      * @var \mpf\web\AccessMap
      */
     public $accessMap;
