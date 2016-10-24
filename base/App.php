@@ -108,13 +108,14 @@ abstract class App extends LogAwareObject
 {
 
     /**
-     * Set from index to measure total time
+     * Set from index to measure total time. To be sent as config option in for `::run()` method. It can also be set in config of the app as that file should be loaded at the start also.
      * @var int
      */
     public $startTime;
 
     /**
-     * String title of current app.
+     * Full title of the current application. For web app it will be used, by default, as the title of the website in the `<title></title>` tag.
+     * It will aslo be used by email classes as prefix of the subject.
      * @var string
      */
     public $title = 'MPF App';
@@ -127,26 +128,39 @@ abstract class App extends LogAwareObject
     public $shortName = 'app';
 
     /**
-     * Class name for cache engine. Must have implement CacheInterface
+     * Class name for cache engine. Must have implement CacheInterface. If none is sent then no cache will be used.
      * @var string
      */
     public $cacheEngineClass;
 
     /**
-     * Link to composer autoload class
+     * Link to composer autoload class. To be sent from index file when running the app. It will be used internally to get
+     * the location of some modules and classes.
      * @var \Composer\Autoload\ClassLoader
      */
     protected $autoload;
 
 
     /**
-     * Recors current app instance;
+     * Records current app instance; Can't be accessed directly but can be accessed by calling {@method:\mpf\base\App::get()} method.
      * @var \mpf\base\App
      */
     private static $_instance;
 
     /**
      * Starts a new application using selected configuration;
+     * This method should be called from the index file like this:
+     *
+     * [php]
+     * \mpf\ConsoleApp::run([
+     *    'startTime' => microtime(true),
+     *    'autoload' => $autoload // <- an instance of composer autoload class;
+     * ]);
+     * [/php]
+     *
+     * `\mpf\ConsoleApp` should be replaced with the app that should be run at that time.
+     *
+     *  This method wil handle all Exceptions and then will call the `::start()` method defined by the instantiated child class and return the instance of the object.
      *
      * @param string[] $config
      * @return static
@@ -189,7 +203,15 @@ abstract class App extends LogAwareObject
     }
 
     /**
-     * Fast access to active Application;
+     * Fast access to active App child instance;
+     * Can be called from any place to get fast access to any components.
+     *
+     * Example:
+     *
+     * [php]
+     *   \mpf\base\App::get()->sql(); // get access to \mpf\datasources\sql\PDOConnection
+     * [/php]
+     *
      * @return static
      */
     public static function get()
@@ -208,7 +230,7 @@ abstract class App extends LogAwareObject
 
     /**
      * Shortcut to Sql database connection;
-     * @param string[] $options
+     * @param string[] $options Optional; Some config options can be set and it will return a specific instance with that config applied.
      * @return \mpf\datasources\sql\PDOConnection
      */
     public function sql($options = [])
@@ -218,7 +240,7 @@ abstract class App extends LogAwareObject
 
     /**
      * Shortcut to Redis database connection
-     * @param string[] $options
+     * @param string[] $options Optional; Some config options can be set and it will return a specific instance with that config applied.
      * @return \Predis\Client
      */
     public function redis($options = array())
