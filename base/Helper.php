@@ -28,12 +28,34 @@
 
 namespace mpf\base;
 
+/**
+ * Extends any helper classes.
+ *
+ * It contains a single method that returns the latest instance of the called classed with the specified config options.
+ *
+ * Example:
+ *
+ * [php]class MyHelper extends Helper{
+ *    protected $format = 'Y-m-d H:i:s'; // can be changed from global config or class config when called;
+ *    public function getFormatedDate($time = null){
+ *        return date($this->format, $time?:time());
+ *    }
+ * }
+ *
+ * echo "Current Time is : " . MyHelper::get()->getFormatedDate();
+ * // or with custom format:
+ *
+ * echo "Current Time is: " . MyHelper::get(['format'=>'Ymd H:i:s'])->getFormatedDate();
+ * [/php]
+ *
+ */
 class Helper extends TranslatableObject {
 
     private static $_instances = [];
 
     /**
      * Return a instance for helper.
+     *
      * @param array $config
      * @return static
      */
