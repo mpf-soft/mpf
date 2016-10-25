@@ -1,7 +1,12 @@
 <?php
 
 namespace mpf\base;
-
+/**
+ * This is the basic class that all the other framework components, and most of the application classes extend.
+ *
+ * There are few exceptions like the {@class:\mpf\base\Config} and  {@class:\mpf\datasources\sql\PDOConnection}.
+ *
+ */
 class Object {
 
     /**

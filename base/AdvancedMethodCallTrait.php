@@ -59,7 +59,7 @@ namespace mpf\base;
  * current command and allows some general options like `--debug` to be available for all commands and actions. It is not recommended
  * for websites where there is no control over what the user input will be, for that a dummy method should be created that won't apply any changes.
  *
- * For details about the default uses of this trait check : {@method:\mpf\cli\Command::run()} and {@methood:\mpf\web\Controller::run()} descriptions.
+ * For details about the default uses of this trait check : {@method:\mpf\cli\Command::run()} and {@method:\mpf\web\Controller::run()} descriptions.
  */
 trait AdvancedMethodCallTrait {
 
