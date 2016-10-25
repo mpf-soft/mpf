@@ -39,13 +39,22 @@ class ConsoleApp extends base\App {
     );
 
     /**
-     * Name of namespace && folder for commands;
+     * Name of namespace&folder for commands, relative to `php` folder from the application;
      * @var string
      */
     public $commandsNamespace = 'commands';
 
+    /**
+     * Name of the command that will be executed if the called one was not found
+     * @var string
+     */
     public $notFoundCommand = '\\mpf\\cli\\NotFound';
 
+    /**
+     * This is the main method called when the application is executed.
+     *
+     * It will first check for the command arguments and if none are found it will call the not found command.
+     */
     protected function start() {
         $args = $this->getServerArguments();
         if ($args['command']) {
@@ -67,15 +76,17 @@ class ConsoleApp extends base\App {
     }
 
     /**
-     * Reads and returns a list with all arguments. Return strucuture:
-     *  array(
-     *      'command' => COMAND_NAME,
-     *      'action' => ACTION_NAME
-     *      'params' => array(
+     * Reads and returns a list with all arguments. Return structure:
+     * [php]
+     * [
+     *      'command' => 'COMAND_NAME',
+     *      'action' => 'ACTION_NAME'
+     *      'params' => [
      *           'name1'=>'value1',
      *           'name2'=>'value2'
-     *      )
-     *  )
+     *      ]
+     * ]
+     * [/php]
      * @return string[]
      */
     private function getServerArguments() {
@@ -87,9 +98,15 @@ class ConsoleApp extends base\App {
         return $args;
     }
 
+    /**
+     * Receives a list of strings and extracts the command, action and parameters from that list.
+     *
+     * @param string[] $args
+     * @return string[]
+     */
     private function parseArgs($args) {
         $command = $action = null;
-        $params = array();
+        $params = [];
         foreach ($args as $argument) {
             if ('-' != $argument[0])
                 if (null === $command)
@@ -97,7 +114,7 @@ class ConsoleApp extends base\App {
                 elseif (null === $action)
                     $action = $argument;
                 else
-                    $this->alert('Invalid argument ' . $argument . '!', array('command' => $command, 'action' => $action, 'serverArguments' => $_SERVER['argv'], 'processedArguments' => $args));
+                    $this->alert('Invalid argument ' . $argument . '!', ['command' => $command, 'action' => $action, 'serverArguments' => $_SERVER['argv'], 'processedArguments' => $args]);
             else {
                 $argument = substr($argument, 1); // supports both  one - or two - ( - / -- )
                 if ('-' == $argument[0])
@@ -107,11 +124,11 @@ class ConsoleApp extends base\App {
                 $params[$argument[0]] = isset($argument[1]) ? $argument[1] : true;
             }
         }
-        return array(
+        return [
             'command' => $command,
             'action' => $action,
             'params' => $params
-        );
+        ];
     }
 
     /**
@@ -128,11 +145,11 @@ class ConsoleApp extends base\App {
 
     /**
      * Returns full namespace and classname for selected command.
-     * Command name is modified with ucfirst() method. Also 'app' it's
+     * Command name is modified with `ucfirst()` method. Also `'app'` it's
      * added as a vendor name in namespace and $this->commandsNamespace
-     * as  subnamespace. In case of modules, if there are no aliases for
-     * selected module then modulesNamespace it's added and then module name  plus
-     * commandsNamespace, in case an alias it's found, then that alias it's
+     * as part of the namespace. In case of modules, if there are no aliases for
+     * selected module then `$modulesNamespace` it's added and then module name plus
+     * `$commandsNamespace`, in case an alias it's found, then that alias it's
      * used instead of 'app', modulesNamespace and module name .
      *
      * Examples:
@@ -150,8 +167,8 @@ class ConsoleApp extends base\App {
      *   Result: \outsidevender\chatModule\commands\Home
      *
      *
-     * @param string $command name of the command
-     * @param string $module name of the module
+     * @param string $command Name of the command
+     * @param string $module Name of the module
      * @return string
      */
     public function getCommandClassFromNameAndModule($command, $module) {
@@ -168,6 +185,9 @@ class ConsoleApp extends base\App {
 
     /**
      * Instantiate command and check if class is correct;
+     *
+     * A critical error will be generated if it's an invalid class(doesn't extend `\mpf\cli\Command`)!
+     *
      * @param string $class
      * @return \mpf\cli\Command
      */
