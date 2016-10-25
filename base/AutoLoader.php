@@ -41,6 +41,7 @@ require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_S
  * Given a foo-bar package of classes in the file system at the following
  * paths ...
  *
+ * [code]
  *     /path/to/packages/foo-bar/
  *         src/
  *             Baz.php             # Foo\Bar\Baz
@@ -50,10 +51,11 @@ require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_S
  *             BazTest.php         # Foo\Bar\BazTest
  *             Qux/
  *                 QuuxTest.php    # Foo\Bar\Qux\QuuxTest
- *
- * ... add the path to the class files for the \Foo\Bar\ namespace prefix
+ * [/code]
+ * ... add the path to the class files for the `\Foo\Bar\` namespace prefix
  * as follows:
  *
+ * [php]
  *      <?php
  *      // instantiate the loader
  *      $loader = new \Example\Psr4AutoloaderClass;
@@ -64,28 +66,33 @@ require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_S
  *      // register the base directories for the namespace prefix
  *      $loader->addNamespace('Foo\Bar', '/path/to/packages/foo-bar/src');
  *      $loader->addNamespace('Foo\Bar', '/path/to/packages/foo-bar/tests');
+ * [/php]
  *
  * The following line would cause the autoloader to attempt to load the
- * \Foo\Bar\Qux\Quux class from /path/to/packages/foo-bar/src/Qux/Quux.php:
+ * `\Foo\Bar\Qux\Quux` class from `/path/to/packages/foo-bar/src/Qux/Quux.php`:
  *
+ * [php]
  *      <?php
  *      new \Foo\Bar\Qux\Quux;
+ * [/php]
  *
  * The following line would cause the autoloader to attempt to load the
- * \Foo\Bar\Qux\QuuxTest class from /path/to/packages/foo-bar/tests/Qux/QuuxTest.php:
+ * `\Foo\Bar\Qux\QuuxTest` class from `/path/to/packages/foo-bar/tests/Qux/QuuxTest.php`:
  *
+ * [php]
  *      <?php
  *      new \Foo\Bar\Qux\QuuxTest;
+ * [/php]
  *
  * This class will only be used if case that the framework is installed without the composer. In case that composer is
  * used to maintain packages that it will also take care of the autoload for all classes.
- * @package mpf\base
  */
 class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
 {
 
     /**
      * Keeps a link to last instantiated AutoLoader class.
+     *
      * @var AutoLoader
      */
     private static $lastRegistered;
@@ -94,7 +101,7 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
      * An associative array where the key is a namespace prefix and the value
      * is an array of base directories for classes in that namespace.
      *
-     * @var array
+     * @var string[]
      */
     public $prefixes = array();
 
@@ -108,9 +115,11 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
     /**
      * This key is used as base namespace for all classes from developer's project.
      * Examples:
+     * [code]
      * \app\controllers\Home
      * \app\models\User
      * \app\components\Controller
+     * [/code]
      */
     const APP_DEVELOPER_VENDORKEY = 'app';
 
@@ -118,11 +127,8 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
      * Adds a base directory for a namespace prefix.
      *
      * @param string $prefix The namespace prefix.
-     * @param string $base_dir A base directory for class files in the
-     * namespace.
-     * @param bool $prepend If true, prepend the base directory to the stack
-     * instead of appending it; this causes it to be searched first rather
-     * than last.
+     * @param string $base_dir A base directory for class files in the namespace.
+     * @param bool $prepend If true, prepend the base directory to the stack instead of appending it; this causes it to be searched first rather than last.
      * @return void
      */
     public function addNamespace($prefix, $base_dir, $prepend = false)
@@ -205,8 +211,7 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
      * @param string $prefix The namespace prefix.
      * @param string $relative_class The relative class name.
      * @param bool $folder If is a folder '.php' won't be added.
-     * @return mixed Boolean false if no mapped file can be loaded, or the
-     * name of the mapped file that was loaded.
+     * @return mixed Boolean false if no mapped file can be loaded, or the name of the mapped file that was loaded.
      */
     protected function loadMappedFile($prefix, $relative_class, $folder)
     {
@@ -252,14 +257,15 @@ class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
     }
 
     /**
-     *
+     * Keep a link too multiple instances of this class, one instance for each configuration that was called.
      * @var \mpf\base\AutoLoader[]
      */
-    private static $_self = array();
+    private static $_self = [];
 
     /**
      * This method is used to get an instance of this class from anywhere without having to initialize the class each time.
      * It will offer different instances for each config.
+     *
      * @param string[] $config Extra config options that can be specified for each class
      * @return \mpf\base\AutoLoader
      */

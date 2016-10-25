@@ -28,22 +28,73 @@
 
 namespace mpf\base;
 
-use mpf\WebApp;
-
+/**
+ * This class doesn't extend any {@class:\mpf\base\Object} or any other class as it should be the first class loaded when
+ * any type of application is executed.
+ *
+ * When it's instantiated it should receive a single parameter that contains a list of options used by all framework classes.
+ * If instead of a list, a string is sent then it will load it as a file and read the config options from there.
+ *
+ * That list is usually read from `php/config/` folder. By default each app has at least 2 config files there:
+ *
+ *  - `console.inc.php` - that will return a list of options for console applications
+ *  - `web.inc.php` - that will return a list of options for websites
+ *
+ * There is usually another file there, `config.inc.php`, that contains config options that is used by both type of apps.
+ *
+ * The config folder may contain another file `accessmap.php` that is used by {@class:\mpf\web\AccessMap} so you will find
+ * more details there. It may also be used to host translations, if the website needs them and if they are set to be saved
+ * in file and not in some database.
+ *
+ * Config format for the array that is sent to this class should be the following:
+ * [php] return [
+ *    '\full\ClassName' => [
+ *          'attributeName' => 'attributeValue',
+ *          'secondAttributeName' => 23, // integer value
+ *          'thirdCallableAttribute' => function(){
+ *               return  'My Callable Function';
+ *          }
+ *    ]
+ * ]
+ * [/php]
+ *
+ * Some of the default options that are usually fond in `config.inc.php` are:
+ * [php][
+ *  "mpf\\interfaces\\LogAwareObjectInterface" => [
+ *    "loggers" => [
+ *      "mpf\\loggers\\InlineWebLogger"
+ *    ]
+ *  ],
+ *  "mpf\\base\\App" => [
+ *    "title" => "MPF Framework",
+ *    "shortName" => "mpf",
+ *    "cacheEngineClass" => "\\mpf\\datasources\\redis\\Cache"
+ *  ]
+ * ]
+ * [/php]
+ *
+ */
 class Config {
 
     /**
+     *
      *
      * @var string[]
      */
     private $options = array();
 
     /**
+     * A ling to the current config instance so that it can be called from anywhere using `::get()` method.
      *
      * @var Config
      */
     private static $instance;
 
+    /**
+     * Config constructor.
+     * Reads the options from file or from the variable.
+     * @param null $options
+     */
     public function __construct($options = null) {
         if (null === $options)
             return;
