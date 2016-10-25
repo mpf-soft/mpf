@@ -2,6 +2,31 @@
 
 namespace mpf;
 
+/**
+ * Default class used for terminal applications created with MPF Framework. Most of the times this will be used for the cronjobs that are required by  the project.
+ *
+ * To execute a terminal application you need the following command:
+ * [code=bash]php /path/to/app/folder/php/run.php command action --extraParam=value[/code]
+ *
+ * The `command` part represents the class name of an extended {@class:\mpf\cli\Command} class. They can be find, by default, in `php/commands/` folder.
+ * Each command can have multiple actions that should be name like this: `"actionName"` . When this is called only the `"name"` part is used.
+ *
+ * In the example that I used above, it will call the `actionAction()` method inside the `Command` class. Also, if the `actionAction()` method has a parameter
+ * with the name `$extraParam` then it will use `"value"` for it when calling the method.
+ *
+ * More details about this process can be found on the {@class:\mpf\cli\Command} class description page.
+ *
+ * You can run a `ConsoleApp` similar to any other app:
+ * [php]
+ * ConsoleApp::run(array(
+ * 'startTime' => microtime(true),
+ * 'autoload' => $autoload
+ * ));
+ * [/php]
+ *
+ * It will offer access to the same components that {@class:\mpf\base\App} offers.
+ *
+ */
 class ConsoleApp extends base\App {
 
     /**
