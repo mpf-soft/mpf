@@ -28,10 +28,20 @@
 
 namespace mpf\base;
 
+/**
+ * Contains a collection of methods that forward messages to the current loggers.
+ *
+ * For more details about how to configure the active loggers you can read the description for {@class:\mpf\base\LogAwareObject}.
+ *
+ * All this methods are required by implementations of {@class:\mpf\interfaces\LogAwareInterface} which is why is usually used when
+ * a class implements that interface.
+ */
 trait LogAwareObjectTrait {
 
     /**
-     * ClassNames and options for every Log object to be used;
+     * A list of full class names for each logger to be used by the object.
+     *
+     * A list of all available loggers, that are offered by the framework, can be found in the `mpf\loggers` namespace.
      * @var string[]
      */
     public $loggers = array(
@@ -39,7 +49,7 @@ trait LogAwareObjectTrait {
     );
 
     /**
-     * List of all instantiated log classes
+     * List of all instantiated log classes.
      * @var \mpf\loggers\Logger[]
      */
     private $loggersInstances = array();
@@ -61,7 +71,6 @@ trait LogAwareObjectTrait {
                 throw new \Exception("Loggers must extend mpf\\base\\Logger class!");
             $this->loggersInstances[] = $instance;
         }
-        return true;
     }
 
     /**
