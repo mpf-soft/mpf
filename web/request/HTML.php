@@ -180,7 +180,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
      * List of available languages;
      * @var array
      */
-    public $availableLanguages = ['ro', 'en', 'en_us'];
+    public $availableLanguages = ['ro', 'en'];
 
     /**
      * Active module
@@ -223,6 +223,24 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
      * @var HTML[]
      */
     private static $_instances = array();
+
+    /**
+     * Get default language
+     * @return string
+     */
+    public function getDefaultLanguage()
+    {
+        return $this->defaultLanguage;
+    }
+
+    /**
+     * Get a list of all available languages
+     * @return string[]
+     */
+    public function getAvailableLanguages()
+    {
+        return $this->availableLanguages;
+    }
 
     /**
      * Calculates current URL and returns it.

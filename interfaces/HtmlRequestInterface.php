@@ -28,7 +28,8 @@
 
 namespace mpf\interfaces;
 
-interface HtmlRequestInterface extends LogAwareObjectInterface{
+interface HtmlRequestInterface extends LogAwareObjectInterface
+{
 
     /**
      * Must return instantiated component;
@@ -66,80 +67,80 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * @return mixed
      */
     public function getModuleNamespace();
-    
+
     /**
      * Get url to the selected page;
      * @param string $controller Name of the controller where the URL must link
      * @param string $action Name of the action where the URL must link
-     * @param array $params List of associative parameters 
+     * @param array $params List of associative parameters
      * @param string $module Name of the module where the URL must link. If none it's set it will use current module;
      * @param string $language
      * @return string
      */
     public function createURL($controller, $action = null, $params = array(), $module = null, $language = null);
-    
+
     /**
      * Get full current URL;
      * @return string
      */
     public function getCurrentURL();
-    
+
     /**
      * Redirect to selected string URL;
      * @return null
      */
     public function goToURL($url);
-    
+
     /**
      * Redirect to generated internal URL;
      * @return null
      */
     public function goToPage($controller, $action = null, $params = array(), $module = null);
-    
+
     /**
      * Reload current page
      * @return null
      */
     public function reloadPage();
-    
+
     /**
      * Go back to the last page
      * @return null
      */
     public function goBack();
-    
+
     /**
      * Get URL referer. Similar to goBack(), but instead of redirect will return the address;
      * @return string
      */
     public function getReferrer();
-    
+
     /**
-     * Will replace current HTML request with selected URI. This is used by HtmlRequest 
+     * Will replace current HTML request with selected URI. This is used by HtmlRequest
      * unit test.
      * @return null
      */
     public function simulateURI($uri);
-    
+
     /**
      * Change current controller.
      * @param string $name
      */
     public function setController($name);
-    
+
     /**
      * Change current action.
      * @param string $name
      */
     public function setAction($name);
-    
+
     /**
      * Get html url for website root to be used to include images, scripts and other
      * media elements
      * @return string
      */
     public function getWebRoot();
-    
+
     /**
      * Get html url for link root to be used to manually create links
      * @return string
@@ -256,4 +257,16 @@ interface HtmlRequestInterface extends LogAwareObjectInterface{
      * @return string
      */
     public function getHost();
+
+    /**
+     * Get default language
+     * @return string
+     */
+    public function getDefaultLanguage();
+
+    /**
+     * Get a list of all available languages
+     * @return string[]
+     */
+    public function getAvailableLanguages();
 }
