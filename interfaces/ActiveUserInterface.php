@@ -28,7 +28,8 @@
 
 namespace mpf\interfaces;
 
-interface ActiveUserInterface extends LogAwareObjectInterface {
+interface ActiveUserInterface extends LogAwareObjectInterface
+{
 
     public static function get();
 
@@ -39,4 +40,8 @@ interface ActiveUserInterface extends LogAwareObjectInterface {
     public function logout();
 
     public function getRights();
+
+    public function hasAnyOfThisRights($rights);
+
+    public function hasRight($right);
 }
