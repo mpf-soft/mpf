@@ -33,7 +33,8 @@ use mpf\base\LogAwareObject;
 use mpf\interfaces\ActiveUserInterface;
 use mpf\WebApp;
 
-abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface {
+abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface
+{
 
     private static $_instance;
 
@@ -41,7 +42,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * Get an instance of current class
      * @return static
      */
-    public static function get() {
+    public static function get()
+    {
         if (!self::$_instance) {
             self::$_instance = new static();
         }
@@ -78,7 +80,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      */
     protected $connected = false;
 
-    public function init($config) {
+    public function init($config)
+    {
         parent::init($config);
 
         $this->refresh();
@@ -92,7 +95,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * Check if user is not connected.
      * @return bool
      */
-    public function isGuest() {
+    public function isGuest()
+    {
         return !$this->connected;
     }
 
@@ -100,14 +104,16 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * Check if user is connected.
      * @return bool
      */
-    public function isConnected() {
+    public function isConnected()
+    {
         return $this->connected;
     }
 
     /**
      * Logout for current user. It wil clear session and cookie.
      */
-    public function logout() {
+    public function logout()
+    {
         $this->_userData = array();
         $this->_rights = array();
         Session::get()->delete(App::get()->shortName . $this->sessionKey);
@@ -120,7 +126,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * @param string $value
      * @return $this
      */
-    public function setState($name, $value) {
+    public function setState($name, $value)
+    {
         $this->_userData[$name] = $value;
         Session::get()->updateListItem(App::get()->shortName . $this->sessionKey, 'vars', $this->_userData, array('vars' => array(), 'rights' => array()));
         return $this;
@@ -129,7 +136,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
     /**
      * Load data from $_SESSION if exists
      */
-    protected function refresh() {
+    protected function refresh()
+    {
         if (Session::get()->exists(App::get()->shortName . $this->sessionKey)) {
             $state = Session::get()->value(App::get()->shortName . $this->sessionKey);
             $this->_userData = $state['vars'];
@@ -140,11 +148,26 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
 
     /**
      * Check if user has selected right.
-     * @param $right
+     * @param string $right Name of the right(group) to be checked
      * @return bool
      */
-    public function hasRight($right) {
+    public function hasRight($right)
+    {
         return in_array($right, $this->_rights);
+    }
+
+    /**
+     * Check for multiple rights at once
+     * Check will be done for each right using {@method:\mpf\web\ActiveUser::hasRight()} method.
+     * @param string[] $rights A list of rights to be checked
+     * @return bool
+     */
+    public function hasAnyOfThisRights($rights)
+    {
+        foreach ($rights as $right)
+            if ($this->hasRight($right))
+                return true;
+        return false;
     }
 
     /**
@@ -152,7 +175,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * @param $rights
      * @return $this
      */
-    public function setRights($rights) {
+    public function setRights($rights)
+    {
         $this->_rights = $rights;
         Session::get()->updateListItem(App::get()->shortName . $this->sessionKey, 'rights', $this->_rights, array('vars' => array(), 'rights' => array()));
         return $this;
@@ -162,7 +186,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * Return list of rights for current user.
      * @return \string[]
      */
-    public function getRights() {
+    public function getRights()
+    {
         return $this->_rights;
     }
 
@@ -171,7 +196,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * @param string $name
      * @return mixed
      */
-    public function __get($name) {
+    public function __get($name)
+    {
         return $this->_userData[$name];
     }
 
@@ -180,7 +206,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface 
      * @param string $name
      * @param $value
      */
-    public function __set($name, $value) {
+    public function __set($name, $value)
+    {
         $this->setState($name, $value);
     }
 
