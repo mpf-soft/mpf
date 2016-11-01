@@ -637,7 +637,7 @@ abstract class DbModel extends BaseModel
     /**
      * Get a list of errors for a specific attribute or for the entire model
      * @param null|string $attribute
-     * @return string
+     * @return string|string[]
      */
     public function getErrors($attribute = null)
     {
