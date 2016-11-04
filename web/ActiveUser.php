@@ -116,7 +116,9 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface
     {
         $this->_userData = array();
         $this->_rights = array();
+        $this->connected = false;
         Session::get()->delete(App::get()->shortName . $this->sessionKey);
+        session_destroy();
         Cookie::get()->delete(App::get()->shortName . $this->cookieKey);
     }
 
@@ -198,7 +200,9 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface
      */
     public function __get($name)
     {
-        return $this->_userData[$name];
+        if ($this->connected)
+            return $this->_userData[$name];
+        return null;
     }
 
     /**
