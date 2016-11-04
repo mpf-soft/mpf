@@ -118,8 +118,8 @@ abstract class ActiveUser extends LogAwareObject implements ActiveUserInterface
         $this->_rights = array();
         $this->connected = false;
         Session::get()->delete(App::get()->shortName . $this->sessionKey);
-        session_destroy();
         Cookie::get()->delete(App::get()->shortName . $this->cookieKey);
+        session_destroy();
     }
 
     /**
