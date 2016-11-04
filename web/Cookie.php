@@ -127,7 +127,7 @@ class Cookie extends LogAwareObject implements CacheInterface {
      */
     public function delete($key){
         $domain = ltrim($_SERVER['SERVER_NAME'], "www.");
-        setcookie($key, "", time(), '/', $domain, $this->secured, $this->httpOnly);
+        setcookie($key, "", time()-5, '/', $domain, $this->secured, $this->httpOnly);
     }
 
     /**
