@@ -345,7 +345,7 @@ class ModelCondition extends LogAwareObject {
         foreach ($values as $val) {
             $vals[] = $this->_param($column, $val, true);
         }
-        return $this->addCondition($this->_column($column) . ' NOT IN (' . implode(', ', $vals), array(), $link);
+        return $this->addCondition($this->_column($column) . ' NOT IN (' . implode(', ', $vals) .' )', array(), $link);
     }
 
     /**
