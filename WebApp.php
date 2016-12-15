@@ -39,7 +39,8 @@ use mpf\interfaces\AccessMapInterface;
  * // this will display a link to user profile if it has access to it.
  * [/php]
  */
-class WebApp extends base\App {
+class WebApp extends base\App
+{
 
     /**
      * List of aliases for selected controllers.
@@ -89,21 +90,21 @@ class WebApp extends base\App {
      * List of Controller & Action replacement page in case that the requeste page was not found.
      * @var string[]
      */
-    public $pageNotFound = ['special', 'notFound'];
+    public $pageNotFound = ['special', 'notFound', ''];
 
     /**
      * List of Controller & Action where user is redirected if it tries to access
      * a page without the required rights;
      * @var string[]
      */
-    public $pageAccessDenied = ['special', 'accessDenied'];
+    public $pageAccessDenied = ['special', 'accessDenied', ''];
 
     /**
      * List of Controller & Action where user is redirected when it tries to access a restricted page
      * but it's not logged in
      * @var string[]
      */
-    public $pageLogin = ['user', 'login'];
+    public $pageLogin = ['user', 'login', ''];
 
     /**
      * Object to be used as access map.
@@ -112,12 +113,12 @@ class WebApp extends base\App {
      * @var \mpf\web\AccessMap
      */
     public $accessMap;
-    
+
     /**
      * Create a log entry when someone accesses an unknown page.
      * @var bool
      */
-    public $logMissingPages = false;    
+    public $logMissingPages = false;
 
     /**
      * Link to active controller
@@ -128,7 +129,8 @@ class WebApp extends base\App {
     /**
      * This method will load the controller based on the Request and execute it;
      */
-    protected function start() {
+    protected function start()
+    {
         $controllerClass = $this->calculateControllerClassFromRights();
         $controller = $this->loadController($controllerClass); // try to instantiate the controller
         if (!$controller) {
@@ -154,7 +156,7 @@ class WebApp extends base\App {
 
         $this->_controller = $controller;
         $path = dirname(dirname($this->autoload()->findFile(get_class($controller)))) . DIRECTORY_SEPARATOR;
-        if ($path != $this->request()->getModulePath()){
+        if ($path != $this->request()->getModulePath()) {
             $this->request()->setModulePath($path);
         }
 
@@ -167,11 +169,13 @@ class WebApp extends base\App {
      * Get controller class by checking if user has rights to access current controller or not.
      * @return string
      */
-    protected function calculateControllerClassFromRights() {
+    protected function calculateControllerClassFromRights()
+    {
         $this->user(); //init user first;
         $controllerClass = $this->getControllerClassFromNameAndModule($this->request()->getController(), $this->request()->getModule());
-        if (!trim($this->request()->getAction())){
-            $ctrl = new $controllerClass; /* @var $ctrl \mpf\web\Controller */
+        if (!trim($this->request()->getAction())) {
+            $ctrl = new $controllerClass;
+            /* @var $ctrl \mpf\web\Controller */
             $this->request()->setAction($ctrl->defaultAction);
 
         }
@@ -198,7 +202,8 @@ class WebApp extends base\App {
      * @param string $class
      * @return \mpf\web\Controller
      */
-    private function loadController($class) {
+    private function loadController($class)
+    {
         $controller = new $class($this->currentControllerAliasConfig);
         if (!is_a($controller, '\\mpf\\web\\Controller')) {
             $this->critical('Controller `' . $class . '` must extend \\mpf\\web\\Controller!', array(
@@ -214,7 +219,8 @@ class WebApp extends base\App {
      * Return an instance of active controller
      * @return \mpf\web\Controller
      */
-    public function getController() {
+    public function getController()
+    {
         return $this->_controller;
     }
 
@@ -252,7 +258,8 @@ class WebApp extends base\App {
      * @param string $module name of the module
      * @return string
      */
-    public function getControllerClassFromNameAndModule($controller, $module) {
+    public function getControllerClassFromNameAndModule($controller, $module)
+    {
         $this->currentControllerAliasConfig = [];
         if (isset($this->controllerAliases[$module ? $module . '/' . $controller : $controller])) { // check for controller alias first
             if (is_array($this->controllerAliases[$module ? $module . '/' . $controller : $controller])) {
@@ -270,10 +277,17 @@ class WebApp extends base\App {
      * Return controller class for in case that page was not found!
      * @return string
      */
-    protected function getPageNotFound() {
+    protected function getPageNotFound()
+    {
         $this->debug('Controller and action changed to: ' . implode("/", $this->pageNotFound));
         $this->request()->setController($this->pageNotFound[0]);
         $this->request()->setAction($this->pageNotFound[1]);
+        if (isset($this->pageNotFound[3]))
+            $this->request()->setModule($this->pageNotFound[3]);
+        if (isset($this->pageNotFound[2]) && is_string($this->pageNotFound[2]))
+            $this->request()->setModule($this->pageNotFound[2]);
+        elseif (isset($this->pageNotFound[2]) && is_array($this->pageNotFound[2]) && !empty($this->pageNotFound[2]))
+            $this->request()->setParams($this->pageNotFound[2]);
         return $this->getControllerClassFromNameAndModule($this->pageNotFound[0], $this->request()->getModule());
     }
 
@@ -281,10 +295,17 @@ class WebApp extends base\App {
      * Return class name to access denied controller
      * @return string
      */
-    protected function getPageAccessDenied() {
+    protected function getPageAccessDenied()
+    {
         $this->debug('Controller and action changed to: ' . implode("/", $this->pageAccessDenied));
         $this->request()->setController($this->pageAccessDenied[0]);
         $this->request()->setAction($this->pageAccessDenied[1]);
+        if (isset($this->pageAccessDenied[3]))
+            $this->request()->setModule($this->pageAccessDenied[3]);
+        if (isset($this->pageAccessDenied[2]) && is_string($this->pageAccessDenied[2]))
+            $this->request()->setModule($this->pageAccessDenied[2]);
+        elseif (isset($this->pageAccessDenied[2]) && is_array($this->pageAccessDenied[2]) && !empty($this->pageAccessDenied[2]))
+            $this->request()->setParams($this->pageAccessDenied[2]);
         return $this->getControllerClassFromNameAndModule($this->pageAccessDenied[0], $this->request()->getModule());
     }
 
@@ -292,8 +313,15 @@ class WebApp extends base\App {
      * Return class name to login controller
      * @return string
      */
-    protected function getPageLogin() {
+    protected function getPageLogin()
+    {
         $this->debug('Controller and action changed to: ' . implode("/", $this->pageLogin));
+        if (isset($this->pageLogin[3]))
+            $this->request()->setModule($this->pageLogin[3]);
+        if (isset($this->pageLogin[2]) && is_string($this->pageLogin[2]))
+            $this->request()->setModule($this->pageLogin[2]);
+        elseif (isset($this->pageLogin[2]) && is_array($this->pageLogin[2]) && !empty($this->pageLogin[2]))
+            $this->request()->setParams($this->pageLogin[2]);
         $this->request()->setController($this->pageLogin[0]);
         $this->request()->setAction($this->pageLogin[1]);
         return $this->getControllerClassFromNameAndModule($this->pageLogin[0], $this->request()->getModule());
@@ -302,7 +330,8 @@ class WebApp extends base\App {
     /**
      * @return \mpf\interfaces\HtmlRequestInterface
      */
-    public function request() {
+    public function request()
+    {
         $class = $this->requestClass;
         return $class::get();
     }
@@ -311,7 +340,8 @@ class WebApp extends base\App {
      * Get activeUser class;
      * @return \app\components\ActiveUser
      */
-    public function user() {
+    public function user()
+    {
         $class = $this->activeUserClass;
         return $class::get();
     }
@@ -321,7 +351,8 @@ class WebApp extends base\App {
      * @param \mpf\interfaces\AccessMapInterface $mapObject
      * @return WebApp
      */
-    public function useAccessMap(AccessMapInterface $mapObject) {
+    public function useAccessMap(AccessMapInterface $mapObject)
+    {
         $this->accessMap = $mapObject;
         return $this;
     }
@@ -333,11 +364,12 @@ class WebApp extends base\App {
      * @param string $module name of the module to be checked. If it's base website use '/' as value. If null is sent then it will use active module
      * @return boolean
      */
-    public function hasAccessTo($controller, $action, $module = null) {
+    public function hasAccessTo($controller, $action, $module = null)
+    {
         if (!$this->accessMap) {
             return true; // if no access map is defined then it has access everywhere
         }
-        if (is_null($module)){
+        if (is_null($module)) {
             $module = $this->request()->getModule();
         }
         return $this->accessMap->canAccess($controller, $action, $module);

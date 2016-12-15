@@ -133,6 +133,10 @@ interface HtmlRequestInterface extends LogAwareObjectInterface
      * @param string $name
      */
     public function setAction($name);
+    
+    public function setModule($name);
+    
+    public function setParams($params);
 
     /**
      * Get html url for website root to be used to include images, scripts and other

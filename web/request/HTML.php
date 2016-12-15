@@ -724,6 +724,16 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
         $this->action = $name;
     }
 
+    public function setModule($name)
+    {
+        $this->module= $name;
+    }
+
+    public function setParams($params)
+    {
+        $this->params = $params;
+    }
+
     /**
      * Get current controller name
      * @return string
