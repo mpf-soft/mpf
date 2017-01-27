@@ -332,12 +332,12 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
             if (is_array($details) && $module[0] == $mod) {
                 $this->applyModuleConfig($details);
                 $this->module = $module[0];
-                $uri = $module[1];
+                $uri = isset($module[1])?$module[1]:'';
                 break;
             }
             if ($details == $module[0]) {
                 $this->module = $module[0];
-                $uri = $module[1];
+                $uri = isset($module[1])?$module[1]:'';
                 break;
             }
         }
