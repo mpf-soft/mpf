@@ -73,6 +73,13 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
     public $debug = false;
 
     /**
+     * It will ignore requests that start with this folders.
+     * Useful for missing uploaded files so that it won't try to check if there's a controller or anything else for it.
+     * @var string[]
+     */
+    public $ignoreFolders = ['/uploads'];
+
+    /**
      * List of available modules. Config options for each module can be set here but be careful because
      * they won't apply for already initialized classes except \mpf\WebApp and \mpf\web\request\HTML classes.
      * Example :
@@ -468,6 +475,11 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
     protected function init($options)
     {
         parent::init($options);
+        $currentURL = $_SERVER['REQUEST_URI'];
+        foreach ($this->ignoreFolders as $folder){
+            if ($folder == substr($currentURL, 0, strlen($folder)))
+                die();
+        }
         self::$_instances[md5(serialize($options))] = $this;
         $this->normalizeRequest();
         $this->calculateCurrentURL();
