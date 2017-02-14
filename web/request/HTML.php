@@ -339,12 +339,12 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
             if (is_array($details) && $module[0] == $mod) {
                 $this->applyModuleConfig($details);
                 $this->module = $module[0];
-                $uri = isset($module[1])?$module[1]:'';
+                $uri = isset($module[1]) ? $module[1] : '';
                 break;
             }
             if ($details == $module[0]) {
                 $this->module = $module[0];
-                $uri = isset($module[1])?$module[1]:'';
+                $uri = isset($module[1]) ? $module[1] : '';
                 break;
             }
         }
@@ -476,7 +476,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
     {
         parent::init($options);
         $currentURL = $_SERVER['REQUEST_URI'];
-        foreach ($this->ignoreFolders as $folder){
+        foreach ($this->ignoreFolders as $folder) {
             if ($folder == substr($currentURL, 0, strlen($folder)))
                 die();
         }
@@ -592,7 +592,11 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
         $url = $this->getLinkRoot();
         $language = $language ?: $this->language;
         if ($language != $this->defaultLanguage && (trim($language))) {
+            $url = $this->getLinkRoot(false);
             $url .= $language . '/';
+            if (!is_null($module) && ($module != $this->defaultModule)) {
+                $url .= $module . '/';
+            }
         }
         if ((!is_null($module)) && $module != $this->module) {
             if ($this->module != $this->defaultModule) {
@@ -609,7 +613,6 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
         } elseif ($this->module) {
             $params['module'] = $this->module;
         }
-
         return $this->_createURL($url, $controller, $action, $this->_prepareParams($params));
     }
 
@@ -738,7 +741,7 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
 
     public function setModule($name)
     {
-        $this->module= $name;
+        $this->module = $name;
     }
 
     public function setParams($params)
@@ -893,9 +896,9 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
         }
     }
 
-    public function getLinkRoot()
+    public function getLinkRoot($withModule = true)
     {
-        return $this->baseURL . ($this->module != $this->defaultModule ? $this->module . '/' : '');
+        return $this->baseURL . ($withModule ? ($this->module != $this->defaultModule ? $this->module . '/' : '') : '');
     }
 
     public function getWebRoot()
