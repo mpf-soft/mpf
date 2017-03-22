@@ -160,7 +160,7 @@ class Helper extends \mpf\base\Helper {
      * Continue an action.
      * @param string $message
      * @param string $color one of class constants
-     * @return type
+     * @return string
      */
     public function continueAction($message, $color = 'default') {
         if (!$this->currentAction)
