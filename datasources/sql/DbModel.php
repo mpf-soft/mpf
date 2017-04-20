@@ -380,6 +380,10 @@ abstract class DbModel extends BaseModel
             return $this->_relations[$name] = $this->getRelationFromDb($name);
         }
 
+        if (method_exists($this, 'get'.ucfirst($name))){
+            return call_user_func([$this, 'get'.ucfirst($name)]);
+        }
+        
         trigger_error('Invalid attribute `' . $name . '`! A column or relation with that name was not found for class ' . get_class($this) . '!');
     }
 
