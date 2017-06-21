@@ -516,7 +516,7 @@ class SqlCommand extends \mpf\base\LogAwareObject
         foreach ($data as $pos => $fieldGroup) {
             $inss = [];
             foreach ($fieldGroup as $k => $v) { // generates inserts and saves values to escape
-                if (isset($col[$k]) || (!$columns)) {
+                if (isset($col[$k]) || (!$safeColumns)) {
                     $cols[$k] = '`' . $k . '`';
                     if (isset($applyMethods[$k])) {
                         $inss[] = $applyMethods[$k] . "(:v$pos$k)";
@@ -535,9 +535,9 @@ class SqlCommand extends \mpf\base\LogAwareObject
         }
         if ($onDuplicateKeyUpdate !== 'ignore') {
             $onDuplicateKeyUpdate = $onDuplicateKeyUpdate ? ' ON DUPLICATE KEY UPDATE ' . $onDuplicateKeyUpdate : '';
-            $sql = 'INSERT INTO `' . $tableName . '` (' . implode(', ', $cols) . ') VALUES ' . implode(', ', $inserts) . $onDuplicateKeyUpdate; // generates full sql command
+            $sql = 'INSERT INTO `' . $this->table . '` (' . implode(', ', $cols) . ') VALUES ' . implode(', ', $inserts) . $onDuplicateKeyUpdate; // generates full sql command
         } else {
-            $sql = 'INSERT IGNORE INTO `' . $tableName . '` (' . implode(', ', $cols) . ') VALUES ' . implode(', ', $inserts); // generates full sql command
+            $sql = 'INSERT IGNORE INTO `' . $this->table . '` (' . implode(', ', $cols) . ') VALUES ' . implode(', ', $inserts); // generates full sql command
         }
         return $this->connection->execQuery($sql, $this->params);
     }
