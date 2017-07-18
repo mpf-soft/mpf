@@ -379,7 +379,7 @@ class SqlCommand extends \mpf\base\LogAwareObject
 
     /**
      * Creates select query, executes it and returns the result as assoc array.
-     * @return string
+     * @return string[]
      */
     public function get()
     {
