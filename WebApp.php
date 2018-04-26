@@ -162,6 +162,7 @@ class WebApp extends base\App
                 $this->alert('Invalid controller ' . $controllerClass . '!');
                 return; // stop execution if it's  an invalid controller
             }
+            $controller->setActiveAction($this->request()->getAction())->setRequest($this->request());
         }
 
         $this->_controller = $controller;
