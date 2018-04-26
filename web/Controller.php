@@ -33,7 +33,8 @@ use mpf\base\LogAwareObject;
 use mpf\interfaces\HtmlRequestInterface;
 use mpf\WebApp;
 
-class Controller extends LogAwareObject {
+class Controller extends LogAwareObject
+{
 
     use AdvancedMethodCallTrait;
 
@@ -99,7 +100,8 @@ class Controller extends LogAwareObject {
      * @param mixed $value
      * @return self
      */
-    public function assign($name, $value) {
+    public function assign($name, $value)
+    {
         $this->_displayVars[$name] = $value;
         return $this;
     }
@@ -109,7 +111,8 @@ class Controller extends LogAwareObject {
      * @param string $file
      * @param array $vars
      */
-    public function display($file, $vars = []) {
+    public function display($file, $vars = [])
+    {
         if ((DIRECTORY_SEPARATOR !== $file[0]) && (':' !== $file[1])) { // get path if not full path was sent
             $moduleFolder = $this->request->getModulePath();
             $controllerFolder = $this->request->getController();
@@ -131,11 +134,24 @@ class Controller extends LogAwareObject {
      * Apply request options to class also, not just method params;
      * @return boolean
      */
-    protected function applyParamsToClass() {
+    protected function applyParamsToClass()
+    {
         return false;
     }
 
-    public function run($arguments = array()) {
+    /**
+     * Checks if it can call current action with the available paramteres;
+     * @param array $arguments
+     * @return bool
+     */
+    public function canRun($arguments = [])
+    {
+        $action = 'action' . ucfirst($this->getActiveAction());
+        return $this->canCallMethod($action, $arguments ? $arguments : ($this->request ? $this->request->getParams() : []));
+    }
+
+    public function run($arguments = array())
+    {
         if ($this->getRequest()->isAjaxRequest()) {
             $this->showLayout = $this->showLayoutOnAjax;
         }
@@ -146,13 +162,13 @@ class Controller extends LogAwareObject {
         }
         $moduleFolder = $this->getRequest()->getModulePath();
         $controllerFolder = $this->request->getController();
-        $result = $this->callMethod($action, $arguments ? $arguments : ($this->request ? $this->request->getParams() : array()));
+        $result = $this->callMethod($action, $arguments ? $arguments : ($this->request ? $this->request->getParams() : []));
         if (!$this->afterAction($this->getActiveAction(), $result)) {
             return;
         }
         $layoutFolder = "";
         if ($this->showLayout) {
-            $layoutFolder = str_replace(array('{APP_ROOT}', '{MODULE_FOLDER}', '{LIBS_FOLDER}', '{DIRECTORY_SEPARATOR}'), array(APP_ROOT, $moduleFolder, LIBS_FOLDER, DIRECTORY_SEPARATOR), $this->layoutFolder);
+            $layoutFolder = str_replace(['{APP_ROOT}', '{MODULE_FOLDER}', '{LIBS_FOLDER}', '{DIRECTORY_SEPARATOR}'], [APP_ROOT, $moduleFolder, LIBS_FOLDER, DIRECTORY_SEPARATOR], $this->layoutFolder);
             $this->display($layoutFolder . DIRECTORY_SEPARATOR . 'header.php');
         }
         $viewsFolder = str_replace(['{APP_ROOT}', '{MODULE_FOLDER}', '{CONTROLLER}', '{LIBS_FOLDER}', '{DIRECTORY_SEPARATOR}'],
@@ -172,7 +188,8 @@ class Controller extends LogAwareObject {
      * @param \mpf\interfaces\HtmlRequestInterface $request
      * @return $this
      */
-    public function setRequest(HtmlRequestInterface $request) {
+    public function setRequest(HtmlRequestInterface $request)
+    {
         $this->request = $request;
         return $this;
     }
@@ -181,7 +198,8 @@ class Controller extends LogAwareObject {
      * Get controller request object;
      * @return \mpf\interfaces\HtmlRequestInterface
      */
-    public function getRequest() {
+    public function getRequest()
+    {
         return $this->request;
     }
 
@@ -190,7 +208,8 @@ class Controller extends LogAwareObject {
      * @param string $name
      * @return $this
      */
-    public function setActiveAction($name) {
+    public function setActiveAction($name)
+    {
         $this->currentAction = $name;
         return $this;
     }
@@ -199,7 +218,8 @@ class Controller extends LogAwareObject {
      * Get active action name;
      * @return string
      */
-    public function getActiveAction() {
+    public function getActiveAction()
+    {
         return $this->currentAction ? $this->currentAction : $this->defaultAction;
     }
 
@@ -208,7 +228,8 @@ class Controller extends LogAwareObject {
      * name will be used.
      * @param string $name
      */
-    public function setPageLayout($name) {
+    public function setPageLayout($name)
+    {
         $this->pageLayout = $name;
     }
 
@@ -221,7 +242,8 @@ class Controller extends LogAwareObject {
      * @param string $module Optional a different module
      * @return bool
      */
-    public function goToPage($controller, $action = 'index', $params = [], $module = null) {
+    public function goToPage($controller, $action = 'index', $params = [], $module = null)
+    {
         return $this->request->goToPage($controller, $action, $params, $module);
     }
 
@@ -231,7 +253,8 @@ class Controller extends LogAwareObject {
      * @param array $params
      * @return bool
      */
-    public function goToAction($action, $params = []) {
+    public function goToAction($action, $params = [])
+    {
         return $this->request->goToPage($this->getName(), $action, $params);
     }
 
@@ -242,7 +265,8 @@ class Controller extends LogAwareObject {
      * @param string $url
      * @return null
      */
-    public function goToURL($url) {
+    public function goToURL($url)
+    {
         return $this->request->goToURL($url);
     }
 
@@ -250,7 +274,8 @@ class Controller extends LogAwareObject {
      * Shortcut to request::goBack() method;
      * @return null
      */
-    public function goBack(){
+    public function goBack()
+    {
         return $this->request->goBack();
     }
 
@@ -258,7 +283,8 @@ class Controller extends LogAwareObject {
      * A shortcut to get web root faster from view.
      * @return string
      */
-    public function getWebRoot() {
+    public function getWebRoot()
+    {
         return $this->request->getWebRoot();
     }
 
@@ -266,7 +292,8 @@ class Controller extends LogAwareObject {
      * A shortcut to get link root faster from view.
      * @return string
      */
-    public function getLinkRoot() {
+    public function getLinkRoot()
+    {
         return $this->request->getLinkRoot();
     }
 
@@ -274,16 +301,19 @@ class Controller extends LogAwareObject {
      * Get this controller's name. It does that by checking the name of the class currently instantiated.
      * @return string
      */
-    public function getName() {
+    public function getName()
+    {
         $class = explode('\\', get_class($this));
         return lcfirst($class[count($class) - 1]);
     }
 
-    protected function beforeAction($actionName) {
+    protected function beforeAction($actionName)
+    {
         return true;
     }
 
-    protected function afterAction($actionName, &$result) {
+    protected function afterAction($actionName, &$result)
+    {
         return true;
     }
 
