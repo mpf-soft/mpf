@@ -76,9 +76,10 @@ trait AdvancedMethodCallTrait
      *
      * @param string $name
      * @param string[] $options
+     * @param bool $logError
      * @return string[] $details
      */
-    public function getMethodParameters($name, $options)
+    public function getMethodParameters($name, $options, $logError = true)
     {
         $method = new \ReflectionMethod($this, $name);
 
@@ -93,7 +94,11 @@ trait AdvancedMethodCallTrait
                 $details[] = $param->getDefaultValue();
             } else {
                 if (is_a($this, '\\mpf\\interfaces\\LogAwareObjectInterface')) {
-                    $this->critical("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                    if ($logError) {
+                        $this->critical("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                    } else {
+                        $this->debug("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                    }
                 }
                 return null;
             }
@@ -134,6 +139,6 @@ trait AdvancedMethodCallTrait
      */
     public function canCallMethod($methodName, $options)
     {
-        return (null !== ($options = $this->getMethodParameters($methodName, $options)));
+        return (null !== ($options = $this->getMethodParameters($methodName, $options, false)));
     }
 }
