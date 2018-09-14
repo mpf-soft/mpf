@@ -28,7 +28,7 @@
 
 namespace mpf\translators;
 
-use mpf\base\Object;
+use mpf\base\MPFObject;
 use mpf\interfaces\TranslatorInterface;
 
 /**
@@ -36,7 +36,7 @@ use mpf\interfaces\TranslatorInterface;
  *
  * @author mirel
  */
-class XML extends Object implements TranslatorInterface {
+class XML extends MPFObject implements TranslatorInterface {
 
     /**
      * @var None[string]

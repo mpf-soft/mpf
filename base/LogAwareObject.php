@@ -31,7 +31,7 @@ namespace mpf\base;
 use mpf\interfaces\LogAwareObjectInterface;
 
 /**
- * A class that extends the basic {@class:\mpf\base\Object} and implements {@class:\mpf\interfaces\LogAwareObjectInterface}.
+ * A class that extends the basic {@class:\mpf\base\MPFObject} and implements {@class:\mpf\interfaces\LogAwareObjectInterface}.
  *
  * It offers access to a series of methods that allows a developer to log any kind of information.
  *
@@ -57,10 +57,10 @@ use mpf\interfaces\LogAwareObjectInterface;
  * {@class:\mpf\base\LogAwareObject} and are forced to just implement {@class:\mpf\interfaces\LogAwareObjectInterface} and use
  * {@class:\mpf\base\LogAwareObjectTrait} for the methods. That is the reason why this class has no methods and instead it uses
  * the trait to get all it's methods here. It's used more like a shortcut so that the developer won't have to implement the interface,
- * extend the {@class:\mpf\base\Object} and use the trait for each class that needs this.
+ * extend the {@class:\mpf\base\MPFObject} and use the trait for each class that needs this.
  *
  */
-class LogAwareObject extends Object implements LogAwareObjectInterface {
+class LogAwareObject extends MPFObject implements LogAwareObjectInterface {
 
     use LogAwareObjectTrait;
 }

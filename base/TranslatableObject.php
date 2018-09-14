@@ -30,7 +30,7 @@ namespace mpf\base;
 
 use mpf\interfaces\TranslatableObjectInterface;
 
-class TranslatableObject extends Object implements TranslatableObjectInterface {
+class TranslatableObject extends MPFObject implements TranslatableObjectInterface {
 
     use TranslatableObjectTrait;
 }

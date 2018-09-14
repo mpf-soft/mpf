@@ -9,9 +9,9 @@
 namespace mpf\web\helpers;
 
 
-use mpf\base\Object;
+use mpf\base\MPFObject;
 
-class JsExpression extends Object {
+class JsExpression extends MPFObject {
     /**
      * @var string
      */
