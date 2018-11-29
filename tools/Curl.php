@@ -16,7 +16,7 @@ class Curl  extends LogAwareSingleton {
      * Location of session file
      * @var string
      */
-    public $cookieLocation = "APP_ROOT_temp";
+    public $cookieLocation = "APP_ROOT_temp/";
 
     public $proxyHost;
 
@@ -48,7 +48,12 @@ class Curl  extends LogAwareSingleton {
      */
     public function startSession($domain) {
         $this->cookieLocation = str_replace('APP_ROOT', APP_ROOT, $this->cookieLocation);
-        $this->currentFile = $this->cookieFileLocation . date('YmdHis') . '-' . md5($domain);
+        if (!is_dir($this->cookieLocation))
+            mkdir($this->cookieLocation);
+        if (!is_dir($this->cookieLocation)) {
+            $this->error($this->error = "Can't create folder {$this->cookieLocation}");
+        }
+        $this->currentFile = $this->cookieLocation . date('YmdHis') . '-' . md5($domain);
         fclose(fopen($this->currentFile, 'w'));
     }
 
@@ -124,8 +129,7 @@ class Curl  extends LogAwareSingleton {
         $message = substr(curl_exec($curl), curl_getinfo($curl, CURLINFO_HEADER_SIZE));
         $this->lastURL = curl_getinfo($curl, CURLINFO_EFFECTIVE_URL);
         if (curl_error($curl)) {
-            $this->error = curl_errno($curl) . ':' . curl_error($curl);
-            $this->error(curl_error($curl));
+            $this->error($this->error = curl_errno($curl) . ':' . curl_error($curl));
         }
         curl_close($curl);
         return $message;
