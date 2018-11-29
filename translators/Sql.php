@@ -28,7 +28,7 @@
 
 namespace mpf\translators;
 
-use mpf\base\Object;
+use mpf\base\MPFObject;
 use mpf\interfaces\TranslatorInterface;
 
 /**
@@ -36,7 +36,7 @@ use mpf\interfaces\TranslatorInterface;
  *
  * @author mirel
  */
-class Sql extends Object implements TranslatorInterface {
+class Sql extends MPFObject implements TranslatorInterface {
     /**
      * @var Sql[string]
      */

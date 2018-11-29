@@ -9,10 +9,10 @@
 namespace mpf\translators;
 
 
-use mpf\base\Object;
+use mpf\base\MPFObject;
 use mpf\interfaces\TranslatorInterface;
 
-class Redis extends Object implements TranslatorInterface {
+class Redis extends MPFObject implements TranslatorInterface {
     /**
      * @var Redis[string]
      */

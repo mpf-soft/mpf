@@ -9,9 +9,9 @@
 namespace mpf\web\helpers;
 
 
-use mpf\base\Object;
+use mpf\base\MPFObject;
 
-class JSON extends Object {
+class JSON extends MPFObject {
 
     /**
      * List of JSON Error messages assigned to constant names for better handling of version differences

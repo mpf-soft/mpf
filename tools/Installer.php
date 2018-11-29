@@ -9,12 +9,12 @@
 namespace mpf\tools;
 
 
-use mpf\base\Object;
+use mpf\base\MPFObject;
 use mpf\cli\Helper;
 use mpf\tools\install\File;
 use mpf\tools\install\SQL;
 
-class Installer extends Object {
+class Installer extends MPFObject {
 
     public static $APP_CONFIG_DIR;
 

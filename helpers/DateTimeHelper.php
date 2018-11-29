@@ -16,6 +16,20 @@ class DateTimeHelper extends Helper
 
     public $timeFormat = ' H:i';
 
+    /**
+     * @param string $date1
+     * @param string $date2
+     * @param string $unit Unit used for interval. Can be day, hour, minute or second
+     * @return float
+     */
+    public function dateDiff($date1, $date2, $unit = 'day')
+    {
+        $intervals = ['day' => 3600 * 24, 'hour' => 3600, 'minute' => 60, 'second' => 1];
+        if (!isset($intervals[$unit]))
+            trigger_error("Invalid unit '$unit'. Valid values are: " . implode(', ', array_keys($intervals)) . ' !');
+        return floor((strtotime($date1) - strtotime($date2)) / $intervals[$unit]);
+    }
+
     public function niceDate($time = null, $noInterval = false, $showDayOfWeek = true, $noValueText = '-')
     {
         if (is_string($time) && (substr($time, 0, 10) === '0000-00-00'))

@@ -379,7 +379,7 @@ class SqlCommand extends \mpf\base\LogAwareObject
 
     /**
      * Creates select query, executes it and returns the result as assoc array.
-     * @return string
+     * @return string[]
      */
     public function get()
     {
@@ -491,6 +491,55 @@ class SqlCommand extends \mpf\base\LogAwareObject
             return false;
         }
 
+    }
+
+    /**
+     * Insert multiple rows at once. Send columns used for each row in the `$data` array
+     * @param array $data
+     * @param string|null $onDuplicateKeyUpdate
+     * @param array $params
+     * @param array $safeColumns
+     * @return int
+     */
+    public function insertRows($data, $onDuplicateKeyUpdate = null, $params = [], $safeColumns = [])
+    {
+        $col = array();
+        if ($safeColumns) {
+            foreach ($safeColumns as $c) {
+                $col[trim($c)] = true;
+            }
+        }
+        $inserts = $cols = [];
+        if ($params) {
+            $this->params = array_merge($params, $this->params);
+        }
+        foreach ($data as $pos => $fieldGroup) {
+            $inss = [];
+            foreach ($fieldGroup as $k => $v) { // generates inserts and saves values to escape
+                if (isset($col[$k]) || (!$safeColumns)) {
+                    $cols[$k] = '`' . $k . '`';
+                    if (isset($applyMethods[$k])) {
+                        $inss[] = $applyMethods[$k] . "(:v$pos$k)";
+                    } else {
+                        $inss[] = ":v$pos$k";
+                    }
+                    $this->params[":v$pos$k"] = $v;
+                }
+            }
+            if ($inss) {
+                $inserts[] = '(' . implode(', ', $inss) . ')';
+            }
+        }
+        if (!count($inserts)) {
+            return 0;
+        }
+        if ($onDuplicateKeyUpdate !== 'ignore') {
+            $onDuplicateKeyUpdate = $onDuplicateKeyUpdate ? ' ON DUPLICATE KEY UPDATE ' . $onDuplicateKeyUpdate : '';
+            $sql = 'INSERT INTO `' . $this->table . '` (' . implode(', ', $cols) . ') VALUES ' . implode(', ', $inserts) . $onDuplicateKeyUpdate; // generates full sql command
+        } else {
+            $sql = 'INSERT IGNORE INTO `' . $this->table . '` (' . implode(', ', $cols) . ') VALUES ' . implode(', ', $inserts); // generates full sql command
+        }
+        return $this->connection->execQuery($sql, $this->params);
     }
 
     /**

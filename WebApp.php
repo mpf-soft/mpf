@@ -154,15 +154,26 @@ class WebApp extends base\App
             }
         }
 
+        $controller->setActiveAction($this->request()->getAction())->setRequest($this->request());
+
+        if (!$controller->canRun()) {
+            $controller = $this->loadController($this->getPageNotFound());
+            if (!$controller) {
+                $this->alert('Invalid controller ' . $controllerClass . '!');
+                return; // stop execution if it's  an invalid controller
+            }
+            $controller->setActiveAction($this->request()->getAction())->setRequest($this->request());
+        }
+
         $this->_controller = $controller;
+
         $path = dirname(dirname($this->autoload()->findFile(get_class($controller)))) . DIRECTORY_SEPARATOR;
         if ($path != $this->request()->getModulePath()) {
             $this->request()->setModulePath($path);
         }
 
-        $controller->setActiveAction($this->request()->getAction())
-            ->setRequest($this->request())
-            ->run();
+        $controller->run();
+
     }
 
     /**

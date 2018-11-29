@@ -1,7 +1,7 @@
 {
     "name": "mpf-soft/mpf",
     "description": "MPF Framework files",
-    "license": "Apache License",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Mirel Mitache",

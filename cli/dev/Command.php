@@ -44,7 +44,7 @@ module --name='moduleName'
                 return false;
             }
             $firstTry = false;
-        } while (!isset($tables[$table + 1]));
+        } while (!isset($tables[$table - 1]));
         return $tables[$table - 1];
     }
 

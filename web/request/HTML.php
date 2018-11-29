@@ -143,6 +143,12 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
     public $csrfSalt = 'D$F#$dx32x43';
 
     /**
+     * List of "module/controller/action" paths to add to exception list
+     * @var array
+     */
+    public $csrfExceptions = [];
+
+    /**
      * Active controller
      * @var string
      */
@@ -483,7 +489,17 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
         self::$_instances[md5(serialize($options))] = $this;
         $this->normalizeRequest();
         $this->calculateCurrentURL();
-        if ($this->secure && isset($_POST) && count($_POST)) {
+        if (!$this->SEO) {
+            $this->language = isset($_GET['language']) ? $_GET['language'] : $this->defaultLanguage;
+            $this->module = isset($_GET['module']) ? $_GET['module'] : $this->defaultModule;
+            $this->controller = isset($_GET['controller']) ? $_GET['controller'] : $this->defaultController;
+            $this->action = isset($_GET['action']) ? $_GET['action'] : null;
+            $this->calculateModulePath();
+        } else {
+            $this->updateURLData();
+        }
+
+        if ($this->secure && isset($_POST) && count($_POST) && (!$this->isSecurityException())) {
             $key = $this->getCsrfKey();
             $value = $this->getCsrfValue();
             if (!isset($_POST[$key])) {
@@ -499,20 +515,38 @@ class HTML extends LogAwareObject implements HtmlRequestInterface
             }
             unset($_POST[$key]);
         }
-        if (!$this->SEO) {
-            $this->language = isset($_GET['language']) ? $_GET['language'] : $this->defaultLanguage;
-            $this->module = isset($_GET['module']) ? $_GET['module'] : $this->defaultModule;
-            $this->controller = isset($_GET['controller']) ? $_GET['controller'] : $this->defaultController;
-            $this->action = isset($_GET['action']) ? $_GET['action'] : null;
-            $this->calculateModulePath();
-        } else {
-            $this->updateURLData();
-        }
         foreach ($this->modules as $name => $details) {
             if (is_array($details) && isset($details['path'])) {
                 WebApp::get()->autoload()->addPsr4('\\app\\modules\\' . $name, $details['path'], true);
             }
         }
+    }
+
+    /**
+     * Check if current url is exception for csrf check
+     * @return bool
+     */
+    protected function isSecurityException()
+    {
+        if (!count($this->csrfExceptions))
+            return false;
+        foreach ($this->csrfExceptions as $route) {
+            list($module, $controller, $action) = explode('/', $route);
+            if ($module != $this->module) {
+                continue;
+            }
+            if ('*' == $controller)
+                return true;
+
+            if ($controller != $this->controller)
+                continue;
+
+            if ('*' == $action)
+                return true;
+
+            return ($action == $this->action);
+        }
+        return false;
     }
 
     /**

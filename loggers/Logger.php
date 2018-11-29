@@ -19,7 +19,7 @@
  */
 
 namespace mpf\loggers;
-use mpf\base\Object;
+use mpf\base\MPFObject;
 
 /**
  * @author Mirel Nicu Mitache <mirel.mitache@gmail.com>
@@ -31,7 +31,7 @@ use mpf\base\Object;
  * @copyright Copyright &copy; 2011 Mirel Mitache 
  * @license  http://www.mpfframework.com/licence
  */
-abstract class Logger extends Object {
+abstract class Logger extends MPFObject {
 
     use LoggerTrait;
 

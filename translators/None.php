@@ -28,10 +28,10 @@
 
 namespace mpf\translators;
 
-use mpf\base\Object;
+use mpf\base\MPFObject;
 use mpf\interfaces\TranslatorInterface;
 
-class None extends Object implements TranslatorInterface {
+class None extends MPFObject implements TranslatorInterface {
 
     /**
      * @var None[string]

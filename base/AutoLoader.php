@@ -28,7 +28,7 @@
 
 namespace mpf\base;
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'Object.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR;
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_SEPARATOR . 'AutoLoaderInterface.php';
 
 /**
@@ -87,7 +87,7 @@ require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_S
  * This class will only be used if case that the framework is installed without the composer. In case that composer is
  * used to maintain packages that it will also take care of the autoload for all classes.
  */
-class AutoLoader extends Object implements \mpf\interfaces\AutoLoaderInterface
+class AutoLoader extends MPFObject implements \mpf\interfaces\AutoLoaderInterface
 {
 
     /**

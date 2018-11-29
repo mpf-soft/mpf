@@ -9,7 +9,7 @@
 namespace mpf\base;
 
 
-class Singleton extends Object {
+class Singleton extends MPFObject {
 
     private static $_instances = [];
 

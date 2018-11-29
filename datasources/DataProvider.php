@@ -10,13 +10,13 @@ namespace mpf\datasources;
 
 
 use mpf\base\App;
-use mpf\base\Object;
+use mpf\base\MPFObject;
 use mpf\web\Cookie;
 use mpf\web\helpers\Html;
 use mpf\web\Session;
 use mpf\WebApp;
 
-abstract class DataProvider extends Object {
+abstract class DataProvider extends MPFObject {
 
     /**
      * Name of the primary key

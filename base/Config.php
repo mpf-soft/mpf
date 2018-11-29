@@ -29,7 +29,7 @@
 namespace mpf\base;
 
 /**
- * This class doesn't extend any {@class:\mpf\base\Object} or any other class as it should be the first class loaded when
+ * This class doesn't extend any {@class:\mpf\base\MPFObject} or any other class as it should be the first class loaded when
  * any type of application is executed.
  *
  * When it's instantiated it should receive a single parameter that contains a list of options used by all framework classes.

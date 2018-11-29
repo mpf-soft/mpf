@@ -61,7 +61,8 @@ namespace mpf\base;
  *
  * For details about the default uses of this trait check : {@method:\mpf\cli\Command::run()} and {@method:\mpf\web\Controller::run()} descriptions.
  */
-trait AdvancedMethodCallTrait {
+trait AdvancedMethodCallTrait
+{
 
     /**
      * Records if there was an error or not when trying to call the method.
@@ -69,15 +70,17 @@ trait AdvancedMethodCallTrait {
      * @var bool
      */
     private $error;
-    
+
     /**
      * Read parameters for searched method;
-     * 
+     *
      * @param string $name
      * @param string[] $options
+     * @param bool $logError
      * @return string[] $details
      */
-    public function getMethodParameters($name, $options) {
+    public function getMethodParameters($name, $options, $logError = true)
+    {
         $method = new \ReflectionMethod($this, $name);
 
         $parameters = $method->getParameters();
@@ -91,7 +94,11 @@ trait AdvancedMethodCallTrait {
                 $details[] = $param->getDefaultValue();
             } else {
                 if (is_a($this, '\\mpf\\interfaces\\LogAwareObjectInterface')) {
-                    $this->critical("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                    if ($logError) {
+                        $this->critical("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                    } else {
+                        $this->debug("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                    }
                 }
                 return null;
             }
@@ -107,12 +114,13 @@ trait AdvancedMethodCallTrait {
 
     /**
      * Call selected method using selected options;
-     * 
+     *
      * @param string $methodName
      * @param string[] $options
      * @return mixed
      */
-    public function callMethod($methodName, $options) {
+    public function callMethod($methodName, $options)
+    {
         $this->error = false;
         if (null === ($options = $this->getMethodParameters($methodName, $options))) {
             $this->error = true;
@@ -122,4 +130,15 @@ trait AdvancedMethodCallTrait {
         return call_user_func_array(array($this, $methodName), $options);
     }
 
+
+    /**
+     * Checks if all the required parameters are sent
+     * @param $methodName
+     * @param $options
+     * @return bool
+     */
+    public function canCallMethod($methodName, $options)
+    {
+        return (null !== ($options = $this->getMethodParameters($methodName, $options, false)));
+    }
 }
