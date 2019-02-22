@@ -37,6 +37,18 @@ class Html extends \mpf\base\Helper {
      * @var string
      */
     public $jqueryUITheme = 'excite-bike';
+    
+    /**
+     * Used when loading partial page from ajax if resource were already loaded
+     * @var bool
+     */
+    public $skipMpfScriptFiles = false;
+    
+    /**
+     * Used when loading partial page from ajax if resource were already loaded
+     * @var bool
+     */
+    public $skipOtherScriptFiles = false;
 
     /**
      * @var array
@@ -73,6 +85,8 @@ class Html extends \mpf\base\Helper {
      * @return string
      */
     public function mpfScriptFile($name) {
+        if ($this->skipMpfScriptFiles)
+            return "";
         return $this->scriptFile(AssetsPublisher::get()->mpfAssetFile('scripts/' . $name));
     }
 
@@ -82,6 +96,9 @@ class Html extends \mpf\base\Helper {
      * @return string
      */
     public function scriptFile($path) {
+        if ($this->skipOtherScriptFiles)
+            return "";
+        
         if ('http' != substr($path, 0, 4)) {
             $path = \mpf\WebApp::get()->request()->getWebRoot() . $path;
         }
