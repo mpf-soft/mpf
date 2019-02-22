@@ -405,6 +405,9 @@ SCR;
         $return = Html::get()->mpfScriptFile('jquery.js') . Html::get()->mpfScriptFile('jquery-ui/jquery-ui.js');
         if (!isset($htmlOptions['id'])) {
             $htmlOptions['id'] = 'mdate-time' . str_replace(array('[', ']'), array('_', '__'), $name) . $this->_date_input_count;
+            if (WebApp::get()->request()->isAjaxRequest()){
+                $htmlOptions['id'] = 'ajax-'.$htmlOptions['id'];
+            }            
             $this->_date_input_count++;
         }
         $s = Html::get()->script("$(function(){\$(\"#{$htmlOptions['id']}\").datepicker({dateFormat: '$format'});});");
