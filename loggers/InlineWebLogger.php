@@ -39,7 +39,9 @@ class InlineWebLogger extends Logger {
         Levels::NOTICE,
     ];
 
-    protected function init($config) {
+    private $firstLog = true;
+
+    protected function initCss() {
         echo <<<STYLE
 <style>
     .log-message{
@@ -97,7 +99,6 @@ class InlineWebLogger extends Logger {
     }
 </style>
 STYLE;
-        parent::init($config);
     }
 
     public function getLogs() {
@@ -107,6 +108,10 @@ STYLE;
     public function log($level, $message, array $context = array()) {
         if (!in_array($level, $this->visibleLevels)){
             return ;
+        }
+        if ($this->firstLog){
+            $this->firstLog = false;
+            $this->initCss();
         }
         $details = array();
         $context['time'] = microtime(true);
