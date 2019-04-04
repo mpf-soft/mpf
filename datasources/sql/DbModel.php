@@ -458,7 +458,6 @@ abstract class DbModel extends BaseModel
         if (!$this->beforeSave()) {
             return false;
         }
-
         if ($this->_isNewRecord) {
             $r = $this->_db->table($this->_tableName)->insert($this->_updatedAttributes);
             if (is_string($this->_pk)) {

@@ -30,6 +30,15 @@ namespace mpf\loggers;
 
 class InlineWebLogger extends Logger {
 
+    public $visibleLevels = [
+        Levels::EMERGENCY,
+        Levels::CRITICAL,
+        Levels::ALERT,
+        Levels::ERROR,
+        Levels::WARNING,
+        Levels::NOTICE,
+    ];
+
     protected function init($config) {
         echo <<<STYLE
 <style>
@@ -96,6 +105,9 @@ STYLE;
     }
 
     public function log($level, $message, array $context = array()) {
+        if (!in_array($level, $this->visibleLevels)){
+            return ;
+        }
         $details = array();
         $context['time'] = microtime(true);
         foreach ($context as $k => $v) {
@@ -103,8 +115,7 @@ STYLE;
         }
         $details = implode('<br />', $details);
         echo "<div class=\"log-message log-$level\"><b>$level : $message</b><span><br />$details</span></div>";
-        $baseScriptsURL = \mpf\web\AssetsPublisher::get()->publishFolder(dirname(\mpf\base\AutoLoader::getLastRegistered()->path('\mpf\__assets\scripts\jquery')) . DIRECTORY_SEPARATOR . 'jquery');
-        echo \mpf\web\helpers\Html::get()->scriptFile($baseScriptsURL . 'jquery.min.js');
+        echo \mpf\web\helpers\Html::get()->mpfScriptFile('jquery.js');
         echo \mpf\web\helpers\Html::get()->script('$(document).ready(function(){'
                 . '$(".log-message").click(function(){if ($("span", this).is(":visible")) {$("span", this).hide();} else {$("span", this).show();} })'
                 . '})');

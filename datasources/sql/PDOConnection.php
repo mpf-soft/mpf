@@ -192,7 +192,7 @@ class PDOConnection extends \PDO implements LogAwareObjectInterface{
                 'Params' => $params,
                 'Trace' => $e->getTraceAsString()
             ));
-            die();
+            return 0;
         }
         $this->debug($statement, array(
             'params' => $params,
