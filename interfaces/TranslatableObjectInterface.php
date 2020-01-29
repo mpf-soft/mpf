@@ -32,16 +32,19 @@ interface TranslatableObjectInterface {
 
     /**
      * Set a new translator; Must implement \mpf\translators\ITranslator
+     * @param string|TranslatorInterface $className
      */
     public function setTranslator($className);
 
     /**
      * Get current translator;
      */
-    public function getTranslator();
+    public function getTranslator() : TranslatorInterface;
 
     /**
      * Translate selected text;
+     * @param string $text
+     * @return string
      */
-    public function translate($text);
+    public function translate(string $text) : string;
 }
