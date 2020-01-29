@@ -28,6 +28,8 @@
 
 namespace mpf\base;
 
+use mpf\interfaces\LogAwareObjectInterface;
+
 /**
  * This trait offers 2 methods that help to call a callable function using an associated array as parameter so that
  * the order won't matter.
@@ -78,7 +80,7 @@ trait AdvancedMethodCallTrait
      * @param string[] $options
      * @param bool $logError
      * @param bool $strict
-     * @return string[]|null $details
+     * @return string[]|null
      * @throws \ReflectionException
      */
     public function getMethodParameters($name, $options, $logError = true, $strict = false)
@@ -87,7 +89,7 @@ trait AdvancedMethodCallTrait
 
         $parameters = $method->getParameters();
 
-        $details = array();
+        $details = [];
         foreach ($parameters as $param) {
             if (isset($options[$param->getName()])) {
                 $details[] = $options[$param->getName()];
@@ -95,11 +97,11 @@ trait AdvancedMethodCallTrait
             } elseif ($param->isDefaultValueAvailable()) {
                 $details[] = $param->getDefaultValue();
             } else {
-                if (is_a($this, '\\mpf\\interfaces\\LogAwareObjectInterface')) {
+                if (is_a($this, LogAwareObjectInterface::class)) {
                     if ($logError) {
-                        $this->critical("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                        $this->critical('Missing parameter ' . $param->getName() . '!', ['options' => $options]);
                     } else {
-                        $this->debug("Missing parameter " . $param->getName() . "!", array('options' => $options));
+                        $this->debug('Missing parameter ' . $param->getName() . '!', ['options' => $options]);
                     }
                 }
                 return null;

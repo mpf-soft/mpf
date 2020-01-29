@@ -51,6 +51,9 @@ namespace mpf\base;
  */
 class Helper extends TranslatableObject {
 
+    /**
+     * @var Helper[]
+     */
     private static $_instances = [];
 
     /**
@@ -59,10 +62,12 @@ class Helper extends TranslatableObject {
      * @param array $config
      * @return static
      */
-    public static function get($config = []) {
-        $key = md5(get_called_class() . serialize($config));
-        if (!isset(self::$_instances[$key]))
+    public static function get($config = []): Helper
+    {
+        $key = md5(static::class . serialize($config));
+        if (!isset(self::$_instances[$key])) {
             self::$_instances[$key] = new static($config);
+        }
         return self::$_instances[$key];
     }
 

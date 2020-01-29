@@ -110,9 +110,11 @@ class Config {
      * Return a link to current config class;
      * @return Config
      */
-    public static function get() {
-        if (!self::$instance)
+    public static function get(): Config
+    {
+        if (!self::$instance) {
             return new Config();
+        }
         return self::$instance;
     }
 
@@ -121,14 +123,17 @@ class Config {
      * add extra config for each of them.
      * @param string $className
      * @return string[]
+     * @throws \ReflectionException
      */
-    public function forClass($className) {
+    public function forClass($className): array
+    {
         $parents = $this->getParents($className);
         $finalConfig = array();
         foreach ($parents as $parent) { // child will overwrite parent config for selected options;
             if (isset($this->options[$parent]) && count($this->options[$parent])) {
-                foreach ($this->options[$parent] as $name => $option)
+                foreach ($this->options[$parent] as $name => $option) {
                     $finalConfig[$name] = $option;
+                }
             }
         }
         return $finalConfig;
@@ -136,22 +141,25 @@ class Config {
 
     /**
      * A small cache for same function (example models)
-     * @var string[]
+     * @var array
      */
-    private $_parents = array();
+    private $_parents = [];
 
     /**
      * Get all parent class and implemented interfaces for selected class;
      * @param string $name
-     * @return string[]
+     * @return array
+     * @throws \ReflectionException
      */
-    private function getParents($name) {
+    private function getParents($name): array
+    {
         if (!isset($this->_parents[$name])) {
             $class = new \ReflectionClass($name);
             $parents = array($name);
             $interfaces = $class->getInterfaceNames();
-            while ($class = $class->getParentClass())
+            while ($class = $class->getParentClass()) {
                 $parents[] = $class->getName();
+            }
             $this->_parents[$name] = array_reverse($parents);
             foreach ($interfaces as $int) {
                 $this->_parents[$name][] = $int;
@@ -166,7 +174,8 @@ class Config {
      * @param $values
      * @return $this
      */
-    public function set($className, $values) {
+    public function set($className, $values): self
+    {
         if (!isset($this->options[$className])) {
             $this->options[$className] = array();
         }

@@ -19,9 +19,10 @@ class Singleton extends MPFObject {
      */
     public static function get($config = []) {
         $c = md5(json_encode($config));
-        $class = get_called_class();
-        if (!isset(self::$_instances[$class . $c]))
+        $class = static::class;
+        if (!isset(self::$_instances[$class . $c])) {
             self::$_instances[$class . $c] = new $class($config);
+        }
         return self::$_instances[$class . $c];
     }
 }

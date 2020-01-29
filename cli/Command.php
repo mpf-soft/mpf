@@ -31,6 +31,7 @@ namespace mpf\cli;
 use mpf\base\AdvancedMethodCallTrait;
 use mpf\base\LogAwareObject;
 use mpf\loggers\InlineCliLogger;
+use mpf\datasources\sql\PDOConnection;
 
 class Command extends LogAwareObject
 {
@@ -50,7 +51,7 @@ class Command extends LogAwareObject
      * Apply request options to class also, not just method params;
      * @return boolean
      */
-    protected function applyParamsToClass()
+    protected function applyParamsToClass(): bool
     {
         return true;
     }
@@ -60,7 +61,7 @@ class Command extends LogAwareObject
      * @param string $name
      * @return $this
      */
-    public function setActiveAction($name)
+    public function setActiveAction($name): self
     {
         $this->currentAction = $name;
         return $this;
@@ -70,7 +71,7 @@ class Command extends LogAwareObject
      * Get active action name;
      * @return string
      */
-    public function getActiveAction()
+    public function getActiveAction(): string
     {
         return $this->currentAction ? $this->currentAction : $this->defaultAction;
     }
@@ -80,10 +81,10 @@ class Command extends LogAwareObject
      * @param string $actionName name of the action to be executed, except for action part
      * @return boolean true to continue
      */
-    protected function beforeAction($actionName)
+    protected function beforeAction($actionName): bool
     {
         if (!$this->debug) {
-            InlineCliLogger::get()->ignoredClasses = array('mpf\datasources\sql\PDOConnection');
+            InlineCliLogger::get()->ignoredClasses = array(PDOConnection::class);
             Helper::get()->showProgressBar = false;
         }
         return true;
@@ -95,11 +96,15 @@ class Command extends LogAwareObject
      * @param mixed $result
      * @return boolean true to continue
      */
-    protected function afterAction($actionName, $result)
+    protected function afterAction($actionName, $result): bool
     {
         return true;
     }
 
+    /**
+     * @param array $arguments
+     * @throws \ReflectionException
+     */
     public function run($arguments = array())
     {
         $action = 'action' . ucfirst($this->getActiveAction());

@@ -55,8 +55,9 @@ class Widget extends LogAwareObject implements TranslatableObjectInterface {
      * @param string [string] $config
      * @return static
      */
-    public static function get($config) {
-        $key = md5(get_called_class() . serialize(self::prepareForSerialize($config)));
+    public static function get($config): Widget
+    {
+        $key = md5(static::class . serialize(self::prepareForSerialize($config)));
         if (!isset(self::$_instances[$key]))
             self::$_instances[$key] = new static($config);
         return self::$_instances[$key];
@@ -67,7 +68,7 @@ class Widget extends LogAwareObject implements TranslatableObjectInterface {
     /**
      * Display a template using full path. It will also assign all variables to it.
      * @param string $filePath
-     * @param array|string[string] $variables
+     * @param array|string[] $variables
      */
     protected function render($filePath, $variables = array()) {
         foreach ($this->_vars as $k => $n) {

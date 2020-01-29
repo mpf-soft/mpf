@@ -128,13 +128,13 @@ MODEL;
 
     protected function getColumnsList($array) {
         if (!$array) {
-            return implode(", ", array_keys($this->columns));
+            return implode(', ', array_keys($this->columns));
         }
         $list = array();
         foreach ($this->columns as $name => $type) {
             $list[] = "\"$name\"";
         }
-        return implode(", ", $list);
+        return implode(', ', $list);
     }
 
     protected function getModelRelations() {
@@ -160,14 +160,14 @@ MODEL;
         $result = array();
         foreach ($this->columns as $name => $type) {
             $stype = 'string';
-            if ('int' == substr($type, 0, 3) || 'smallint' == substr($type, 0, 8) || 'tinyint' == substr($type, 0, 7)) {
+            if (strpos($type, 'int') === 0 || strpos($type, 'smallint') === 0 || strpos($type, 'tinyint') === 0) {
                 $stype = 'int';
             }
             $result[] = " * @property $stype \${$name}";
         }
         if ($this->relations) {
             foreach ($this->relations as $relation) {
-                $multiple = in_array($relation['type'], array(DbRelations::HAS_MANY, DbRelations::MANY_TO_MANY)) ? '[]' : '';
+                $multiple = in_array($relation['type'], [DbRelations::HAS_MANY, DbRelations::MANY_TO_MANY], true) ? '[]' : '';
                 $result[] = " * @property {$relation['model']}$multiple \${$relation['name']}";
             }
         }

@@ -28,7 +28,6 @@
 
 namespace mpf\base;
 
-require_once __DIR__ . DIRECTORY_SEPARATOR;
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'interfaces' . DIRECTORY_SEPARATOR . 'AutoLoaderInterface.php';
 
 /**
@@ -101,9 +100,9 @@ class AutoLoader extends MPFObject implements \mpf\interfaces\AutoLoaderInterfac
      * An associative array where the key is a namespace prefix and the value
      * is an array of base directories for classes in that namespace.
      *
-     * @var string[]
+     * @var array
      */
-    public $prefixes = array();
+    public $prefixes = [];
 
     /**
      * Will check if file exists or not before including it. For a faster execution
@@ -148,7 +147,7 @@ class AutoLoader extends MPFObject implements \mpf\interfaces\AutoLoaderInterfac
         if ($prepend) {
             array_unshift($this->prefixes[$prefix], $base_dir);
         } else {
-            array_push($this->prefixes[$prefix], $base_dir);
+            $this->prefixes[$prefix][] = $base_dir;
         }
     }
 
@@ -172,7 +171,7 @@ class AutoLoader extends MPFObject implements \mpf\interfaces\AutoLoaderInterfac
      * from libs folder;
      * @param string $name Name of class + namespace;
      * @param bool $folder If is set as folder .php extension is not added
-     * @return string
+     * @return string|bool
      */
     public function path($name, $folder = false)
     {
@@ -247,7 +246,7 @@ class AutoLoader extends MPFObject implements \mpf\interfaces\AutoLoaderInterfac
      * @param string $file The file to require.
      * @return bool True if the file exists, false if not.
      */
-    protected function requireFile($file)
+    protected function requireFile($file): bool
     {
         if (!$this->fileExists || file_exists($file)) {
             require $file;
@@ -268,6 +267,7 @@ class AutoLoader extends MPFObject implements \mpf\interfaces\AutoLoaderInterfac
      *
      * @param string[] $config Extra config options that can be specified for each class
      * @return \mpf\base\AutoLoader
+     * @throws \ReflectionException
      */
     public static function get($config = [])
     {

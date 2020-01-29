@@ -28,6 +28,9 @@
 
 namespace mpf\base;
 
+use mpf\loggers\Logger;
+use mpf\loggers\NullLogger;
+
 /**
  * Contains a collection of methods that forward messages to the current loggers.
  *
@@ -45,12 +48,12 @@ trait LogAwareObjectTrait {
      * @var string[]
      */
     public $loggers = array(
-        'mpf\\loggers\\NullLogger'
+        NullLogger::class
     );
 
     /**
      * List of all instantiated log classes.
-     * @var \mpf\loggers\Logger[]
+     * @var Logger[]
      */
     private $loggersInstances = array();
 
@@ -58,17 +61,19 @@ trait LogAwareObjectTrait {
      * Init logs for current component;
      * @param array $config
      * @return null
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     protected function init($config) {
-        foreach ($this->loggers as $class => $config) {
-            if (!is_array($config)) {
-                $class = $config;
-                $config = [];
+        foreach ($this->loggers as $class => $classConfig) {
+            if (!is_array($classConfig)) {
+                $class = $classConfig;
+                $classConfig = [];
             }
-            $instance = $class::get($config);
-            if (!is_a($instance, 'mpf\\loggers\\Logger'))
-                throw new \Exception("Loggers must extend mpf\\base\\Logger class!");
+            $instance = $class::get($classConfig);
+            $loggerClass= Logger::class;
+            if (!is_a($instance, $loggerClass)) {
+                throw new \RuntimeException("Loggers must extend $loggerClass class!");
+            }
             $this->loggersInstances[] = $instance;
         }
     }
@@ -79,9 +84,9 @@ trait LogAwareObjectTrait {
      * 
      * $this->addLogger(MyCustomLogger::get());
      * 
-     * @param \mpf\loggers\Logger $logger An insantiated object for selected engine;
+     * @param Logger $logger An instantiated object for selected engine;
      */
-    public function addLogger(\mpf\loggers\Logger $logger) {
+    public function addLogger(Logger $logger) {
         $this->loggersInstances[] = $logger;
     }
 
@@ -91,7 +96,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function alert($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->alert($message, $context);
         }
@@ -103,7 +108,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function critical($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->critical($message, $context);
         }
@@ -115,7 +120,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function debug($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->debug($message, $context);
         }
@@ -127,7 +132,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function emergency($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->emergency($message, $context);
         }
@@ -139,7 +144,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function error($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->error($message, $context);
         }
@@ -151,7 +156,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function info($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->info($message, $context);
         }
@@ -164,7 +169,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function log($level, $message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->log($level, $message, $context);
         }
@@ -176,7 +181,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function notice($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->notice($message, $context);
         }
@@ -188,7 +193,7 @@ trait LogAwareObjectTrait {
      * @param array $context
      */
     public function warning($message, array $context = array()) {
-        $context['fromClass'] = get_called_class();
+        $context['fromClass'] = static::class;
         foreach ($this->loggersInstances as $logger) {
             $logger->warning($message, $context);
         }

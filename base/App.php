@@ -30,6 +30,7 @@ namespace mpf\base;
 
 use mpf\datasources\redis\Connection;
 use mpf\datasources\sql\PDOConnection;
+use mpf\interfaces\CacheInterface;
 
 /**
  * App class is extended, by default, by {@class:\mpf\WebApp} and {@class:\mpf\ConsoleApp} and those are the main classes used by the framework to run a website or a terminal application.
@@ -116,7 +117,7 @@ abstract class App extends LogAwareObject
 
     /**
      * Full title of the current application. For web app it will be used, by default, as the title of the website in the `<title></title>` tag.
-     * It will aslo be used by email classes as prefix of the subject.
+     * It will also be used by email classes as prefix of the subject.
      * @var string
      */
     public $title = 'MPF App';
@@ -144,7 +145,7 @@ abstract class App extends LogAwareObject
 
     /**
      * Records current app instance; Can't be accessed directly but can be accessed by calling {@method:\mpf\base\App::get()} method.
-     * @var \mpf\base\App
+     * @var App
      */
     private static $_instance;
 
@@ -169,12 +170,12 @@ abstract class App extends LogAwareObject
     public static function run($config = [])
     {
         try {
-            $class = get_called_class();
+            $class = static::class;
             self::$_instance = new $class($config);
             self::$_instance->start();
             return self::$_instance;
         } catch (\ErrorException $ex) {
-            if (in_array($ex->getSeverity(), array(E_WARNING, E_USER_WARNING)))
+            if (in_array($ex->getSeverity(), [E_WARNING, E_USER_WARNING], true)) {
                 self::get()->warning($ex->getMessage(), [
                     'File' => $ex->getFile(),
                     'Line' => $ex->getLine(),
@@ -182,7 +183,7 @@ abstract class App extends LogAwareObject
                     'Trace' => $ex->getTraceAsString(),
                     'Class' => get_class($ex)
                 ]);
-            elseif (in_array($ex->getSeverity(), array(E_NOTICE, E_USER_NOTICE, E_USER_DEPRECATED)))
+            } elseif (in_array($ex->getSeverity(), [E_NOTICE, E_USER_NOTICE, E_USER_DEPRECATED], true)) {
                 self::get()->notice($ex->getMessage(), [
                     'File' => $ex->getFile(),
                     'Line' => $ex->getLine(),
@@ -190,7 +191,7 @@ abstract class App extends LogAwareObject
                     'Trace' => $ex->getTraceAsString(),
                     'Class' => get_class($ex)
                 ]);
-            else
+            } else {
                 self::get()->error($ex->getMessage(), [
                     'File' => $ex->getFile(),
                     'Line' => $ex->getLine(),
@@ -198,6 +199,7 @@ abstract class App extends LogAwareObject
                     'Trace' => $ex->getTraceAsString(),
                     'Class' => get_class($ex)
                 ]);
+            }
         } catch (\Exception $ex) {
             self::get()->error($ex->getMessage(), array('exception' => $ex));
         }
@@ -217,8 +219,9 @@ abstract class App extends LogAwareObject
      */
     public static function get()
     {
-        if (!self::$_instance)
+        if (!self::$_instance) {
             return self::run();
+        }
         return self::$_instance;
     }
 
@@ -232,7 +235,7 @@ abstract class App extends LogAwareObject
     /**
      * Shortcut to Sql database connection;
      * @param string[] $options Optional; Some config options can be set and it will return a specific instance with that config applied.
-     * @return \mpf\datasources\sql\PDOConnection
+     * @return PDOConnection
      */
     public function sql($options = [])
     {
@@ -314,7 +317,7 @@ abstract class App extends LogAwareObject
 
     /**
      * Get an instance of selected Cache object or null if none is set;
-     * @return \mpf\interfaces\CacheInterface|null
+     * @return CacheInterface|null
      */
     public function cache()
     {

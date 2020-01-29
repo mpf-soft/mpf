@@ -33,8 +33,10 @@ class Process extends LogAwareObject {
     /**
      * @param array $config
      * @return static
+     * @throws \ReflectionException
      */
-    public static function get($config = array()) {
+    public static function get($config = array()): Process
+    {
         if (!self::$_self) {
             self::$_self = new static($config);
         }

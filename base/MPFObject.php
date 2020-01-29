@@ -1,6 +1,8 @@
 <?php
 
 namespace mpf\base;
+use mpf\interfaces\AutoLoaderInterface;
+
 /**
  * This is the basic class that all the other framework components, and most of the application classes extend.
  *
@@ -27,10 +29,11 @@ class MPFObject {
      *
      * This method will also call {@method:\mpf\base\MPFObject::init()} method that can be overwritten for each class and used as a construct.
      * @param string[] $config A list of attribute->value pairs to be applied to this object
+     * @throws \ReflectionException
      */
     public function __construct($config = []) {
-        if (!is_a($this, 'mpf\\interfaces\\AutoLoaderInterface')) {
-            $this->applyConfig(Config::get()->forClass(get_called_class()));
+        if (!is_a($this, AutoLoaderInterface::class)) {
+            $this->applyConfig(Config::get()->forClass(static::class));
         }
         $this->applyConfig($config);
         $this->init($config);
@@ -89,8 +92,9 @@ class MPFObject {
      * Get name of the called class as a string.
      * @return string Full class name
      */
-    public static function className() {
-        return get_called_class();
+    public static function className(): string
+    {
+        return static::class;
     }
 
 }

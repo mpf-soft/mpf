@@ -28,58 +28,71 @@
 
 namespace mpf\base;
 
+use mpf\interfaces\TranslatorInterface;
 use mpf\translators\Exception;
+use mpf\translators\None;
 
-trait TranslatableObjectTrait {
+trait TranslatableObjectTrait
+{
 
     /**
      *
-     * @var \mpf\translators\Interface;
+     * @var TranslatorInterface;
      */
     private $_translator;
-    public $translator = '\\mpf\\translators\\None';
+    public $translator = None::class;
 
     /**
      * Set a new translator. Can be sent as class name or class instance;
-     * @param string|\mpf\interfaces\TranslatorInterface $class
-     * @throws \mpf\translators\Exception
+     * @param string|TranslatorInterface $class
+     * @throws Exception
      */
-    public function setTranslator($class) {
+    public function setTranslator($class)
+    {
         if (is_string($class)) {
             $this->_translator = new $class;
         } else {
             $this->_translator = $class;
         }
-        if (!is_a($this->_translator, '\\mpf\\interfaces\\TranslatorInterface')) {
+        if (!is_a($this->_translator, TranslatorInterface::class)) {
             $this->_translator = null;
-            throw new Exception("Invalid translator $class!  Must implement \\mpf\\interfaces\\TranslatorInterface!");
+            throw new Exception("Invalid translator $class!  Must implement " . TranslatorInterface::class . '!');
         }
         $this->translator = $class;
     }
 
     /**
      * Return instance to translator
-     * @return \mpf\interfaces\TranslatorInterface
-     * @throws \mpf\translators\Exception
+     * @return TranslatorInterface
+     * @throws Exception
      */
-    public function getTranslator() {
+    public function getTranslator(): TranslatorInterface
+    {
         if (!$this->_translator) {
             if ($this->translator) {
                 $class = $this->translator;
                 $this->_translator = $class::get();
-                if (!is_a($this->_translator, '\\mpf\\interfaces\\TranslatorInterface')) {
+                if (!is_a($this->_translator, TranslatorInterface::class)) {
                     $this->_translator = null;
                     $this->translator = '';
-                    throw new Exception("Invalid translator $class!  Must implement \\mpf\\interfaces\\TranslatorInterface!");
+                    throw new Exception("Invalid translator $class!  Must implement " . TranslatorInterface::class . '!');
                 }
             }
         }
         return $this->_translator;
     }
 
-    public function translate($text) {
+    /**
+     * Translate a piece of text
+     *
+     * @param string $text
+     * @return string
+     * @throws Exception
+     */
+    public function translate(string $text): string
+    {
         $translator = $this->getTranslator();
-        if (!$translator){
+        if (!$translator) {
             return $text;
         }
         return $translator->t($text, get_class($this));

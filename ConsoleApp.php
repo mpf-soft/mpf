@@ -2,6 +2,9 @@
 
 namespace mpf;
 
+use mpf\cli\dev\Command;
+use mpf\cli\NotFound;
+
 /**
  * Default class used for terminal applications created with MPF Framework. Most of the times this will be used for the cronjobs that are required by  the project.
  *
@@ -35,7 +38,7 @@ class ConsoleApp extends base\App {
      * @var array
      */
     public $commandAliases = array(
-        'dev' => '\mpf\cli\dev\Command'
+        'dev' => Command::class
     );
 
     /**
@@ -48,7 +51,7 @@ class ConsoleApp extends base\App {
      * Name of the command that will be executed if the called one was not found
      * @var string
      */
-    public $notFoundCommand = '\\mpf\\cli\\NotFound';
+    public $notFoundCommand = NotFound::class;
 
     /**
      * This is the main method called when the application is executed.
@@ -89,7 +92,8 @@ class ConsoleApp extends base\App {
      * [/php]
      * @return string[]
      */
-    private function getServerArguments() {
+    private function getServerArguments(): array
+    {
         $args = $_SERVER['argv'];
         array_shift($args);
 
@@ -104,11 +108,12 @@ class ConsoleApp extends base\App {
      * @param string[] $args
      * @return string[]
      */
-    private function parseArgs($args) {
+    private function parseArgs($args): array
+    {
         $command = $action = null;
         $params = [];
         foreach ($args as $argument) {
-            if ('-' != $argument[0])
+            if ('-' !== $argument[0])
                 if (null === $command)
                     $command = $argument;
                 elseif (null === $action)
@@ -171,7 +176,8 @@ class ConsoleApp extends base\App {
      * @param string $module Name of the module
      * @return string
      */
-    public function getCommandClassFromNameAndModule($command, $module) {
+    public function getCommandClassFromNameAndModule($command, $module): string
+    {
         if (isset($this->commandAliases[$command])) { // check if is an alias first.
             return $this->commandAliases[$command];
         }
@@ -189,12 +195,13 @@ class ConsoleApp extends base\App {
      * A critical error will be generated if it's an invalid class(doesn't extend `\mpf\cli\Command`)!
      *
      * @param string $class
-     * @return \mpf\cli\Command
+     * @return cli\Command
      */
-    private function loadCommand($class) {
+    private function loadCommand($class): cli\Command
+    {
         $controller = new $class();
-        if (!is_a($controller, '\\mpf\\cli\\Command')) {
-            $this->critical('Command `' . $class . '` must extend \\mpf\\cli\\Command!', array(
+        if (!is_a($controller, cli\Command::class)) {
+            $this->critical('Command `' . $class . '` must extend ' . cli\Command::class . '!', array(
                 'requestedController' => $this->request()->getController(),
                 'requestedModule' => $this->request()->getModule()
             ));

@@ -23,8 +23,8 @@ module --name='moduleName'
 
     }
 
-    protected function similarTables($table) {
-        $similar = ConsoleApp::get()->sql()->queryAssoc("SHOW TABLES LIKE '%$table%'");
+    protected function similarTables(string $originalTable) {
+        $similar = ConsoleApp::get()->sql()->queryAssoc("SHOW TABLES LIKE '%$originalTable%'");
         echo "Similar tables: \n";
         $tables = array();
         foreach ($similar as $row) {
@@ -38,9 +38,9 @@ module --name='moduleName'
             if (!$firstTry) {
                 $this->error('Invalid selection!');
             }
-            $table = Helper::get()->input("Select another table (enter number or 0 to exit)", 0);
+            $table = Helper::get()->input('Select another table (enter number or 0 to exit)', 0);
             if (!$table) {
-                $this->debug("Aborded!");
+                $this->debug('Aborded!');
                 return false;
             }
             $firstTry = false;
@@ -56,23 +56,23 @@ module --name='moduleName'
             }
         }
         $className = str_replace(' ', '', ucwords(str_replace('_', ' ', $table)));
-        $className = Helper::get()->input("Class name", $className);
+        $className = Helper::get()->input('Class name', $className);
         $this->info("Selected class: $className");
         $columns = ConsoleApp::get()->sql()->getTableColumns($table);
         $modelInfo = array(
             'table' => $table,
             'class' => $className,
-            'namespace' => Helper::get()->input("Namespace", 'app\models'),
+            'namespace' => Helper::get()->input('Namespace', 'app\models'),
             'columns' => array(),
             'labels' => array()
         );
-        echo "Labels (found " . count($columns) . " columns): \n";
+        echo 'Labels (found ' . count($columns) . " columns): \n";
         foreach ($columns as $column) {
             $modelInfo['columns'][$column['Field']] = $column['Type'];
             $modelInfo['labels'][$column['Field']] = Helper::get()->input($column['Field'], ucwords(str_replace('_', ' ', $column['Field'])));
         }
 
-        if ('Y' == strtoupper(Helper::get()->input('Add relations? (y/n)', 'y'))) {
+        if ('Y' === strtoupper(Helper::get()->input('Add relations? (y/n)', 'y'))) {
             $modelInfo['relations'] = array();
             do {
                 $name = '';
@@ -108,7 +108,7 @@ Selected type');
                     'model' => $model,
                     'connection' => $connection
                 );
-            } while ('y' == Helper::get()->input('Add more? (y/n)', 'y'));
+            } while ('y' === Helper::get()->input('Add more? (y/n)', 'y'));
         }
 
         $creator = new Creator($modelInfo);

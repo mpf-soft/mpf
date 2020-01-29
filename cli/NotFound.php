@@ -40,18 +40,21 @@ class NotFound extends Command {
 
     protected function getAllCommands() {
         $path = APP_ROOT . str_replace('\\', '/', ConsoleApp::get()->commandsNamespace) . DIRECTORY_SEPARATOR;
-        if (!$path)
-            return array();
+        if (!$path) {
+            return [];
+        }
         $files = scandir($path);
         echo HCli::color('Available actions: ' . "\n\n");
         foreach ($files as $file) {
-            if (in_array($file, array('.', '..', '.htaccess')))
+            if (in_array($file, array('.', '..', '.htaccess'))) {
                 continue;
+            }
             $command = lcfirst(str_replace('.php', '', $file));
             $reflection = new \ReflectionClass($this->getClassFromFile($file));
             $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-            foreach ($methods as $method)
+            foreach ($methods as $method) {
                 $this->present($command, $method, $reflection);
+            }
         }
         echo "\n";
     }
@@ -63,17 +66,20 @@ class NotFound extends Command {
      * @return null
      */
     protected function present($command, \ReflectionMethod $method, \ReflectionClass $class) {
-        if ($method->isStatic())
+        if ($method->isStatic()) {
             return;
-        if ('action' !== substr($method->getName(), 0, 6))
+        }
+        if (strpos($method->getName(), 'action') !== 0) {
             return;
+        }
 
         $params = $method->getParameters();
 
-        echo $this->getRunPath() . ' ' . $command . " " . lcfirst(substr($method->getName(), 6));
+        echo $this->getRunPath() . ' ' . $command . ' ' . lcfirst(substr($method->getName(), 6));
 
-        foreach ($params as $p)
+        foreach ($params as $p) {
             echo $this->paramDetails($p);
+        }
         if ($class->getDocComment()) {
             echo "\n" . $class->getDocComment();
         }
@@ -84,7 +90,8 @@ class NotFound extends Command {
      * Get namespace for commands;
      * @return string
      */
-    protected function getNameSpace() {
+    protected function getNameSpace(): string
+    {
         return '\\app\\' . \mpf\ConsoleApp::get()->commandsNamespace . '\\';
     }
 
@@ -93,7 +100,8 @@ class NotFound extends Command {
      * @param string $fileName
      * @return string
      */
-    protected function getClassFromFile($fileName) {
+    protected function getClassFromFile(string $fileName): string
+    {
         return self::getNameSpace() . str_replace('.php', '', $fileName);
     }
 
@@ -101,7 +109,8 @@ class NotFound extends Command {
      * Get path to script as it was executed;
      * @return string
      */
-    protected function getRunPath() {
+    protected function getRunPath(): string
+    {
         return $_SERVER['SCRIPT_NAME'];
     }
 
@@ -109,8 +118,10 @@ class NotFound extends Command {
      * Get a declaration of the param for cli command;
      * @param \ReflectionParameter $param
      * @return string
+     * @throws \ReflectionException
      */
-    protected function paramDetails(\ReflectionParameter $param) {
+    protected function paramDetails(\ReflectionParameter $param): string
+    {
         return ' ' . ($param->isOptional() ? '[' : '') . '--' . $param->getName() . ($param->isOptional() ? '=' . ($param->isDefaultValueConstant() ? $param->getDefaultValueConstantName() : '"' . $param->getDefaultValue() . '"') : '') . ($param->isOptional() ? ']' : '');
     }
 

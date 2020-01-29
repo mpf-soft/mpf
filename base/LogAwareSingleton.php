@@ -17,11 +17,14 @@ class LogAwareSingleton extends LogAwareObject {
      * @param array $config
      * @return static
      */
-    public static function get($config = []) {
+    public static function get($config = [])
+    {
         $c = md5(json_encode($config));
-        $class = get_called_class();
-        if (!isset(self::$_instances[$class . $c]))
-            self::$_instances[$class . $c] = new $class($config);
-        return self::$_instances[$class . $c];
+        $class = static::class;
+        $key = $class.$c;
+        if (!isset(self::$_instances[$key])) {
+            self::$_instances[$key] = new $class($config);
+        }
+        return self::$_instances[$key];
     }
 }
