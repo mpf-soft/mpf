@@ -106,11 +106,17 @@ trait AdvancedMethodCallTrait
             }
         }
 
-        if ($options && $this->applyParamsToClass())
-            foreach ($options as $k => $n) { // apply extra options 
-                $this->$k = $n;
+        if ($options && $this->applyParamsToClass()) {
+            $class = new \ReflectionClass($this);
+            $attr = $class->getProperties(\ReflectionProperty::IS_PUBLIC);
+            foreach ($attr as $prop) {
+                if (!isset($options[$prop->getName()])) {
+                    continue;
+                }
+                $this->{$prop->getName()} = $options[$prop->getName()];
+                unset($options[$prop->getName()]);
             }
-
+        }
         if ($strict && count($options)) {
             return null; // if there are any invalid params then return false
         }
