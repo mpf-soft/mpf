@@ -77,9 +77,11 @@ trait AdvancedMethodCallTrait
      * @param string $name
      * @param string[] $options
      * @param bool $logError
-     * @return string[] $details
+     * @param bool $strict
+     * @return string[]|null $details
+     * @throws \ReflectionException
      */
-    public function getMethodParameters($name, $options, $logError = true)
+    public function getMethodParameters($name, $options, $logError = true, $strict = false)
     {
         $method = new \ReflectionMethod($this, $name);
 
@@ -109,6 +111,9 @@ trait AdvancedMethodCallTrait
                 $this->$k = $n;
             }
 
+        if ($strict && count($options)) {
+            return null; // if there are any invalid params then return false
+        }
         return $details;
     }
 
@@ -118,6 +123,7 @@ trait AdvancedMethodCallTrait
      * @param string $methodName
      * @param string[] $options
      * @return mixed
+     * @throws \ReflectionException
      */
     public function callMethod($methodName, $options)
     {
@@ -133,12 +139,14 @@ trait AdvancedMethodCallTrait
 
     /**
      * Checks if all the required parameters are sent
-     * @param $methodName
-     * @param $options
+     * @param string $methodName
+     * @param string[] $options
+     * @param bool $strict
      * @return bool
+     * @throws \ReflectionException
      */
-    public function canCallMethod($methodName, $options)
+    public function canCallMethod($methodName, $options, $strict = false)
     {
-        return (null !== ($options = $this->getMethodParameters($methodName, $options, false)));
+        return (null !== ($options = $this->getMethodParameters($methodName, $options, false, $strict)));
     }
 }

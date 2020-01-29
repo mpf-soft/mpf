@@ -32,7 +32,8 @@ use mpf\base\AdvancedMethodCallTrait;
 use mpf\base\LogAwareObject;
 use mpf\loggers\InlineCliLogger;
 
-class Command extends LogAwareObject {
+class Command extends LogAwareObject
+{
 
     use AdvancedMethodCallTrait;
 
@@ -49,7 +50,8 @@ class Command extends LogAwareObject {
      * Apply request options to class also, not just method params;
      * @return boolean
      */
-    protected function applyParamsToClass() {
+    protected function applyParamsToClass()
+    {
         return true;
     }
 
@@ -58,7 +60,8 @@ class Command extends LogAwareObject {
      * @param string $name
      * @return $this
      */
-    public function setActiveAction($name) {
+    public function setActiveAction($name)
+    {
         $this->currentAction = $name;
         return $this;
     }
@@ -67,7 +70,8 @@ class Command extends LogAwareObject {
      * Get active action name;
      * @return string
      */
-    public function getActiveAction() {
+    public function getActiveAction()
+    {
         return $this->currentAction ? $this->currentAction : $this->defaultAction;
     }
 
@@ -76,7 +80,8 @@ class Command extends LogAwareObject {
      * @param string $actionName name of the action to be executed, except for action part
      * @return boolean true to continue
      */
-    protected function beforeAction($actionName) {
+    protected function beforeAction($actionName)
+    {
         if (!$this->debug) {
             InlineCliLogger::get()->ignoredClasses = array('mpf\datasources\sql\PDOConnection');
             Helper::get()->showProgressBar = false;
@@ -90,12 +95,21 @@ class Command extends LogAwareObject {
      * @param mixed $result
      * @return boolean true to continue
      */
-    protected function afterAction($actionName, $result) {
+    protected function afterAction($actionName, $result)
+    {
         return true;
     }
 
-    public function run($arguments = array()) {
+    public function run($arguments = array())
+    {
         $action = 'action' . ucfirst($this->getActiveAction());
+        try {
+            if (!$this->canCallMethod($action, $arguments, true)) {
+                return;
+            }
+        } catch (\ReflectionException $e){
+            return;
+        }
         if (!$this->beforeAction($this->getActiveAction())) {
             return;
         }
