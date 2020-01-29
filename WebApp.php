@@ -186,7 +186,7 @@ class WebApp extends base\App
     protected function calculateControllerClassFromRights(): string
     {
         $this->user(); //init user first;
-        $controllerClass = $this->getControllerClassFromNameAndModule($this->request()->getController(), $this->request()->getModule());
+        $controllerClass = $this->getControllerClassFromNameAndModule($this->request()->getController() . '', $this->request()->getModule() . '');
         if (!trim($this->request()->getAction())) {
             $ctrl = new $controllerClass;
             /* @var $ctrl Controller */
