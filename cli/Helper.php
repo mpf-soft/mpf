@@ -156,7 +156,7 @@ class Helper extends \mpf\base\Helper
         if (!($color || $background)) {
             return $message;
         }
-        return ($color ? "\033[" . $color . 'm' : '') . ($background ? "\033[" . $background . 'm' : '') . $message . '\033[0m';
+        return ($color ? "\033[" . $color . 'm' : '') . ($background ? "\033[" . $background . 'm' : '') . $message . "\033[0m";
     }
 
     /**
